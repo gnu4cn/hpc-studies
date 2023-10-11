@@ -198,12 +198,189 @@ HOST_NAME       status  r15s   r1m  r15m   ut    pg  ls    it   tmp   swp   mem
 sta-f4-d.sensco     ok   0.2   0.7   0.7   1%   0.0   2     0  452G  3.8G 13.3G
 lenny.peng@sta-f4-d:/opt/ibm/lsfce/conf$ bhosts
 HOST_NAME          STATUS       JL/U    MAX  NJOBS    RUN  SSUSP  USUSP    RSV
-sta-f4-d.senscomm. ok              -     14      0      0      0      0      0
+sta-f4-d.xfoss. ok              -     14      0      0      0      0      0
 ```
 
 ## 提交作业
 
 在高性能计算调度程序的世界里，睡眠作业就类似于运行一个 "hello world" 程序。因此，在第一次测试中，咱们以集群非根用户的身份，提交了一个简短的睡眠作业。咱们会提交一个 10 秒钟的睡眠作业，并将作业输出写入 `output.<JOBID>` 文件。作业完成后，我们将显示输出文件的内容。
+
+
+```sh
+lenny.peng@sta-f4-d:~$ bsub -o output.%J /bin/sleep 10
+Job <1> is submitted to default queue <normal>.
+lenny.peng@sta-f4-d:~$ bjobs
+JOBID   USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME
+1       lenny.p RUN   normal     sta-f4-d.se sta-f4-d.se */sleep 10 Oct 11 14:15
+lenny.peng@sta-f4-d:~$ bjobs
+JOBID   USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME
+1       lenny.p RUN   normal     sta-f4-d.se sta-f4-d.se */sleep 10 Oct 11 14:15
+lenny.peng@sta-f4-d:~$ bjobs
+No unfinished job found
+lenny.peng@sta-f4-d:~$ more output.1
+Sender: LSF System <lsfadmin@sta-f4-d.xfoss.com>
+Subject: Job 1: </bin/sleep 10> in cluster <hpc.xfoss.com> Done
+
+Job </bin/sleep 10> was submitted from host <sta-f4-d.xfoss.com> by user <lenny.peng> in cluster <hpc.xfoss.com> at Wed Oct 11 14:15:
+52 2023
+Job was executed on host(s) <sta-f4-d.xfoss.com>, in queue <normal>, as user <lenny.peng> in cluster <hpc.xfoss.com> at Wed Oct 11 14
+:15:52 2023
+</home/lenny.peng> was used as the home directory.
+</home/lenny.peng> was used as the working directory.
+Started at Wed Oct 11 14:15:52 2023
+Terminated at Wed Oct 11 14:16:03 2023
+Results reported at Wed Oct 11 14:16:03 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/bin/sleep 10
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   0.05 sec.
+    Max Memory :                                 13 MB
+    Average Memory :                             13.00 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                4
+    Run time :                                   16 sec.
+    Turnaround time :                            11 sec.
+
+The output (if any) follows:
+
+
+```
+
+
+## 另一个作业提交示例
+
+我知道。提交睡眠作业，足以让作为读者的你昏昏欲睡。那么，让咱们提交一些更有趣的东西吧 -- 无处不在的高性能 Linpack（HPL）基准测试。因为这里运行的系统并不先进，所以这里的目的是展示 LSF 对并行工作负载的支持，而不是其 Linpack 性能。
+
+
+尽管在 openSUSE Tumbleweed 上，作为一个软件包提供了 OpenMPI，但其并未被编译支持 LSF。因此，咱们将首先编译出支持 LSF 的 OpenMPI。我们将使用最新的 OpenMPI v4.1.6，并将其编译和安装到 `/opt/openmpi-4.1.6`。
+
+```sh
+lenny.peng@sta-f4-d:~$ mkdir MPI
+lenny.peng@sta-f4-d:~$ cd MPI
+lenny.peng@sta-f4-d:~/MPI$ wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz
+lenny.peng@sta-f4-d:~/MPI$ tar zxvf openmpi-4.1.6.tar.gz
+lenny.peng@sta-f4-d:~/MPI$ cd openmpi-4.1.6
+lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ ./configure --prefix=/opt/openmpi-4.1.6 --enable-orterun-prefix-by-default --disable-getpwuid --with-lsf
+...
+...
+...
+...
+Open MPI configuration:
+-----------------------
+Version: 4.1.6
+Build MPI C bindings: yes
+Build MPI C++ bindings (deprecated): no
+Build MPI Fortran bindings: no
+MPI Build Java bindings (experimental): no
+Build Open SHMEM support: false (no spml)
+Debug build: no
+Platform file: (none)
+
+Miscellaneous
+-----------------------
+CUDA support: no
+HWLOC support: internal
+Libevent support: internal
+Open UCC: no
+PMIx support: Internal
+
+Transports
+-----------------------
+Cisco usNIC: no
+Cray uGNI (Gemini/Aries): no
+Intel Omnipath (PSM2): no
+Intel TrueScale (PSM): no
+Mellanox MXM: no
+Open UCX: no
+OpenFabrics OFI Libfabric: no
+OpenFabrics Verbs: no
+Portals4: no
+Shared memory/copy in+copy out: yes
+Shared memory/Linux CMA: yes
+Shared memory/Linux KNEM: no
+Shared memory/XPMEM: no
+TCP: yes
+
+Resource Managers
+-----------------------
+Cray Alps: no
+Grid Engine: no
+LSF: yes
+Moab: no
+Slurm: yes
+ssh/rsh: yes
+Torque: no
+
+OMPIO File Systems
+-----------------------
+DDN Infinite Memory Engine: no
+Generic Unix FS: yes
+IBM Spectrum Scale/GPFS: no
+Lustre: no
+PVFS2/OrangeFS: no
+
+lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ time make -j8
+...
+...
+...
+...
+
+real    1m29.744s
+user    4m14.699s
+sys     0m33.777s
+
+lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ sudo make install
+```
+
+
+OpenMPI 准备就绪后，我们就可以开始编译 HPL 了。HPL 是针对 OpenMPI v4.1.6（上文中所编译的）并使用操作系统所提供的 OpenBLAS 库编译的。HPL 将编译并安装到 `/opt/HPL/hpl-2.3`。
+
+
+```sh
+lenny.peng@sta-f4-d:/opt$ mkdir HPL
+lenny.peng@sta-f4-d:/opt$ cd HPL
+lenny.peng@sta-f4-d:/opt/HPL$ wget http://netlib.org/benchmark/hpl/hpl-2.3.tar.gz
+lenny.peng@sta-f4-d:/opt/HPL$ tar zxvf hpl-2.3.tar.gz
+lenny.peng@sta-f4-d:/opt/HPL$ cd hpl-2.3/
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ cd setup/
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ source make_generic
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ mv Make.UNKNOWN Make.Linux_x86_64
+```
+
+修改其中的下列两处：
+
+- `ARCH         = UNKNOWN`  -> `ARCH            = Linux_x86_64`
+
+- `LAlib        = -lblas`   -> `LAlib           = -lopenblas`
+
+> **注意**：需要在主机上安装好 `openblas` 软件包。
+
+准备好 `Makefile` 后，就要构建 `xhpl` 二进制文件了。请注意，我们在此设置了 `PATH` 和 `LD_LIBRARY_PATH`，以引用 OpenMPI v4.1.6 的安装文件。
+
+
+```sh
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export PATH=/opt/openmpi-4.1.6/bin:$PATH
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export LD_LIBRARY_PATH=/opt/openmpi-4.1.1/lib:$LD_LIBRARY_PATH
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd ..
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ ln -s ./setup/Make.Linux_aarch64 ./Make.Linux_aarch64
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=Linux_x86_64
+```
+
+> **注意**：需要执行 `export OMPI_FC=mpif77`，否则会报出 `wrapper...` 错误。
+
+咱们的 `xhpl` 二进制文件已经就绪，位于 `/opt/HPL/hpl-3.2/bin/Linux_aarch64`。在将 `xhpl` 提交 LSF 执行之前，我们会根据系统（内存大小、核心数量等）调整 `HPL.dat` 参数文件。最后，提交给 LSF 的 `xhpl` 请求使用 4 个内核。
 
 
 ```sh
