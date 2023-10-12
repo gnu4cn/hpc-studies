@@ -434,7 +434,7 @@ lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=Linux_x86_64
 
 > **注意**：
 >
-> 1. 需要安装 `gfortran` 软件包，并在 ` sudo vim /opt/openmpi/share/openmpi/mpif90-wrapper-data.txt` 文件中，设置 `compiler=gfortran`；
+> 1. 需要安装 `gfortran` 软件包，并在 `/opt/openmpi/share/openmpi/mpif90-wrapper-data.txt` 文件中，设置 `compiler=gfortran`；
 
 咱们的 `xhpl` 二进制文件已经就绪，位于 `/opt/HPL/hpl-3.2/bin/Linux_aarch64`。在将 `xhpl` 提交 LSF 执行之前，我们会根据系统（内存大小、核心数量等）调整 `HPL.dat` 参数文件。最后，提交给 LSF 的 `xhpl` 请求使用 4 个内核。
 
