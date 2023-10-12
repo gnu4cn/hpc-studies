@@ -385,9 +385,9 @@ lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd vim Make.linux
 修改该文件的以下内容：
 
 ```console
-lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 ./Make.UNKNOWN ./Make.linux
---- ./Make.UNKNOWN      2023-10-12 16:45:52.093090209 +0800
-+++ ./Make.linux        2023-10-12 16:46:12.154249376 +0800
+lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 Make.UNKNOWN Make.linux
+--- Make.UNKNOWN        2023-10-12 17:25:55.239585022 +0800
++++ Make.linux  2023-10-12 17:25:47.647322759 +0800
 @@ -63,3 +63,3 @@
  #
 -ARCH         = UNKNOWN
@@ -415,6 +415,11 @@ lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 ./Make.UNKNOWN ./Make.linux
 -LAlib        = -lblas
 +LAlib        = $(LAdir)/lib/libopenblas.a
  #
+@@ -172,3 +172,3 @@
+ #
+-LINKER       = mpif77
++LINKER       = mpicc
+ LINKFLAGS    =
 ```
 
 > **注意**：
@@ -426,7 +431,7 @@ lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 ./Make.UNKNOWN ./Make.linux
 
 ```sh
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export PATH=/opt/openmpi-4.1.6/bin:$PATH
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export LD_LIBRARY_PATH=/opt/openmpi-4.1.1/lib:$LD_LIBRARY_PATH
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export LD_LIBRARY_PATH=/opt/openmpi-4.1.1/lib/libmpi.so:$LD_LIBRARY_PATH
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd ..
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ ln -s ./setup/Make.Linux_aarch64 ./Make.Linux_aarch64
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=Linux_x86_64
