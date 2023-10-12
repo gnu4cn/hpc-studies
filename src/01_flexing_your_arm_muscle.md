@@ -425,6 +425,8 @@ lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 Make.UNKNOWN Make.linux
 > **注意**：
 >
 > 1. 需要在主机上编译安装 `openblas` 软件包。
+>
+> 参考链接：[Build High Performance LINPACK with BLAS and MPI](https://sites.google.com/site/rangsiman1993/comp-env/test-and-benchmarks/build-hpl-with-blas-and-mpi)
 
 准备好 `Makefile` 后，就要构建 `xhpl` 二进制文件了。请注意，我们在此设置了 `PATH` 和 `LD_LIBRARY_PATH`，以引用 OpenMPI v4.1.6 的安装文件。
 
