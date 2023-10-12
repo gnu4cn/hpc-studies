@@ -95,7 +95,9 @@ lsf10.1_lsfinstall/instlib/lsfprechkfuncs.sh
 准备好安装配置文件后，我们就可以调用 IBM Spectrum LSF CE 安装程序了（为简洁起见，下面的安装输出已被截断）。
 
 
-```sh
+```console
+root@sta-fpga-d:/home/lenny.peng/lsfsce10.2.0.12-x86_64/lsf/lsf10.1_lsfinstall# useradd lsfamdin
+root@sta-fpga-d:/home/lenny.peng/lsfsce10.2.0.12-x86_64/lsf/lsf10.1_lsfinstall# ./lsfinstall -f ./install.config
 Creating /opt/ibm/lsf/conf/resource_connector/ego ...
 Creating /opt/ibm/lsf/conf/resource_connector/openstack ...
 Creating /opt/ibm/lsf/conf/resource_connector/aws ...
@@ -116,8 +118,23 @@ Creating lsf_quick_admin.html ...
 ... Done creating lsf_quick_admin.html
 
 lsfinstall is done.
-
 ```
+
+> **注意**：LSF 安装程序，需要 JDK/JRE 环境，且已知在 JDK17 下，会报出如下错误：
+
+```console
+root@sta-fpga-d:/home/lenny.peng/lsfsce10.2.0.12-x86_64/lsf/lsf10.1_lsfinstall# ./lsfinstall -f ./install.config
+
+Logging installation sequence in /home/lenny.peng/lsfsce10.2.0.12-x86_64/lsf/lsf10.1_lsfinstall/Install.log
+
+Missing ./lap/license/LA_id
+Missing ./lap/license/LI_id
+Error: Missing one or more required license files.
+Exited with: 11
+   Installation exiting ...
+```
+
+> 在 [IBM 社区论坛 "Missing lap license while lsfinstall"](https://community.ibm.com/community/user/businessanalytics/discussion/missing-lap-license-while-lsfinstall)，提到了其根本原因为 JDK17 的问题，需要降级 JDK。
 
 
 ## 开始启动
