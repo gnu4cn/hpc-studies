@@ -377,16 +377,49 @@ lenny.peng@sta-f4-d:/opt/HPL$ tar zxvf hpl-2.3.tar.gz
 lenny.peng@sta-f4-d:/opt/HPL$ cd hpl-2.3/
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ cd setup/
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ source make_generic
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ mv Make.UNKNOWN Make.Linux_x86_64
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ mv Make.UNKNOWN ../Make.linux
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd ..
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd vim Make.linux
 ```
 
-修改其中的下列两处：
+修改该文件的以下内容：
 
-- `ARCH         = UNKNOWN`  -> `ARCH            = Linux_x86_64`
+```console
+lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 ./Make.UNKNOWN ./Make.linux
+--- ./Make.UNKNOWN      2023-10-12 16:45:52.093090209 +0800
++++ ./Make.linux        2023-10-12 16:46:12.154249376 +0800
+@@ -63,3 +63,3 @@
+ #
+-ARCH         = UNKNOWN
++ARCH         = linux
+ #
+@@ -69,3 +69,3 @@
+ #
+-TOPdir       = $(HOME)/hpl
++TOPdir       = $(HOME)/hpl-2.3
+ INCdir       = $(TOPdir)/include
+@@ -83,5 +83,5 @@
+ #
+-MPdir        =
+-MPinc        =
+-MPlib        =
++MPdir        = /opt/openmpi
++MPinc        = -I${MPdir}/include
++MPlib        = ${MPdir}/lib/libmpi.so
+ #
+@@ -94,5 +94,5 @@
+ #
+-LAdir        =
++LAdir        = /opt/openblas
+ LAinc        =
+-LAlib        = -lblas
++LAlib        = $(LAdir)/lib/libopenblas.a
+ #
+```
 
-- `LAlib        = -lblas`   -> `LAlib           = -lopenblas`
-
-> **注意**：需要在主机上安装好 `openblas` 软件包。
+> **注意**：
+>
+> 1. 需要在主机上编译安装 `openblas` 软件包。
 
 准备好 `Makefile` 后，就要构建 `xhpl` 二进制文件了。请注意，我们在此设置了 `PATH` 和 `LD_LIBRARY_PATH`，以引用 OpenMPI v4.1.6 的安装文件。
 
@@ -399,7 +432,9 @@ lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ ln -s ./setup/Make.Linux_aarch64 ./Make.Li
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=Linux_x86_64
 ```
 
-> **注意**：需要执行 `export OMPI_FC=mpif77`，否则会报出 `wrapper...` 错误。
+> **注意**：
+>
+> 1. 需要安装 `gfortran` 软件包，并在 ` sudo vim /opt/openmpi/share/openmpi/mpif90-wrapper-data.txt` 文件中，设置 `compiler=gfortran`；
 
 咱们的 `xhpl` 二进制文件已经就绪，位于 `/opt/HPL/hpl-3.2/bin/Linux_aarch64`。在将 `xhpl` 提交 LSF 执行之前，我们会根据系统（内存大小、核心数量等）调整 `HPL.dat` 参数文件。最后，提交给 LSF 的 `xhpl` 请求使用 4 个内核。
 
