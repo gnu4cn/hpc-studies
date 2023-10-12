@@ -289,7 +289,7 @@ lenny.peng@sta-f4-d:~$ cd MPI
 lenny.peng@sta-f4-d:~/MPI$ wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz
 lenny.peng@sta-f4-d:~/MPI$ tar zxvf openmpi-4.1.6.tar.gz
 lenny.peng@sta-f4-d:~/MPI$ cd openmpi-4.1.6
-lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ ./configure --prefix=/opt/openmpi-4.1.6 --enable-orterun-prefix-by-default --disable-getpwuid --with-lsf
+lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ ./configure --prefix=/opt/openmpi-4.1.6 --with-lsf=/opt/ibm/lsfce/10.1 --with-lsf-libdir=/opt/ibm/lsfce/10.1/linux2.6-glibc2.3-x86_64/lib
 ...
 ...
 ...
@@ -360,6 +360,10 @@ sys     0m33.777s
 
 lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ sudo make install
 ```
+
+> **注意**：请注意 `./configure` 后面的参数，不仅包括 `--with-lsf`，还包括了 `--with-lsf-libdir` 参数。
+>
+> *参考链接*：[./configure failed with option '--with-lsf'](https://github.com/open-mpi/ompi/issues/10943#issuecomment-1282595183)
 
 
 OpenMPI 准备就绪后，我们就可以开始编译 HPL 了。HPL 是针对 OpenMPI v4.1.6（上文中所编译的）并使用操作系统所提供的 OpenBLAS 库编译的。HPL 将编译并安装到 `/opt/HPL/hpl-2.3`。
