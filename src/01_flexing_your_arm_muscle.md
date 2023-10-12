@@ -433,16 +433,23 @@ lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 Make.UNKNOWN Make.linux
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export PATH=/opt/openmpi-4.1.6/bin:$PATH
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export LD_LIBRARY_PATH=/opt/openmpi-4.1.1/lib/libmpi.so:$LD_LIBRARY_PATH
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd ..
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ ln -s ./setup/Make.Linux_aarch64 ./Make.Linux_aarch64
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=Linux_x86_64
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ ln -s ./setup/Make.linux ./Make.linux
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=linux
 ```
 
 > **注意**：
 >
 > 1. 需要安装 `gfortran` 软件包，并在 `/opt/openmpi/share/openmpi/mpif90-wrapper-data.txt` 文件中，设置 `compiler=gfortran`；
 
-咱们的 `xhpl` 二进制文件已经就绪，位于 `/opt/HPL/hpl-3.2/bin/Linux_aarch64`。在将 `xhpl` 提交 LSF 执行之前，我们会根据系统（内存大小、核心数量等）调整 `HPL.dat` 参数文件。最后，提交给 LSF 的 `xhpl` 请求使用 4 个内核。
+咱们的 `xhpl` 二进制文件已经就绪，位于 `~/hpl-2.3/bin/linux/`。在将 `xhpl` 提交 LSF 执行之前，我们会根据系统（内存大小、核心数量等）调整 `HPL.dat` 参数文件。最后，提交给 LSF 的 `xhpl` 请求使用 4 个内核。
 
 
-```sh
+```console
+lenny.peng@sta-fpga-d:~$ cd hpl-2.3/bin/linux/
+lenny.peng@sta-fpga-d:~/hpl-2.3/bin/linux$ bsub -n 4 mpirun -np 4 ./xhpl
+Job <11> is submitted to default queue <normal>.
 ```
+
+上述 `xhpl` 作业已成功提交，并被 LSF 调度到 4 个内核上。作业运行时，我们可以使用 `bjobs` 和 `bpeek` 命令，分别查看资源利用率和输出。
+
+
