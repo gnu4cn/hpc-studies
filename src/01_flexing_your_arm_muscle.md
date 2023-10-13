@@ -366,19 +366,17 @@ lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ sudo make install
 > *参考链接*：[./configure failed with option '--with-lsf'](https://github.com/open-mpi/ompi/issues/10943#issuecomment-1282595183)
 
 
-OpenMPI 准备就绪后，我们就可以开始编译 HPL 了。HPL 是针对 OpenMPI v4.1.6（上文中所编译的）并使用操作系统所提供的 OpenBLAS 库编译的。HPL 将编译并安装到 `/opt/HPL/hpl-2.3`。
+OpenMPI 准备就绪后，我们就可以开始编译 HPL 了。HPL 是针对 OpenMPI v4.1.6（上文中所编译的）并使用操作系统所提供的 OpenBLAS 库编译的。HPL 将编译并安装到 `~/hpl-2.3`。
 
 
 ```sh
-lenny.peng@sta-f4-d:/opt$ mkdir HPL
-lenny.peng@sta-f4-d:/opt$ cd HPL
-lenny.peng@sta-f4-d:/opt/HPL$ wget http://netlib.org/benchmark/hpl/hpl-2.3.tar.gz
-lenny.peng@sta-f4-d:/opt/HPL$ tar zxvf hpl-2.3.tar.gz
-lenny.peng@sta-f4-d:/opt/HPL$ cd hpl-2.3/
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ cd setup/
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ source make_generic
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cp Make.UNKNOWN Make.linux
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd vim Make.linux
+lenny.peng@sta-f4-d:~$ wget http://netlib.org/benchmark/hpl/hpl-2.3.tar.gz
+lenny.peng@sta-f4-d:~$ tar zxvf hpl-2.3.tar.gz
+lenny.peng@sta-f4-d:~$ cd hpl-2.3/
+lenny.peng@sta-f4-d:~/hpl-2.3$ cd setup/
+lenny.peng@sta-f4-d:~/hpl-2.3/setup$ source make_generic
+lenny.peng@sta-f4-d:~/hpl-2.3/setup$ cp Make.UNKNOWN Make.linux
+lenny.peng@sta-f4-d:~/hpl-2.3/setup$ cd vim Make.linux
 ```
 
 修改该文件的以下内容：
