@@ -1,4 +1,4 @@
-# Flexing your Arm Muscle
+# HPC 入门
 
 原文：[Flexing your Arm Muscle](https://medium.com/ibm-data-ai/flexing-your-arm-muscle-for-hpc-ce00c29f000d)
 
@@ -451,6 +451,7 @@ lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=linux
 lenny.peng@sta-fpga-d:~/hpl-2.3/bin/linux$ cat HPL.dat
 HPLinpack benchmark input file
 Innovative Computing Laboratory, University of Tennessee
+Modified by hpc.xfoss.com, for single LSF server, 8 cores used.
 HPL.out      output file name (if any)
 6            device out (6=stdout,7=stderr,file)
 1            # of problems sizes (N)
@@ -482,6 +483,12 @@ HPL.out      output file name (if any)
 8            memory alignment in double (> 0)
 ```
 
+> **注意**：这个 `HPL.dat` 文件，是 HPLinpack 基准测试的输入文件，需要针对集群 CPU、内存等资源，加以调整，否则会导致其因内存占用过高等原因，被主机系统以 `signal 9` 信号杀死，而返回非零的退出代码。
+
+```console
+mpirun noticed that process rank 5 with PID 0 on node sta-fpga-d exited on signal 9 (Killed).
+```
+
 以 8 核运行该作业：
 
 ```console
@@ -490,7 +497,7 @@ lenny.peng@sta-fpga-d:~/hpl-2.3/bin/linux$ bsub -n 8 mpirun -np 8 ./xhpl
 Job <11> is submitted to default queue <normal>.
 ```
 
-上述 `xhpl` 作业已成功提交，并被 LSF 调度到 4 个内核上。作业运行时，我们可以使用 `bjobs` 和 `bpeek` 命令，分别查看资源利用率和输出。
+上述 `xhpl` 作业已成功提交，并被 LSF 调度到 8 个内核上。作业运行时，我们可以使用 `bjobs` 和 `bpeek` 命令，分别查看资源利用率和输出。
 
 
 执行 `bjobs -l 25` 命令的输出：
@@ -526,6 +533,7 @@ Thu Oct 12 18:40:42: Started 8 Task(s) on Host(s) <sta-fpga-d.xfoss.com> <st
 
 ```
 
+执行 `bpeek 24` 命令的输出：
 
 ```console
 lenny.peng@sta-fpga-d:~/hpl-2.3/bin/linux$ bpeek 24
