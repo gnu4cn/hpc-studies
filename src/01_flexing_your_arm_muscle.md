@@ -377,8 +377,7 @@ lenny.peng@sta-f4-d:/opt/HPL$ tar zxvf hpl-2.3.tar.gz
 lenny.peng@sta-f4-d:/opt/HPL$ cd hpl-2.3/
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ cd setup/
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ source make_generic
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ mv Make.UNKNOWN ../Make.linux
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd ..
+lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cp Make.UNKNOWN Make.linux
 lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd vim Make.linux
 ```
 
