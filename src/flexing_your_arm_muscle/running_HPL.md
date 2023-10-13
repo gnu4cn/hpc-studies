@@ -207,11 +207,14 @@ HPL.out      output file name (if any)
 
 > **注意**：这个 `HPL.dat` 文件，是 HPLinpack 基准测试的输入文件，需要针对集群 CPU、内存等资源，加以调整，否则会导致其因内存占用过高等原因，被主机系统以 `signal 9` 信号杀死，而返回非零的退出代码。
 >
-> 参考链接：[Does anyone know how to fix mpirun signal 9 (killed) problem?](https://www.researchgate.net/post/Does-anyone-know-how-to-fix-mpirun-signal-9-killed-problem)
 
 ```console
 mpirun noticed that process rank 5 with PID 0 on node sta-fpga-d exited on signal 9 (Killed).
 ```
+> 参考链接：
+>
+> 1. [Does anyone know how to fix mpirun signal 9 (killed) problem?](https://www.researchgate.net/post/Does-anyone-know-how-to-fix-mpirun-signal-9-killed-problem)
+> 2. [Linpack `HPL.dat` Tuning](https://github.com/open-power/op-benchmark-recipes/blob/master/standard-benchmarks/HPL/Linpack_HPL.dat_tuning.md)
 
 以 8 核运行该作业：
 
