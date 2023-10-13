@@ -24,7 +24,7 @@ LSF 群集还可以配置一个备份的管理节点，即 *候选管理主机�
 
 - 服务器的主机负载信息管理程序（`LIM`, Load Information Manager）
 
-{{#include ./01_flexing_your_arm_muscle.md:13:15}}
+{{#include ./start_lsf_and_running_hello_world.md:13:15}}
 
 这个 LSF 集群中只有一台服务器。因此，他既是 LSF 管理节点，也是 LSF 服务器，可以运行作业。下面咱们将使用一些命令，来启动 LSF 以及提交和管理作业。下面将简要介绍这些命令：
 
