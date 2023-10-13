@@ -1,10 +1,11 @@
 # 运行 HPL 基准测试
 
 
-## 另一个作业提交示例
-
 我知道。提交睡眠作业，足以让作为读者的你昏昏欲睡。那么，让咱们提交一些更有趣的东西吧 -- 无处不在的高性能 Linpack（High Performance Linpack, HPL）基准测试。因为这里运行的系统并不先进，所以这里的目的是展示 LSF 对并行工作负载的支持，而不是其 Linpack 性能。
 
+
+
+## 安装带 LSF 支持的 OpenMPI 编译器
 
 尽管在 openSUSE Tumbleweed 上，作为一个软件包提供了 OpenMPI，但其并未被编译支持 LSF。因此，咱们将首先编译出支持 LSF 的 OpenMPI。我们将使用最新的 OpenMPI v4.1.6，并将其编译和安装到 `/opt/openmpi-4.1.6`。
 
@@ -91,7 +92,22 @@ lenny.peng@sta-f4-d:~/MPI/openmpi-4.1.6$ sudo make install
 > *参考链接*：[./configure failed with option '--with-lsf'](https://github.com/open-mpi/ompi/issues/10943#issuecomment-1282595183)
 
 
-OpenMPI 准备就绪后，我们就可以开始编译 HPL 了。HPL 是针对 OpenMPI v4.1.6（上文中所编译的）并使用操作系统所提供的 OpenBLAS 库编译的。HPL 将编译并安装到 `~/hpl-2.3`。
+## 安装 OpenBlAS
+
+```bash
+$ git clone https://github.com/xianyi/OpenBLAS.git
+$ cd OpenBLAS
+$ git checkout v0.3.24
+$ make
+$ sudo make PREFIX=/opt/openblas install
+```
+
+参考链接：[How to compile HPL LINPACK on Ubuntu 22.04](https://www.mgaillard.fr/2022/08/27/benchmark-with-hpl.html)
+
+
+## 编译 HPL
+
+OpenMPI 准备就绪后，我们就可以开始编译 HPL 了。HPL 是针对 OpenMPI v4.1.6（上文中所编译的）的，并使用上面编译安装的 OpenBLAS 库编译的。HPL 将编译并安装到 `~/hpl-2.3`。
 
 
 ```sh
