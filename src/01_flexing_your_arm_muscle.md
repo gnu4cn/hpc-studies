@@ -432,11 +432,11 @@ lenny.peng@sta-fpga-d:~/hpl-2.3/setup$ diff -u1 Make.UNKNOWN Make.linux
 
 
 ```sh
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export PATH=/opt/openmpi-4.1.6/bin:$PATH
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ export LD_LIBRARY_PATH=/opt/openmpi-4.1.1/lib/libmpi.so:$LD_LIBRARY_PATH
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3/setup$ cd ..
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ ln -s ./setup/Make.linux ./Make.linux
-lenny.peng@sta-f4-d:/opt/HPL/hpl-2.3$ make arch=linux
+lenny.peng@sta-f4-d:~/hpl-2.3/setup$ export PATH=/opt/openmpi/bin:$PATH
+lenny.peng@sta-f4-d:~/hpl-2.3/setup$ export LD_LIBRARY_PATH=/opt/openmpi/lib/libmpi.so:$LD_LIBRARY_PATH
+lenny.peng@sta-f4-d:~/hpl-2.3/setup$ cd ..
+lenny.peng@sta-f4-d:~/hpl-2.3$ ln -s ./setup/Make.linux ./Make.linux
+lenny.peng@sta-f4-d:~/hpl-2.3$ make arch=linux
 ```
 
 > **注意**：
