@@ -215,7 +215,10 @@ mpirun noticed that process rank 5 with PID 0 on node sta-fpga-d exited on signa
 > 参考链接：
 >
 > 1. [Does anyone know how to fix mpirun signal 9 (killed) problem?](https://www.researchgate.net/post/Does-anyone-know-how-to-fix-mpirun-signal-9-killed-problem)
+>
 > 2. [Linpack `HPL.dat` Tuning](https://github.com/open-power/op-benchmark-recipes/blob/master/standard-benchmarks/HPL/Linpack_HPL.dat_tuning.md)
+>
+> 3. [matthew-li/lbnl_hpl_doc](https://github.com/matthew-li/lbnl_hpl_doc/blob/master/samples/HPL.dat)
 
 以 8 核运行该作业：
 
