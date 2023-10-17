@@ -39,35 +39,38 @@
             - `1`（一），表示 LSF 服务器主机；
             - `0`（零），表示仅限 LSF 客户端的主机。
 
-```conf
-HOSTNAME  model  type      server  r1m  mem  RESOURCES  REXPRI
-hosta     !      SUNSOL    1       1.0  4    ()         0
-hostb     !      LINUX     0       1.0  4    ()         0
-hostc     !      HPPA      1       1.0  4    ()         0
-End Host
-```
+    ```conf
+    HOSTNAME  model  type      server  r1m  mem  RESOURCES  REXPRI
+    hosta     !      SUNSOL    1       1.0  4    ()         0
+    hostb     !      LINUX     0       1.0  4    ()         0
+    hostc     !      HPPA      1       1.0  4    ()         0
+    End Host
+    ```
+
     c. 保存对 `LSF_CONFDIR/lsf.cluster.cluster_name` 的修改；
     d. 重新配置 `lim`，以启用集群中的这台新主机；
 
-```console
-% lsadmin reconfig
-Checking configuration files ...
-No errors found.
-Do you really want to restart LIMs on all hosts? [y/n] y
-Restart LIM on <hosta> ...... done
-Restart LIM on <hostc> ...... done
-Restart LIM on <hostd> ...... done
-```
+    ```console
+    % lsadmin reconfig
+    Checking configuration files ...
+    No errors found.
+    Do you really want to restart LIMs on all hosts? [y/n] y
+    Restart LIM on <hosta> ...... done
+    Restart LIM on <hostc> ...... done
+    Restart LIM on <hostd> ...... done
+    ```
+
     `lsadmin reconfig` 命令，会进行配置错误检查。如果没有发现无法恢复的错误，系统会要求咱们加以确认，是否要在所有主机上重启 `lim`，然后重新配置 `lim`。如果发现无法恢复的错误，则重新配置会退出。
     e. 重新配置 `mbatchd`;
 
-```console
-% badmin reconfig
-Checking configuration files ...
-No errors found.
-Do you want to reconfigure? [y/n] y
-Reconfiguration initiated
-```
+    ```console
+    % badmin reconfig
+    Checking configuration files ...
+    No errors found.
+    Do you want to reconfigure? [y/n] y
+    Reconfiguration initiated
+    ```
+
     `badmin reconfig` 命令，会进行配置错误检查。如果没有发现无法恢复的错误，系统会要求咱们对重新配置进行确认。如果发现无法恢复的错误，则重新配置会退出。
 
 
@@ -77,22 +80,25 @@ Reconfiguration initiated
 
     b. 切换到安装脚本目录；
 
-```console
-# cd /opt/ibm/lsfce/install
-```
+    ```console
+    # cd /opt/ibm/lsfce/install
+    ```
+
     c. 运行 `hostsetup` 命令来设置新主机；
 
-```console
-# ./hostsetup --top="/opt/ibm/lsfce" --boot="y"
-```
+    ```console
+    # ./hostsetup --top="/opt/ibm/lsfce" --boot="y"
+    ```
+
     d. 在新主机上启动 LSF。
     请运行以下命令：
 
-```console
-# bctrld start lim
-# bctrld start res
-# bctrld start sbd
-```
+    ```console
+    # bctrld start lim
+    # bctrld start res
+    # bctrld start sbd
+    ```
+
     e. 运行 `bhosts` 与 `lshosts` 命令，验证咱们的变更。
     如果有任何主机类型，或主机型号为 `UNKNOWN` 或 `DEFAULT`，请参阅在 [IBM Spectrum LSF Cluster Management and Operations](https://www.ibm.com/docs/en/SSWRJV_10.1.0/lsf_welcome/lsf_kc_cluster_ops.html) 中，[Working with hosts](https://www.ibm.com/docs/en/SSWRJV_10.1.0/lsf_admin/chap_hosts_working_with.html) 以解决问题。
 
