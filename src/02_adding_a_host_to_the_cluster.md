@@ -218,3 +218,14 @@ Wed Oct 18 13:15:33: Resource usage collected.
  Effective: select[type == local] order[r15s:pg]
 
 ```
+
+
+运行作业时，运行 `bhosts` 命令的输出：
+
+
+```console
+lenny.peng@sta-fpga-d:~/hpl-2.3/bin/linux$ bhosts
+HOST_NAME          STATUS       JL/U    MAX  NJOBS    RUN  SSUSP  USUSP    RSV
+sta-fpga-b.xfoss   ok              -     14     10     10      0      0      0
+sta-fpga-d.xfoss   closed          -     14     14     14      0      0      0
+```
