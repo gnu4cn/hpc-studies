@@ -48,6 +48,7 @@
     ```
 
     c. 保存对 `LSF_CONFDIR/lsf.cluster.cluster_name` 的修改；
+
     d. 重新配置 `lim`，以启用集群中的这台新主机；
 
     ```console
