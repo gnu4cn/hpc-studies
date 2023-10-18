@@ -62,6 +62,7 @@
     ```
 
     `lsadmin reconfig` 命令，会进行配置错误检查。如果没有发现无法恢复的错误，系统会要求咱们加以确认，是否要在所有主机上重启 `lim`，然后重新配置 `lim`。如果发现无法恢复的错误，则重新配置会退出。
+
     e. 重新配置 `mbatchd`;
 
     ```console
@@ -92,6 +93,7 @@
     ```
 
     d. 在新主机上启动 LSF。
+
     请运行以下命令：
 
     ```console
@@ -101,6 +103,7 @@
     ```
 
     e. 运行 `bhosts` 与 `lshosts` 命令，验证咱们的变更。
+
     如果有任何主机类型，或主机型号为 `UNKNOWN` 或 `DEFAULT`，请参阅在 [IBM Spectrum LSF Cluster Management and Operations](https://www.ibm.com/docs/en/SSWRJV_10.1.0/lsf_welcome/lsf_kc_cluster_ops.html) 中，[Working with hosts](https://www.ibm.com/docs/en/SSWRJV_10.1.0/lsf_admin/chap_hosts_working_with.html) 以解决问题。
 
 ## 结果
