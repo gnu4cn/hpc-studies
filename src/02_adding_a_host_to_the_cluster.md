@@ -47,6 +47,16 @@
     请参阅 [配置安装程序](../flexing_your_arm_muscle/lsf_install.md#配置安装程序)，了解更多有关这个 `install.config` 文件，以及 `lsfinstall` 命令的信息。
 
 
+    ```conf
+    LSF_TOP="/opt/ibm/lsfce"
+    LSF_ADMINS="lsfadmin"
+    LSF_CLUSTER_NAME="xfoss.com"
+    LSF_MASTER_LIST="sta-fpga-d"
+    LSF_TARDIR="/home/lenny.peng/lsfsce10.2.0.12-x86_64/lsf"
+    ENABLE_DYNAMIC_HOSTS="Y"
+    ```
+
+
     d. 运行 `sudo ./lsfinstall -f ./install.config` 命令；
 
     e. 请按照由 `lsfinstall` 脚本，所生成的 `/opt/ibm/lsfce/10.1/lsf_quick_admin.html` 文件中，主机设置的步骤，设置新的主机。
@@ -66,11 +76,11 @@
             - `0`（零），表示仅限 LSF 客户端的主机。
 
     ```conf
-    HOSTNAME  model  type      server  r1m  mem  RESOURCES  REXPRI
-    hosta     !      SUNSOL    1       1.0  4    ()         0
-    hostb     !      LINUX     0       1.0  4    ()         0
-    hostc     !      HPPA      1       1.0  4    ()         0
-    End Host
+    Begin   Host
+    HOSTNAME  model    type        server  RESOURCES    #Keywords
+    sta-fpga-d   !   !   1   (mg)
+    sta-fpga-b   !   !   1   (mg)
+    End     Host
     ```
 
     c. 保存对 `LSF_CONFDIR/lsf.cluster.cluster_name` 的修改；
@@ -89,6 +99,30 @@
 
     `lsadmin reconfig` 命令，会进行配置错误检查。如果没有发现无法恢复的错误，系统会要求咱们加以确认，是否要在所有主机上重启 `lim`，然后重新配置 `lim`。如果发现无法恢复的错误，则重新配置会退出。
 
+    > **注意**：需要先以 `root` 用户，启动管理主机。
+    >
+    ```console
+    # lsadmin limstartup
+    # lsadmin resstartup
+    # badmin hstartup
+    ```
+    > 而运行 `lsadmin reconfig` 命令，需要以 `lsfadmin` 用户身份运行，否则会报错错误：
+
+    ```console
+    root@sta-fpga-d:/opt/ibm/lsfce# source conf/profile.lsf
+    root@sta-fpga-d:/opt/ibm/lsfce# lsadmin reconfig
+
+    Checking configuration files ...
+
+    No errors found.
+
+    Restart only the master candidate hosts? [y/n] y
+    Restart LIM on <sta-fpga-d.xfoss.com> ...... ls_limcontrol: Operation permission denied by LIM
+    ```
+
+    > 而导致添加服务器主机失败。
+
+
     e. 重新配置 `mbatchd`;
 
     ```console
@@ -100,6 +134,8 @@
     ```
 
     `badmin reconfig` 命令，会进行配置错误检查。如果没有发现无法恢复的错误，系统会要求咱们对重新配置进行确认。如果发现无法恢复的错误，则重新配置会退出。
+
+    > 与 `lsadmin reconfig` 一样，`badmin reconfig` 也应以 `lsfadmin` 用户身份运行。
 
 
 3. （可选的）使用 `hostsetup` 命令设置新主机。
@@ -137,3 +173,14 @@
 - 使用动态主机配置将主机添加到群集，而无需手动更改 LSF 配置。有关动态添加主机的更多信息，请参阅 [IBM Spectrum LSF 群集管理和操作](https://www.ibm.com/docs/en/SSWRJV_10.1.0/lsf_welcome/lsf_kc_cluster_ops.html)；
 
 - 如果出现错误，请参阅 [LSF 问题排除](https://www.ibm.com/docs/en/SSWRJV_10.1.0/lsf_admin/chap_troubleshooting_lsf.html#v3523448)，了解一些常见的配置错误。
+
+
+集群成功添加新的服务器主机后，运行 `bhosts` 命令输出如下：
+
+```console
+lenny.peng@sta-fpga-d:~$ source /opt/ibm/lsfce/conf/profile.lsf
+lenny.peng@sta-fpga-d:~$ bhosts
+HOST_NAME          STATUS       JL/U    MAX  NJOBS    RUN  SSUSP  USUSP    RSV
+sta-fpga-b.xfoss   ok              -     14      0      0      0      0      0
+sta-fpga-d.xfoss   ok              -     14      0      0      0      0      0
+```
