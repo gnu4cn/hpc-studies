@@ -8,7 +8,6 @@
 
 
 - [往集群添加主机](02_adding_a_host_to_the_cluster.md)
-    - [流程](adding_a_host/procedure.md)
 
 
 - [术语表](glossories.md)
