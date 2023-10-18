@@ -184,3 +184,37 @@ HOST_NAME          STATUS       JL/U    MAX  NJOBS    RUN  SSUSP  USUSP    RSV
 sta-fpga-b.xfoss   ok              -     14      0      0      0      0      0
 sta-fpga-d.xfoss   ok              -     14      0      0      0      0      0
 ```
+
+运行 `bjobs -l 3` 命令的输出：
+
+
+```console
+lenny.peng@sta-fpga-d:~/hpl-2.3/bin/linux$ bjobs -l 3
+
+Job <3>, User <lenny.peng>, Project <default>, Status <RUN>, Queue <normal>, Co
+                     mmand <mpirun -np 16 ./xhpl>, Share group charged </lenny.
+                     peng>
+Wed Oct 18 13:14:40: Submitted from host <sta-fpga-d.xfossm.com>, CWD <$HOME/
+                     hpl-2.3/bin/linux>, Output File <output.3>, 16 Task(s);
+Wed Oct 18 13:14:41: Started 16 Task(s) on Host(s) <14*sta-fpga-d.xfossm.com>
+                     <2*sta-fpga-b.xfossm.com>, Allocated 16 Slot(s) on Host(
+                     s) <14*sta-fpga-d.xfossm.com> <2*sta-fpga-b.xfossm.com
+                     >, Execution Home </home/lenny.peng>, Execution CWD </home
+                     /lenny.peng/hpl-2.3/bin/linux>;
+Wed Oct 18 13:15:33: Resource usage collected.
+                     MEM: 30 Mbytes;  SWAP: 227 Mbytes;  NTHREAD: 7
+
+
+ MEMORY USAGE:
+ MAX MEM: 30 Mbytes;  AVG MEM: 29 Mbytes
+
+ SCHEDULING PARAMETERS:
+           r15s   r1m  r15m   ut      pg    io   ls    it    tmp    swp    mem
+ loadSched   -     -     -     -       -     -    -     -     -      -      -
+ loadStop    -     -     -     -       -     -    -     -     -      -      -
+
+ RESOURCE REQUIREMENT DETAILS:
+ Combined: select[type == local] order[r15s:pg]
+ Effective: select[type == local] order[r15s:pg]
+
+```
