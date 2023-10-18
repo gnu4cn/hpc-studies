@@ -9,5 +9,7 @@
 
 - [往集群添加主机](02_adding_a_host_to_the_cluster.md)
 
+- [在 IBM LSF 上运行 `X` 应用](03_running_x_app_on_ibm_lsf.md)
+
 
 - [术语表](glossories.md)
