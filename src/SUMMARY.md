@@ -11,5 +11,7 @@
 
 - [在 LSF 集群上运行 `X` 应用](03_running_x_app_on_ibm_lsf.md)
 
+- [`env-modules` 之于 HPC](04_env-modules.md)
+
 
 - [术语表](glossories.md)
