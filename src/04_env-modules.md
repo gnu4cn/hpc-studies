@@ -24,11 +24,11 @@
 
 > 相比这个历史悠久的 `env-modules` 环境模组系统，另一个类似较新的，基于 Lua 的模组系统 [TACC/Lmod](https://github.com/TACC/Lmod)，提供了更丰富的功能。
 >
-> * 文档:   https://lmod.readthedocs.org
-> * GitHub:          https://github.com/TACC/Lmod
-> * SourceForge:     https://lmod.sf.net
-> * TACC 主页:   https://www.tacc.utexas.edu/research-development/tacc-projects/lmod
-> * Lmod 测试套件: https://github.com/rtmclay/Lmod_test_suite
+> * 文档:           [lmod.readthedocs.org](https://lmod.readthedocs.org)
+> * GitHub:         [TACC/Lmod](https://github.com/TACC/Lmod)
+> * SourceForge:    [lmod.sf.net](https://lmod.sf.net)
+> * TACC 主页:      [tacc.utexas.edu](https://www.tacc.utexas.edu/research-development/tacc-projects/lmod)
+> * Lmod 测试套件:  [rtmclay/Lmod_test_suite](https://github.com/rtmclay/Lmod_test_suite)
 >
 
 **经由一些 `modulefiles`，环境模块包，the Environment Modules package, 提供了动态修改用户环境的功能**。
