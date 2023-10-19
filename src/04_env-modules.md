@@ -1,5 +1,8 @@
 # `env-modules`
 
+
+**[hpc-wiki.info: hpc/Modules](https://hpc-wiki.info/hpc/Modules)**：
+
 > `module` 系统是大多数超级计算机上都有的概念，可简化不同软件（版本）的使用，使其精确可控。
 >
 > 在大多数情况下，超级计算机安装的软件，都要比普通用户使用的软件多得多。每个软件包都需要对 `$PATH`、`$LD_LIBRARY_PATH`，以及其他 [环境变量](glossories.md#环境变量environment-variables) 进行不同的设置，这些设置可能会相互影响，甚至相互排斥。其次，不同的用户（群组）需要不同版本的相同软件，而这些软件一般不能在同一系统中并行安装或使用。
@@ -9,7 +12,6 @@
 > 通过模块系统，便可使用命令 `module`，列出、加载及卸载群集上当前可用的所有软件。
 >
 
--- https://hpc-wiki.info/hpc/Modules
 
 
 `env-modules` 项目，目前（2023/10）是由供职于 [法国原子能委员会](https://www.cea.fr/english) 的 [Xavier Delaruelle](https://fr.linkedin.com/in/xdelaruelle)，所维护的一个开源项目，项目网站 [modules.sourceforge.net](http://modules.sourceforge.net/)，源码仓库：
