@@ -20,6 +20,8 @@
 
 - [sourceforge.net: Environment Modules Git](https://sourceforge.net/p/modules/modules/ci/main/tree/)
 
+文档页面：[modules.readthedocs.io](https://modules.readthedocs.io/en/latest/)
+
 
 **经由一些 `modulefiles`，环境模块包，the Environment Modules package, 提供了动态修改用户环境的功能**。
 
