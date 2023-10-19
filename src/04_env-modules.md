@@ -8,6 +8,12 @@
 >
 > 通过模块系统，便可使用命令 `module`，列出、加载及卸载群集上当前可用的所有软件。
 >
-> -- https://hpc-wiki.info/hpc/Modules
+
+-- https://hpc-wiki.info/hpc/Modules
 
 
+`env-modules` 项目，目前（2023/10）是由供职于 [法国原子能委员会](https://www.cea.fr/english) 的 [Xavier Delaruelle](https://fr.linkedin.com/in/xdelaruelle)，所维护的一个开源项目，项目网站 [modules.sourceforge.net](http://modules.sourceforge.net/)，源码仓库：
+
+- [github.com: cea-hpc/modules](https://github.com/cea-hpc/modules)
+
+- [sourceforge.net: Environment Modules Git](https://sourceforge.net/p/modules/modules/ci/main/tree/)
