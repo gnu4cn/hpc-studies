@@ -26,4 +26,4 @@ yay -S env-modules
 module list
 ```
 
-
+> **注意**：在 Ubuntu 系统上，安装后需退出并重新登录，否则会报出找不到 `module` 命令。
