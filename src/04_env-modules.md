@@ -19,3 +19,17 @@
 - [github.com: cea-hpc/modules](https://github.com/cea-hpc/modules)
 
 - [sourceforge.net: Environment Modules Git](https://sourceforge.net/p/modules/modules/ci/main/tree/)
+
+
+**经由一些 `modulefiles`，环境模块包，the Environment Modules package, 提供了动态修改用户环境的功能**。
+
+
+模块包是一种简化 shell 初始化的工具，使用 `modulefiles`，用户在会话期间可以轻松修改其环境。
+
+
+每个 `modulefile`，都包含了为某个应用程序，配置 shell 所需的信息。模块包初始化后，便可使用对模块文件，modulefiles 进行的 `module` 命令，按模块修改环境。通常情况下，模块文件会指示 `module` 命令，修改或设置 shell 环境变量，如 `PATH`、`MANPATH` 等。模块文件会被系统中的许多用户共享，而用户也可能拥有自己的模块文件集，以补充或替代共享的模块文件。
+
+模块可以动态及原子方式地，atomically，加载和卸载，干净利落。支持所有常用的 shell，包括 `bash`、`ksh`、`zsh`、`sh`、`csh`、`tcsh`、`fish`、`cmd` 等，以及一些脚本语言，如 `tcl`、`perl`、`python`、`ruby`、`cmake` 及 `r` 等。
+
+
+模块在管理不同版本的应用程序时非常有用。模块还可以捆绑成元模块，meta-modules，用于加载整套不同的应用程序。
