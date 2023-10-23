@@ -14,7 +14,7 @@
 - [`env-modules` 之于 HPC](04_env-modules.md)
     - [安装 `env-modules`](env-modules/installation.md)
 
-- [Tcl 语法](env-modules/tcl_syntax.md)
+- [Tcl 教程](tcl_tutorial.md)
 
 
 - [术语表](glossories.md)
