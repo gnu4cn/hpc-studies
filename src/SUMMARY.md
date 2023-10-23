@@ -15,6 +15,7 @@
     - [安装 `env-modules`](env-modules/installation.md)
 
 - [Tcl 教程](tcl_tutorial.md)
+    - [基本语法](src/tcl_tk_tutorial/basic_syntax.md)
 
 
 - [术语表](glossories.md)
