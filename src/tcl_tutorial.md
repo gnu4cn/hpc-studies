@@ -10,11 +10,14 @@
 
 而在高性能计算方面，`env-modules` 模块系统本身是由 [Tcl 语言](https://www.tcl-lang.org/) 实现，同时其中的 `modulefiles` 也是由 Tcl 语言编写，故有必要花点时间，来了解掌握这门语言。
 
+
+## 关于 Tcl/Tk
+
 这里将使用 [A Tcl(Tutorial for Cool Languages) for Tcl/Tk](https://bin-co.com/tcl/tutorial/)。
 
 [Tcl/Tk](https://www.tcl-lang.org/) -- 一种语言，多种用途。使用强大的 TK 库，其可用于 GUI（图形用户界面，Graphic User Interface）的开放。*Tcl/Tk* 作为网景和微软公司构造的网络浏览器插件运行。因此，他可以用来替代 JavaScript 和 VBScript。他是一种 CGI 语言，可用于服务器。*Tcl-Tk* 还具有极强的可扩展性 -- 对于想学习高级脚本语言来制作用户界面，或集成大型系统的 C/C++ 程序员来说，Tcl/Tk 非常有价值。
 
-Tcl 是 **工具命令语言，Tool Command Language ** 的缩写。 **Tcl** 及其相关 GUI 工具包 **Tk**，是由加州大学伯克利分校的 John Ousterhout 教授创建。Tcl 是一种脚本语言，a scripting language，可在 Windows、UNIX 和 Macintosh 平台上运行。Tk 是 Tcl 的标准插件，a standard add-on to Tcl，提供了快速、轻松创建用户界面的命令。尽管 Tcl 最初是在 UNIX 平台上创建的，但咱们的 Tcl/Tk 脚本，在所有受支持平台上运行时都是一样的，只有少许不同之处。
+Tcl 是 **工具命令语言，Tool Command Language** 的缩写。 **Tcl** 及其相关 GUI 工具包 **Tk**，是由加州大学伯克利分校的 John Ousterhout 教授创建。Tcl 是一种脚本语言，a scripting language，可在 Windows、UNIX 和 Macintosh 平台上运行。Tk 是 Tcl 的标准插件，a standard add-on to Tcl，提供了快速、轻松创建用户界面的命令。尽管 Tcl 最初是在 UNIX 平台上创建的，但咱们的 Tcl/Tk 脚本，在所有受支持平台上运行时都是一样的，只有少许不同之处。
 
 
 Tcl 是一种非常简单、开源授权的编程语言，提供了变量、过程及控制等基本语言功能，可在几乎所有现代操作系统上运行，如 Unix/Linux、MacOS 和 Windows XP/7/10/11 等的计算机。
@@ -24,6 +27,10 @@ Tcl最初是作为用于实验性计算机辅助设计（CAD）工具的，一�
 
 
 但 Tcl 本身也是一种编程语言，可以粗略地将其描述作，是介于 LISP/Scheme（减少了括号）和 shells（具有更强大的结构）之间的杂交品种。咱们可以用 Tcl 编写任意数量的程序，就像用其他语言一样。Tcl 程序通常被称为 “脚本，scripts”，因为这些程序不需要编译成机器可读的形式。
+
+
+## 关于 Tk GUI 框架
+
 
 Tcl/Tk 本身不依赖于传统的框架，例如一些其他图形用户界面（GUI）工具包，如 Qt 或 GTK。相反，Tcl/Tk 包括了用于创建 GUI 应用程序的内置框架。Tk 工具包，作为 Tcl/Tk 的一个不可或缺的部分，提供了创建图形用户界面的必要框架。
 
