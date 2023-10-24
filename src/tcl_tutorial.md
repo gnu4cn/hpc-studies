@@ -31,6 +31,7 @@ Tcl最初是作为用于实验性计算机辅助设计（CAD）工具的，一�
 
 ## 关于 Tk GUI 框架
 
+> **注意**：以下内容来自 [chat.openai.com](https://chat.openai.com/)。
 
 Tcl/Tk 本身不依赖于传统的框架，例如一些其他图形用户界面（GUI）工具包，如 Qt 或 GTK。相反，Tcl/Tk 包括了用于创建 GUI 应用程序的内置框架。Tk 工具包，作为 Tcl/Tk 的一个不可或缺的部分，提供了创建图形用户界面的必要框架。
 
