@@ -27,4 +27,56 @@ good
 language
 ```
 
+`\n` 表示新行。还有其他一些替换。详情请阅读 [手册](https://tcl.tk/man/tcl8.2.3/TclCmd/string.html)。字符串变量的使用非常简单。请看下面的脚本。
 
+```tcl
+set joke1 "There are two ways to write error-free programs. Only the third one works."
+set joke2 "A bug in the code is worth two in the documentation."
+
+label .jokes -text "Joke 1 : $joke1 \nJoke 2 : $joke2"
+pack .jokes
+```
+
+赋值字符串的另一方法，是使用 `{...}`（使用花括号）。举例如下。
+
+
+```tcl
+set price {$20}
+```
+
+花括号（大括号）确保在其内不进行任何替换。如果咱们不使用大括号，而是使用 `""`（双引号），设置价格为 `"$20"`，脚本将给出一个错误，提示 Tcl 无法读取名为 `20` 的变量。在双引号中可以进行替换。因此 Tcl 认为 `20` 是一个变量，因为他跟在 `$` 符号后面。这在大括号内是不会发生的。之前也解释过这个问题。
+
+
+
+## 一些基本的字符串操作技巧
+
+`string` 函数，是几乎所有字符串操作技巧的基础。下面给出了一些最常用的函数。请注意，在所有情况下，结果都会返回。而要将结果存入变量，就必须使用下面这样的代码：
+
+```tcl
+set result [string index "Binny" 0]
+```
+
+现提供几个例子。
+
+
+### 获取某个字符串的第 `n` 个字母
+
+`[string index <string> <character index>]`
+
+
+示例：
+
+
+```tcl
+set quest "What is at the beginning of the end and at the end of all time?"
+set ans [string index $quest 32]
+label .question -text "Question : $quest"
+label .answer -text "Answer : \"$ans\" OR \"[string index $quest end-1]\""
+pack .question
+pack .answer
+```
+
+> **注意**：在 Windows 系统上，使用 Vim 编辑器编写带有中文字符串的 Tk 脚本，会显示为乱码。而在 Linux 系统上，却没有这样的问题（Windows 中的终端 Tcl 脚本，也不会显示乱码）。这是因为 Tk 默认使用 UTF-8 编码，而 Windows 系统上，中文使用了 GB2312(cp936) 的编码。参见：
+> - [关于TCL中的编码问题](https://blog.csdn.net/lights_joy/article/details/1748448)。
+>
+> - [How to Use Tcl 8.1 Internationalization Features](https://www.tcl.tk/doc/howto/i18n.html)
