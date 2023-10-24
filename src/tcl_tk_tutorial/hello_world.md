@@ -24,4 +24,4 @@ exec wish "$0" "$@"
 
 为什么？原因请参见 [Unix 中的 Tcl/Tk]()。
 
-{{#include appendix.md:20}}
+{{#include ./appendix.md:20}}

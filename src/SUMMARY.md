@@ -16,6 +16,7 @@
 
 - [Tcl 教程](tcl_tutorial.md)
     - [基本语法](tcl_tk_tutorial/basic_syntax.md)
+    - [`Hello World`](tcl_tk_tutorial/hello_world.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
