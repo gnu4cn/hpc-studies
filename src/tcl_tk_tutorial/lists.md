@@ -1,4 +1,4 @@
-# 清单
+# 清单/列表
 
 Tcl 列表包含着一个元素序列，a sequence of elements，每个元素则可以是数字、字符串或其他列表。咱们来构造一个列表：
 
@@ -64,3 +64,10 @@ puts [llength $str]
 ```
 
 > 将输出：`9`，表示这个字符串有 9 个单词。
+
+还有更多与列表相关的命令，如 `lsort`、`lset`、`lrange`、`lsearch` 以及 `split`、`join` 等。有关这些命令的详细信息，请参阅 [手册](https://tcl.tk/man/tcl8.6.13/TclCmd/list.html)。
+
+
+**`split`**
+
+
