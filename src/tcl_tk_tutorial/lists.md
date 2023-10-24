@@ -68,6 +68,72 @@ puts [llength $str]
 还有更多与列表相关的命令，如 `lsort`、`lset`、`lrange`、`lsearch` 以及 `split`、`join` 等。有关这些命令的详细信息，请参阅 [手册](https://tcl.tk/man/tcl8.6.13/TclCmd/list.html)。
 
 
-**`split`**
+## **`split`** 命令
+
+`split` 是一条非常有用的命令，用于从字符串创建出列表。如果要在字符串中的任意字符处，将字符串拆分成若干项，可以使用 ...嗯... `split` 命令。在要将句子中的每个单词都放入列表中时，该命令非常有用。
+
+```tcl
+set words [split $sentence " "]
+```
 
 
+在这里，名为 `$sentence` 的变量中的每一个空格，都会被剪切 -- 实质上就是将其分割成单词。现在有了一个名为 `$words` 的新列表。`[lindex $words 0]` 的结果，将是第一个单词，`1` 将是第二个单词，以此类推。这条命令的另一个用途，是用 `read` 命令读取文件，然后用 `\n` 对该命令的结果字符串加以分割，从而得到文件中所有行的列表。要了解这一点，需要前往 [文件处理](./file.md)。
+
+
+## 字典
+
+> **注**：原文为 “数组”，根据下面的内容，这种数据结构实为字典。
+
+使用 `array` 命令，咱们可以在 Tcl 中创建出另一种数组。这会给到数组中的每个值一个名字，而可以用名字访问这些值。
+
+
+*语法*：
+
+```tcl
+array option arrayName ?arg arg ...?
+```
+
+示例：
+
+```tcl
+#Make the array
+array set star_trek {
+	location	"Bridge of the Enterprise"
+	problem		"Power surge"
+	solution	"a fuse"
+}
+
+#Access the variables
+label .sol1 -text "The $star_trek(problem) at $star_trek(location) \
+	could have been avoided if they had $star_trek(solution)."
+
+#Change the variable
+set star_trek(solution)	"Wesley"
+
+#Access the changed variables
+label .sol2 -text "The $star_trek(problem) at $star_trek(location) \
+	could have been avoided if they had $star_trek(solution)."
+
+#Show the solutions
+pack .sol1 .sol2
+```
+
+> **注意**：与列表一样，Tcl 的字典也可以存储不同类型的值，如字符串、数字与布尔值等。
+
+命令 `array set star_trek` 会创建出字典 `star_trek`，并给到随后的参数，作为其内容。可以用以下代码，访问这个字典。
+
+```tcl
+$<ARRAY_NAME>(<ELEMENT_ID>)
+```
+
+移除 `$` 符号后，就可以像访问其他变量一样，轻松地修改变量。例如：
+
+```tcl
+set <ARRAY_NAME>(<ELEMENT_ID>) <VALUE>
+```
+
+一些 `array` 相关的命令，及其描述：
+
+| 命令 | 语法 | 描述 |
+| :-- | :-- | :-- |
+| `array set` | `array set arrayName { list }` |
