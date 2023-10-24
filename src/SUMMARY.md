@@ -18,6 +18,7 @@
     - [基本语法](tcl_tk_tutorial/basic_syntax.md)
     - [`Hello World`](tcl_tk_tutorial/hello_world.md)
     - [字符串操作](tcl_tk_tutorial/string_manipulation.md)
+    - [清单](tcl_tk_tutorial/lists.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
