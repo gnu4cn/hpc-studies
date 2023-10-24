@@ -80,3 +80,72 @@ pack .answer
 > - [关于TCL中的编码问题](https://blog.csdn.net/lights_joy/article/details/1748448)。
 >
 > - [How to Use Tcl 8.1 Internationalization Features](https://www.tcl.tk/doc/howto/i18n.html)
+
+
+### 获取从字符数 `n` 到字符数 `m` 的字符串
+
+`[string range <string> <first character index> <last character index>]`
+
+
+示例：
+
+```tcl
+set common "marriage, a man"
+set end "for the women he loves"
+set verb "yearns"
+
+label .before -text "Before...\nBefore $common $verb $end\n"
+label .afterm -text "After...\nAfter $common [string range $verb 1 end] $end"
+
+pack .before
+pack .afterm
+```
+
+> **注意**：这里只能在 `last character index` 参数处，使用 `end` 关键字，而不能在 `<first character index>` 处，使用 `start/begin` 这样的关键字。
+
+
+### 获取字符串中某个字符（字符串）的第一和最后一个实例
+
+- `[string first <string1> <string2> ?startIndex?]` - 用于获取第一个 `string1` 的位置索引；
+
+- `[string last <string1> <string2> ?startIndex?]` - 用于获取最后一个 `string2` 的位置索引。
+
+示例：
+
+```tcl
+#!/usr/bin/env tclsh
+set str "The quick brown fox jumps over the lazy dog."
+
+puts "First o's index: [string first "o" $str]"
+puts "Last o's index: [string last "o" $str]"
+```
+
+输出为：
+
+```console
+First o's index: 12
+Last o's index: 41
+```
+
+### 获取字符串长度
+
+`[string lenght <string>]`
+
+
+示例：
+
+```tclsh
+#!/usr/bin/env tclsh
+set str "The quick brown fox jumps over the lazy dog."
+
+puts [string length $str]
+```
+
+输出为：
+
+
+```console
+44
+```
+
+还有许多其他字符串的函数。完整列表请参见 [手册](https://tcl.tk/man/tcl8.2.3/TclCmd/string.htm#M8)。
