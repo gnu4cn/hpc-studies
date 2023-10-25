@@ -14,7 +14,7 @@
 - [`env-modules` 之于 HPC](04_env-modules.md)
     - [安装 `env-modules`](env-modules/installation.md)
 
-- [Tcl 教程](tcl_tutorial.md)
+- [Tcl/Tk 教程](tcl_tutorial.md)
     - [基本语法](tcl_tk_tutorial/basic_syntax.md)
     - [`Hello World`](tcl_tk_tutorial/hello_world.md)
     - [字符串操作](tcl_tk_tutorial/string_manipulation.md)
@@ -22,6 +22,7 @@
     - [控制流, control flow](tcl_tk_tutorial/control_flow.md)
     - [过程，procudure, `proc`](tcl_tk_tutorial/proc.md)
     - [文件操作，File Handling](tcl_tk_tutorial/file.md)
+    - [关于 Tk](tcl_tk_tutorial/tk.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
