@@ -255,4 +255,57 @@ pack .mul
 ![Tcl `while` 循环打印的完整乘法表](../images/multiplication_table.png)
 
 
+## `switch` 循环
 
+根据给定值，执行多个脚本中之一。
+
+*语法*：
+
+```tcl
+switch ?options? string { pattern body ?pattern body ...? }
+```
+
+而我（作者）更喜欢下面这种......
+
+
+```tcl
+switch ?options? { string } {
+    pattern  { body }
+    ?pattern { body }
+    ...?
+}
+```
+
+其中 `?options?` 可以是下面任何一项：
+
+
+- `-exact`，在将字符串与模式匹配时，使用精确匹配。这是默认设置；
+
+- `-glob`，在匹配字符串与模式时，使用 `glob` 风格的匹配（即与字符串匹配命令的实现方式相同）；
+
+- `-regexp`，将字符串与模式匹配时，使用正则表达式匹配。
+
+
+`switch` 与 `if-else` 命令非常相似。因此，这里将使用刚才的例子。
+
+
+```tcl
+#The marriage status script...
+#Change the status please
+set marital_status "After"
+
+label .thesis -text "Marriage is a three ring circus..."
+
+switch $marital_status {
+    "Before" { set ring "Engagement" }
+    "During" { set ring "Wedding" }
+    default { set ring "suffe -" }
+}
+
+label .proof -text "$marital_status Marriage: $ring ring"
+
+pack .thesis
+pack .proof
+```
+
+{{#include ./control_flow.md:45}}
