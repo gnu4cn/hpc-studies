@@ -54,7 +54,7 @@ label .hell -text "Hell World" -font courierfont -relief raised
 <NameOfWidget> <path> ?<option 1> <option 2> ...?
 ```
 
-第四行 -- `pack .hello` - 这一行告诉咱们，如何打包这个小部件。这一行请求解释器，打包名为 `.hello` 的部件。解释器比一般孩子都听话，他照做了。现在，`pack` 是个几何管理器，a geometry manager。另一个几何管理器是 `grid`。我个人更喜欢 `grid`。
+第四行 -- `pack .hello` - 这一行告诉咱们，如何打包这个小部件。这一行请求解释器，打包名为 `.hello` 的部件。解释器比一般孩子都听话，他照做了。现在，`pack` 是个几何管理器，a geometry manager。另一个几何管理器是 [`grid`](widgets.md#grid)。我个人更喜欢 `grid`。
 
 
 现在，Tcl 的清教徒们，Tcl puritans，会大声疾呼，说这不是打印 "Hello World" 的方法。“纯粹” 方法如下......

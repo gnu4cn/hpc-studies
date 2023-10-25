@@ -23,6 +23,7 @@
     - [过程，procudure, `proc`](tcl_tk_tutorial/proc.md)
     - [文件操作，File Handling](tcl_tk_tutorial/file.md)
     - [关于 Tk](tcl_tk_tutorial/tk.md)
+    - [Tk 的小部件](tcl_tk_tutorial/widgets.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
