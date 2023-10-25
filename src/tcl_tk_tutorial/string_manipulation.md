@@ -172,3 +172,5 @@ PS C:\tools\msys64\home\Lenny.Peng\tcl-scripts> wish -encoding utf-8 .\tk_gui_de
 进一步，可在 Tcl/Tk 脚本顶部的 Shebang 行，写下 `#!/usr/bin/env -S wish -encoding utf-8`，便可在赋予脚本执行属性（`chmod +x`）后，直接以参数 `-encoding utf-8` 执行所编写的 Tk 脚本了。
 
 > *参考链接*：[Multiple arguments in shebang](https://unix.stackexchange.com/a/477651)
+
+类似地，也可以写这样的 Shebang：`#!/usr/bin/env -S tclsh -encoding utf-8`。
