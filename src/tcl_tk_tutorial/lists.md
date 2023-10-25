@@ -80,7 +80,7 @@ set words [split $sentence " "]
 在这里，名为 `$sentence` 的变量中的每一个空格，都会被剪切 -- 实质上就是将其分割成单词。现在有了一个名为 `$words` 的新列表。`[lindex $words 0]` 的结果，将是第一个单词，`1` 将是第二个单词，以此类推。这条命令的另一个用途，是用 `read` 命令读取文件，然后用 `\n` 对该命令的结果字符串加以分割，从而得到文件中所有行的列表。要了解这一点，需要前往 [文件处理](./file.md)。
 
 
-## 字典
+## 数组/字典
 
 > **注**：原文为 “数组”，根据下面的内容，这种数据结构实为字典。
 
@@ -136,4 +136,6 @@ set <ARRAY_NAME>(<ELEMENT_ID>) <VALUE>
 
 | 命令 | 语法 | 描述 |
 | :-- | :-- | :-- |
-| `array set` | `array set arrayName { list }` |
+| `array set` | `array set arrayName { list }` | 设置 `arrayName` 中一个或多个元素的值。*列表，list* 的形式必须与数组 `get` 返回的形式相同，由偶数个元素组成。列表中各个奇数元素，都会被视为 `arrayName` 中的元素名，而列表中的下一元素，会被用作该数组元素的新值。 |
+| `array size` | `arrary size arrayName` | 返回一个十进制字符串，表示数组中元素的个数。如果 `arrayName` 不是某个数组的名称，则返回 `0`。 |
+| `array names` | `array names arrayName ?mode? ?pattern?` | 返回一个列表，其中包含了字典中，与模式匹配的所有元素名称。其中模式可以是 `-exact`、`-glob` 或 `-regexp`。 |
