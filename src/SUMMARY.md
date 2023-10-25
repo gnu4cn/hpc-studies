@@ -19,8 +19,9 @@
     - [`Hello World`](tcl_tk_tutorial/hello_world.md)
     - [字符串操作](tcl_tk_tutorial/string_manipulation.md)
     - [列表，list](tcl_tk_tutorial/lists.md)
-    - [控制流](tcl_tk_tutorial/control_flow.md)
-    - [控制流循环](tcl_tk_tutorial/for_loop.md)
+    - [控制流：`if`](tcl_tk_tutorial/control_flow.md)
+    - [控制流：`for` 循环](tcl_tk_tutorial/for_loop.md)
+    - [控制流：`while` 循环](tcl_tk_tutorial/while_loop.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
