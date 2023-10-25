@@ -73,4 +73,4 @@ Tcl 有两种运算符。
 | :-- | :-- | :-- |
 | `! expression` | 非（`NOT`） | `!$a` |
 | `expression1 && expression2` | 与（`AND`） | `$a > 6 && $a < 10` |
-| `expression1 \|\| expression2` | 或（`OR`） | `$a != 6 || $a != 5` |
+| <code>expression1 &#124;&#124; expression2</code> | 或（`OR`） | `$a != 6 || $a != 5` |
