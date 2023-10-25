@@ -75,3 +75,184 @@ Tcl 有两种运算符。
 | `! expression` | 非（`NOT`） | `!$a` |
 | `expression1 && expression2` | 与（`AND`） | `$a > 6 && $a < 10` |
 | <code>expression1 &#124;&#124; expression2</code> | 或（`OR`） | <code>$a != 6 &#124;&#124; $a != 5</code> |
+
+## `for` 循环
+
+最常用的循环，是 `for` 循环。当咱们必须在很少或没有变化的情况下，执行一组给定指令时，这个循环非常有用。
+
+
+*语法*：
+
+`for init test next body`
+
+我（作者）更喜欢下面这种语法：
+
+```tcl
+for { init } { test } { next } {
+    body
+}
+```
+
+现在，咱们要第一次编写脚本，来做一些有用的事情 -- 构造一个乘法表。想知道这有什么用吗？当你像我（作者）一样忘记数学时，就会发现他非常有用。
+
+
+```tcl
+# 乘法表...
+set n 4 ;# 咱们要的是 4 的乘法表
+set table ""
+
+for { set i 1 } { $i <= 10 } { incr i } {
+# 这将把 n 的所有数相乘，追加到名为
+# table 的变量
+	set table "$table $i x $n = [expr $i \* $n]\n"
+}
+
+label .mul -text [encoding convertto utf-8 "Multiplication table for $n\n\n$table"]
+pack .mul
+```
+
+> **注意**：以下是完整的乘法表（需在 Linux 系统上运行，否则会出现乱码）：
+
+```tcl
+#!/usr/bin/env wish
+
+# 乘法表...
+set table ""
+
+for { set i 1 } { $i < 10 } { incr i } {
+# 这将把 n 的所有数相乘，追加到名为
+# table 的变量
+	for { set j 1 } { $j <= $i } { incr j } {
+		set tmpExp  "$j x $i = [expr $j \* $i]"
+		set table [ expr [string length $tmpExp] <= 9 ? { "$table$tmpExp\t\t" } : { "$table$tmpExp\t" } ]
+	}
+	set table "$table\n"
+}
+
+label .mul -justify left -text "乘法表\n\n$table"
+pack .mul
+```
+
+
+## `foreach`
+
+*语法*：
+
+`foreach varName list body`
+
+> **注意**：同 `for` 循环一样，更具可读性的写法为：
+
+```tcl
+foreach varName list {
+    body
+}
+```
+
+这是一种可以让编程变得更简单的循环。主要用于列表。例如......
+
+
+```tcl
+#Make the list
+set list [list "Item 1" {Item 2} Last]
+
+set text ""
+foreach item $list {
+	#Append the every item to $text
+	set text "$text\n$item"
+}
+
+#Shows the result
+label .lab -text "$text"
+pack .lab
+```
+
+
+> **注意**：这里会显示出 4 个行，其中第一个是空行，因为 `list` 列表中第一个元素为 `list`，是个空列表。
+
+
+通过下面这样一个普通的 `for` 循环，也能达到同样的效果。
+
+```tcl
+#Make the list
+set list [list "Item 1" {Item 2} Last]
+
+set text ""
+for { set i 0 } { $i < [llength $list] } { incr i } {
+	#Append the every item to $text
+	set text "$text\n[lindex $list $i]"
+}
+
+label .lab -text "$text"
+pack .lab
+```
+
+## `while` 循环
+
+只要满足条件，就重复执行脚本。在给到的语法中，`test` 是条件，`body` 是脚本。只要 `test` 为真，脚本就会重复执行。
+
+
+*语法*：
+
+```tcl
+while test body
+```
+
+而我（作者）更喜欢下面这种......
+
+```tcl
+while { test } {
+    body
+}
+```
+
+与我们在 `for` 循环中，用到的程序相同。现在介绍 -- `while` 循环：
+
+
+```tcl
+#Multiplication table...
+set n 4 ;# We want the multiplication table of 4
+
+set table ""
+set i 1
+while { $i <= 10 } {
+# This will append all multiples of all numbers for the number n
+#		into a variable called table
+	set table "$table $i x $n = [expr $i \* $n]\n"
+	incr i
+}
+
+label .mul -text "Multiplication table for $n\n\n$table"
+pack .mul
+```
+
+> **注意**：使用 Tcl 的 `while` 循环，打印完整乘法表的代码如下：
+
+```tcl
+#!/usr/bin/env wish
+
+# 乘法表...
+set table ""
+set i 1
+
+while { $i < 10 } {
+# 这将把 n 的所有数相乘，追加到名为
+# table 的变量
+	set j 1
+	while { $j <= $i } {
+		set tmpExp  "$j x $i = [expr $j \* $i]"
+		set table [ expr [string length $tmpExp] <= 9 ? { "$table$tmpExp\t\t" } : { "$table$tmpExp\t" } ]
+		incr j
+	}
+
+	incr i
+	set table "$table\n"
+}
+
+label .mul -justify left -text "乘法表\n\n$table"
+pack .mul
+```
+
+![Tcl `while` 循环打印的完整乘法表](../images/multiplication_table.png)
+
+
+
