@@ -76,10 +76,6 @@ pack .question
 pack .answer
 ```
 
-> **注意**：在 Windows 系统上，使用 Vim 编辑器编写带有中文字符串的 Tk 脚本，会显示为乱码。而在 Linux 系统上，却没有这样的问题（Windows 中的终端 Tcl 脚本，也不会显示乱码）。这是因为 Tk 默认使用 UTF-8 编码，而 Windows 系统上，中文使用了 GB2312(cp936) 的编码。参见：
-> - [关于TCL中的编码问题](https://blog.csdn.net/lights_joy/article/details/1748448)。
->
-> - [How to Use Tcl 8.1 Internationalization Features](https://www.tcl.tk/doc/howto/i18n.html)
 
 
 ### 获取从字符数 `n` 到字符数 `m` 的字符串
@@ -149,3 +145,25 @@ puts [string length $str]
 ```
 
 还有许多其他字符串的函数。完整列表请参见 [手册](https://tcl.tk/man/tcl8.2.3/TclCmd/string.htm#M8)。
+
+
+## `utf-8` 与 `cp936` 字符编码问题
+
+Windows 系统上，使用 Vim 编辑器编写带有中文字符串的 Tk 脚本，会显示为乱码。而在 Linux 系统上，却没有这样的问题（Windows 中的终端 Tcl 脚本，也不会显示乱码）。这是因为 Tk 默认使用 UTF-8 编码，而 Windows 系统上，中文使用了 GB2312(cp936) 的编码。参见：
+
+- [关于TCL中的编码问题](https://blog.csdn.net/lights_joy/article/details/1748448)。
+
+- [How to Use Tcl 8.1 Internationalization Features](https://www.tcl.tk/doc/howto/i18n.html)
+
+
+Windows 系统上，因为这两种字符编码，会造成 Tcl/Tk 程序处理中文等文字时，显示为乱码。在运行 `tclsh` 或 `wish` 解释器时，使用 `-encoding utf-8` 选项可解决这个问题。如：
+
+```powershell
+PS C:\tools\msys64\home\Lenny.Peng\tcl-scripts> wish -encoding utf-8 .\tk_gui_demo.tcl
+```
+
+会打开如下窗口：
+
+![在 Windows 上 Tk `while` 实现的完整乘法表](../images/multipication_table_win.png)
+
+> *参考链接*：[Working with UTF-8 encoded TCL files on windows](https://stackoverflow.com/a/29004123)
