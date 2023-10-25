@@ -164,6 +164,6 @@ PS C:\tools\msys64\home\Lenny.Peng\tcl-scripts> wish -encoding utf-8 .\tk_gui_de
 
 会打开如下窗口：
 
-![在 Windows 上 Tk `while` 实现的完整乘法表](../images/multipication_table_win.png)
+![在 Windows 上 Tk `while` 实现的完整乘法表](../images/multiplication_table_win.png)
 
 > *参考链接*：[Working with UTF-8 encoded TCL files on windows](https://stackoverflow.com/a/29004123)
