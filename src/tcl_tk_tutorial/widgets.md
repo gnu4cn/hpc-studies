@@ -104,4 +104,82 @@ pack .lab .ent .but
 
 ## `frame`
 
+框架是一种简单的部件。其主要用途，是作为复杂窗口布局的间隔或容器。边框的唯一特征，是其背景颜色和可选的三维边框，可使边框看起来凸起或凹陷。
+
+**一些选项**
+
+
+| 选项 | 描述 |
+| :-- | :-- |
+| `-relief STYLE` | 指定该 `frame` 部件所需的三维效果。可接受的值有 `raised`、`sunken`、`flat`、`ridge`、`solid` 和 `groove`。该值表示这个小部件内部相对于外部的显示效果；例如，`raised` 表示部件内部相对于外部，突出屏幕。 |
+
+**示例**：
+
+
+```tcl
+proc push_button {} {
+	.ent insert 0 {Hello }
+}
+
+frame .frm -relief groove
+label .lab -justify left -text {Enter name:}
+entry .ent
+button .but -text {Push Me} -command "push_button"
+
+pack .lab -in .frm
+pack .ent -in .frm
+
+pack .frm
+pack .but
+```
+
+
+## `text`
+
+文本小部件显示一或多行文本，并允许对文本进行编辑。与 [输入小部件](#entry) 类似，但尺寸更大。
+
+
+**一些选项**
+
+| 选项 | 描述 |
+| :-- | :-- |
+| `-xscrollcommand COMMAND` | 这是为了实现文本小部件和滚动条小部件之间的通信。还有一个 `-yscrollcommand` 与之类似。 |
+| `-font FONTNAME` | 指定在 `text` 小部件内，绘制文本时使用的字体。 |
+| `-width NUMBER` | 指定 `text` 小部件的宽度。 |
+| `-height NUMBER` | 指定 `text` 小部件的高度，猜对了。 |
+
+
+**一些命令**
+
+| 语法 | 描述 | 示例 |
+| :-- | :-- | :-- |
+| `path get index1 ?index2 ...?` | 返回该文本输入框的某个字符范围。返回值将是文本中从索引为 `index1` 的字符开始，到索引为 `index2` 字符之前的所有字符（不会返回索引为 `index2` 的字符）。如果省略 `index2`，则返回 `index1` 处的单个字符。
+请注意，文本的索引与输入 `entry` 部件的索引不同。文本输入框部件的索引格式为 `LINE_NO.CHARECTER_NO`。这意味着 `1.0` 表示第一行第一个字符。 | `set contents [.txt get 1.0 end]` |
+| `path insert index DATA` | 在索引处的字符前，插入所有参数字符。如果索引指向文本输入框的末尾（最后一个换行符之后的字符），那么新文本将插入到最后一个换行符之前。 | `.txt insert end "Hello World"` |
+
+
+**示例**
+
+
+```tcl
+proc push_button {} {
+    set name [.ent get]
+    .txt insert end "Hello, $name"
+}
+
+frame .frm -relief groove
+label .lab -justify left -text {Enter name:}
+entry .ent
+button .but -text {Push Me} -command "push_button"
+text .txt -width 20 -height 10
+
+pack .lab -in .frm
+pack .ent -in .frm
+
+pack .frm
+pack .but
+pack .txt
+```
+
+
 
