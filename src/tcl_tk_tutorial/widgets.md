@@ -348,3 +348,85 @@ pack .textarea
 ![老式收音机](../images/old-radio.jpg)
 
 -- 摘自 [`<input type="radio">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio)
+
+
+**部分选项**
+
+| 选项 | 说明 |
+| :-- | :-- |
+| `-command COMMAND` | 指定与该按钮相关联的一条 Tcl 命令。当鼠标按钮 1 在这个按钮视窗上释放时，该命令通常会被调用到。 |
+| `-variable VARIABLE` | 指定出设置用以表示此按钮是否选中的全局变量名字。 |
+| `-value VALUE` | 指定在该按钮被选中时，要存储到按钮相关变量中的值。 |
+
+**部分命令**
+
+
+| 语法 | 说明 | 示例 |
+| :-- | :-- | :-- |
+| `path deselect` | 取消选择复选按钮，并将相关变量设置为其 `off` 值。 | `.rdb_m deselect` |
+| `path select` | 选择复选按钮，并将相关变量设置为其 `on` 值。 | `.rdb_m select` |
+
+
+**示例**
+
+```tcl
+#This function will be exected when the button is pushed
+proc push_button {} {
+    global age gender
+    set name [.ent get]
+    .txt insert end "$name\($gender\) is $age years old.\n"
+}
+
+#Global Variables
+set age 10
+set gender "Male"
+
+#GUI building
+frame .frm_name
+label .lab -text "Name:"
+entry .ent -width 48
+
+#Age
+scale .scl -label "Age :" -orient h -digit 1 -from 10 -to 50 \
+    -variable age -tickinterval 5 -length 640
+
+#Gender
+frame .gender
+label .lbl_gender -text "Sex "
+radiobutton .gender.rdb_m -text "Male"   -variable gender -value "Male"
+radiobutton .gender.rdb_f -text "Female" -variable gender -value "Female"
+.gender.rdb_m select
+
+button .but -text "Push Me" -command "push_button"
+
+#Text Area
+frame .textarea
+text .txt -yscrollcommand ".srl_y set" -xscrollcommand ".srl_x set" \
+    -width 48 -height 10
+scrollbar .srl_y -command ".txt yview" -orient v
+scrollbar .srl_x -command ".txt xview" -orient h
+
+#Geometry Management
+grid .frm_name -in . -row 1 -column 1 -columnspan 2
+grid .lab -in .frm_name -row 1 -column 1
+grid .ent -in .frm_name -row 1 -column 2
+
+grid .scl -in . -row 2 -column 1 -columnspan 2
+
+grid .gender -in . -row 3 -column 2
+grid .lbl_gender -in .gender -row 1 -column 1
+grid .gender.rdb_m -in .gender -row 1 -column 2
+grid .gender.rdb_f -in .gender -row 1 -column 3
+
+grid .but -in . -row 4 -column 1 -columnspan 2
+
+grid .txt   -in .textarea -row 1 -column 1
+grid .srl_y -in .textarea -row 1 -column 2 -sticky ns
+grid .srl_x -in .textarea -row 2 -column 1 -sticky ew
+grid .textarea -in . -row 5 -column 1 -columnspan 2
+```
+
+这次程序的变化更大 -- 几何管理器现在是完全网格化的。不再有 `pack` 的实例。当布局变得更加复杂时，咱们会发现这是必要的。希望咱们能在如此艰难的时刻，与我同行。
+
+
+
