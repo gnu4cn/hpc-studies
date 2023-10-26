@@ -11,6 +11,34 @@
 如果命令是 `pack .hello -in .frame`，那么 `.hello` 这个小部件，就将被打包到另一个名为 `.frame` 的小部件中。在没有 `-in` 选项的情况下，所指定的小部件，会放在主窗口中。
 
 
-## `button` 小部件
+## `button`
+
+这将生成一个按钮。其可以被配置为，在按下时执行一些代码。所执行的代码，通常是指一个函数，因此当按钮被按下时，函数就会运行。下面使用 HTML 展示了一个按钮。
+
+
+<button>Push Me</button>
+
+
+**一些选项**
+
+| 选项 | 选项描述 |
+| :-- | :-- |
+| `-text "TEXT"` | `TEXT` 将是显示在该按钮上的文本。 |
+| `-command "CODE"` | `CODE` 将是在该按钮被按下时，所执行的代码。 |
+
+
+*示例*：
+
+
+```tcl
+proc push_button {} {
+	... whatever ...
+}
+
+button .but -text "Push Me" -command "push_button"
+pack .but
+```
+
+## `entry`
 
 
