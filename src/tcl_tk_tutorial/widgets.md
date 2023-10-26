@@ -41,4 +41,44 @@ pack .but
 
 ## `entry`
 
+输入小部件，the entry，是一个显示单行文本字符串的部件，用户可以在其中输入和编辑文本。当输入焦点在条目上时，他就会显示一个插入光标，an insertion cursor，指示新字符将插入的位置。下面使用 HTML，给出了一个输入元素。
+
+
+<input type="text" value="Text can be inputed here." />
+
+
+**一些选项**
+
+| 选项 | 描述 |
+| :-- | :-- |
+| `-width NUMBER` | 这个输入字段的宽度。其中的 `NUMBER` 应是整数。 |
+| `-textvariable VARIABLE` | 变量 `VARIABLE` 的内容，将显示在该小部件中。在小部件中的文本被编辑时，变量也将自动被编辑。在给到 `VARIABLE` 时，前面应 **不带** `$` 符号。 |
+| `-state STATE` | 这个输入字段的状态。可以是 `normal`、`disabled` 或 `readonly`。如果是 `readonly` 状态，则无法编辑文本。 |
+
+
+**一些命令**
+
+| 命令 | 描述 |
+| :-- | :-- |
+| `path get` | 输入字段内的文本，可以通过此命令提取。 | `set name [.ent get]` |
+| `path delete FIRST ?LAST?` | 删除该输入部件的一或多个元素。`FIRST` 是要删除的第一个字符索引，`LAST` 是要删除的最后字符之后字符的索引。如果没有指定 `LAST`，则其默认为 `FIRST+1`，即只删除一个字符。此命令将返回空字符串。 | `.ent delete 0 end` |
+| `path insert index STRING` | 将 `STRING` 中的字符，插入索引所表示字符之前。第一个字符的索引为 `0`。最后一个字符可以使用 `end`（结束）。 | `.ent insert end {Hello}` |
+
+**示例**：
+
+
+```tcl
+set input {World}
+
+proc push_button {} {
+	.ent insert 0 {Hello, }
+}
+
+entry .ent -textvariable input
+button .but -text "Push Me" -command "push_button"
+
+pack .ent .but
+```
+
+
 
