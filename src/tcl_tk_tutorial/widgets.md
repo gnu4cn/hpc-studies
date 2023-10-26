@@ -527,3 +527,144 @@ grid .textarea -in . -row 5 -column 1 -columnspan 2
 ```
 
 
+## `listbox`
+
+列表框是一种显示字符串列表的小部件，每行一个字符串。首次创建时，新的列表框没有任何元素。可以使用下面讲到的小部件命令，添加或删除元素。
+
+
+**部分选项**
+
+
+| 选项 | 描述 |
+| :-- | :-- |
+| `-listvariable VARIABLE` | 指定变量名称。`VARIABLE` 的值是要该小部件中显示的列表；如果 `VARIABLE` 的值发生变化，该小部件将自动更新，以反映新值。 |
+| `-selectmode MODE` | 指定操作选项的几种样式之一。`MODE` 可以是任意的，但默认的绑定，the default bindings，希望其为 `single`、`browse`、`multiple` 或 `extended`；默认值是 `browse`。 |
+
+
+**部分命令**
+
+| 语法 | 说明 | 示例 |
+| :-- | :-- | :-- |
+| `path curselection` | 返回一个列表，其中包含了列表框中所有当前选中元素的数字索引。如果列表框中没有选中元素，则返回空字符串。 | `set sel [.lst curselection]` |
+| `path delete first ?last?` | 删除列表框中的一或多个元素。`first`（第一个）和 `last`（最后一个）属于索引，指定了要删除范围内的第一和最后一个元素。如果没有指定 `last`，则默认为 `first`，即删除一个元素。 | `.lst delete 5` |
+| `path get first ?last?` | 如果省略 `last`，则返回 `first` 指向的列表框元素内容；如果 `first` 指向的元素不存在，则返回空字符串。如果指定了 `last`，命令将返回一个列表，其元素是 `first` 和 `last` 之间的所有列表框元素，包括首尾元素。 | `.lst get 5 end` |
+| `path index index` | 返回与 `index` 对应的整数索引值。如果索引为 `end`，则返回值为列表框中，元素的个数（而不是最后一个元素的索引）。 | `.lst index 5` |
+| `path insert index ?element element ...?` | 在列表中插入零或多个新元素，位于正好 `index` 所指定元素之前。如果 `index` 指定为 `end`，则新元素会被添加到列表的末尾。此命令返回空字符串。 | `.lst insert end {Me}` |
+| `path size` | 返回一个十进制字符串，表示列表框中元素的总数。 | `set count [.lst size]` |
+| `path xview` | 该命令用于查询及更改该小部件视窗中，信息的水平位置。另一个类似的命令是 `yview`。 | `.lst xview` |
+
+
+**示例**
+
+
+```tcl
+#This function will be exected when the button is pushed
+proc push_button {} {
+    global age occupied gender
+    set name [.ent get]
+    .txt insert end "$name\($gender\) is $age years old and is "
+
+    if { $occupied == 1 } { ;#See whether he is employed
+        set job_id [.lst curselection] ;#Get the No. of selected jobs
+        if { $job_id=={} } { ;#If there is no job
+            set job {a Non worker.}
+        } else {
+            set job [.lst get $job_id] ;#Get the name of the job
+            .txt insert end "a $job."
+        }
+    } else {
+        .txt insert end {unemployed.}
+    }
+
+    .txt insert end "\n"
+}
+
+#Jobs will be activated only if occupation is enabled
+proc activate_jobs {} {
+    global occupied
+    if { $occupied == 1 } {
+        .lst configure -state normal
+    } else {
+        .lst configure -state disable
+    }
+}
+
+#Global Variables
+set age 10
+set occupied 1
+set gender {Male}
+
+#GUI building
+frame .frm_name
+label .lab -text {Name:}
+entry .ent -width 48
+
+#Age
+scale .scl -label {Age :} -orient v -digit 1 -from 10 -to 50 \
+    -variable age -tickinterval 5 -length 640
+
+#Jobs
+frame .frm_job
+
+checkbutton .chk -text {Occupied} -variable occupied -command "activate_jobs"
+.chk deselect
+
+listbox .lst -selectmode single
+#Adding jobs
+.lst insert end {Student} {Teacher} {Clerk} {Business Man} \
+    {Military Personal} {Computer Expert} {Others}
+.lst configure -state disable ;#Disable jobs
+
+#Gender
+frame .gender
+label .lbl_gender -text {Sex }
+radiobutton .gender.rdb_m -text {Male}   -variable gender -value {Male}
+radiobutton .gender.rdb_f -text {Female} -variable gender -value {Female}
+.gender.rdb_m select
+
+button .but -text {Push Me} -command "push_button"
+
+#Text Area
+frame .textarea
+text .txt -yscrollcommand ".srl_y set" -xscrollcommand ".srl_x set" \
+    -width 40 -height 10
+scrollbar .srl_y -command ".txt yview" -orient v
+scrollbar .srl_x -command ".txt xview" -orient h
+
+#Geometry Management
+grid .frm_name -in . -row 1 -column 1 -columnspan 2
+grid .lab -in .frm_name -row 1 -column 1
+grid .ent -in .frm_name -row 1 -column 2
+
+grid .scl -in . -row 2 -column 1
+
+grid .frm_job -in . -row 2 -column 2
+grid .chk -in .frm_job -row 1 -column 1 -sticky w
+grid .lst -in .frm_job -row 2 -column 1
+
+grid .gender -in . -row 3 -column 1 -columnspan 2
+grid .lbl_gender -in .gender -row 1 -column 1
+grid .gender.rdb_m -in .gender -row 1 -column 2
+grid .gender.rdb_f -in .gender -row 1 -column 3
+
+grid .but -in . -row 4 -column 1 -columnspan 2
+
+grid .txt   -in .textarea -row 1 -column 1
+grid .srl_y -in .textarea -row 1 -column 2 -sticky ns
+grid .srl_x -in .textarea -row 2 -column 1 -sticky ew
+grid .textarea -in . -row 5 -column 1 -columnspan 2
+```
+
+哇！我们的“小”例子，现在成了一个大程序（而毫无意义）。从现在开始，我要停止“示例”了。
+
+这很复杂，不是吗？咱们为什么不运行一下脚本，看看我们做了一个多么漂亮的脚本。复制上述脚本，并将其粘贴到一个名为 `info.tcl` 的文件中，然后双击该文件。瞧！咱们是 TCL/TK 程序员了。
+
+
+有必要解释一下。在 `Occupied` 激活状态处于关闭时，工作这个列表框，将处于停用状态。而在 `Occupied` 勾选框被勾选时，这个列表框就将被激活。按下 `Push Me` 按钮后，将调用 `push_button` 函数，收集所有输入字段的详细信息，并将汇总写入那个 `.txt` 字段。
+
+注意到有些注释以 `#` 开头，而有些则以 `;#` 开头吗？在新行中开始注释时，使用 `#`，而若把注释放在行尾，则要使用 `;#`。`;` 字符表示命令已结束，否则编译器会认为，注释是程序的一部分。这是 Tcl 程序员最常犯的错误之一。
+
+
+## `menubutton`
+
+
