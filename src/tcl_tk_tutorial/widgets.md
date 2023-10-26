@@ -681,4 +681,106 @@ grid .textarea -in . -row 5 -column 1 -columnspan 2
 ## `menu`
 
 
+菜单是一种用于显示，按一列或多列排列的单行条目集合的小部件。有几种不同类型的条目，每种条目都有不同属性。不同类型的条目，可以组合在一个菜单中。菜单条目与输入 `entry` 部件不同。事实上，菜单条目甚至并非独特部件，menu entries are not even distinct widgets；整个菜单就是一个小部件。
+
+
+**部分选项**
+
+| 选项 | 说明 |
+| :-- | :-- |
+| `-tearoff BOOLEAN` | 此选项必须有一个恰当的布尔值，指定菜单是否应在顶部，包含一个撕离条目，a tear-off entry。如果是，该条目就将作为菜单的第 `0` 个条目存在，而其他条目将从第 `1` 条目开始编号。 默认的菜单绑定，会在调用这个撕离条目时，将菜单展开。 |
+| `-title STRING` | 在展开该菜单时，这个字符串将用于所创建出的视窗标题。如果标题为空，则那个视窗，将使用菜单按钮的标题，或调用该菜单的级联项的文本。 |
+| `-type OPTION` | 该选项可以是 `menubar`、`tearoff` 或 `normal` 之一，并在菜单被创建时得以设置。如果此选项被修改，那么配置数据库返回的字符串也会改变，但这不会影响菜单小部件的行为。 |
+
+
+**部分命令**
+
+
+| 语法 | 说明 | 示例 |
+| :-- | :-- | :-- |
+| `path add type ?option value option value ...?` | 在菜单底部，添加一个新条目。新条目的类型，由 `type` 指定，必须是 `cascade`、`checkbutton`、`command`、`radiobutton` 或 `separator` 中的一种，或者是上述几种之一的唯一缩写。如果有附加参数，则指定以下任一选项：<br />
+- `-accelerator VALUE` 指定在该菜单项右侧，要显示的字符串。通常是描述一个加速按键序列，输入该序列便可调用与菜单项相同的功能。该选项不适用于分隔符，或展开条目。<br />
+- `-columnbreak VALUE` 当该选项为 `0` 时，菜单项会出现在上一个菜单条目下方。而当该选项为 `1` 时，该菜单项则会显示在菜单中，新列的顶部。<br />
+- `-label VALUE` 指定在菜单条目中，作为标识标签显示的字符串。此选项不适用于分隔符或展开条目。<br />
+- `-compound VALUE` 指定该菜单条目，是否要同时显示图像及文本，在同时显示时，指定图像相对于文本的位置。该选项的有效值为 `botton`、`center`、`left`、`none`、`right` 和 `top`。<br />
+- `-image VALUE` 指定菜单中要显示的图片，而不是文本字符串或位图。所要显示的图片，必须是早先调用 `image create` 命令已创建好的。该选项会覆盖 `-label` 与 `-bitmap` 选项，但可以重置为空字符串，以便显示文本或位图的标签。该选项不适用于分隔符或展开条目。<br />
+- `-underline VALUE` 指定要在菜单条目中，加上下划线字符的整数索引。该选项用于键盘快捷键。`0` 代表条目中所显示文本的第一个字符，`1` 代表下一个字符，依此类推。 |
+| `path clone newPathName` | 构造出一个名为 `newPathName` 的当前菜单克隆。该克隆菜单，本身就是一个菜单，但对克隆菜单的任何更改，都会传播到原始菜单，反之亦然。 |
+| `path delete index1 ?index2?` | 删除 `index1` 和 `index2`（含）之间的所有菜单条目。如果 `index2` 被省略，则默认为 `index1`。删除展开菜单条目的尝试，将被忽略（相反，咱们应修改 `tearOff` 选项，来删除展开条目）。 |
+
+
+**示例**
+
+
+```tcl
+proc menu_clicked { no opt } {
+    tk_messageBox -message \
+        "You have clicked $opt.\nThis function is not implanted yet."
+}
+
+#Declare that there is a menu
+menu .mbar
+. config -menu .mbar
+
+#The Main Buttons
+.mbar add cascade -label {File} -underline 0 \
+    -menu [menu .mbar.file -tearoff 0]
+
+.mbar add cascade -label {Others} \
+    -underline 0 -menu [menu .mbar.oth -tearoff 1]
+
+.mbar add cascade -label {Help} -underline 0 \
+    -menu [menu .mbar.help -tearoff 0]
+
+## File Menu ##
+set m .mbar.file
+$m add command -label {New} -underline 0 \
+    -command { .txt delete 1.0 end } ;# A new item called New is added.
+$m add checkbutton -label {Open} -underline 0 -command { menu_clicked 1 {Open} }
+$m add command -label {Save} -underline 0 -command { menu_clicked 1 {Save} }
+$m add separator
+$m add command -label {Exit} -underline 1 -command exit
+
+## Others Menu ##
+set m .mbar.oth
+$m add cascade -label {Insert} -underline 0 -menu [menu $m.mnu -title {Insert}]
+$m.mnu add command -label {Name} \
+    -command { .txt insert end "Name : Binny V A\n"}
+$m.mnu add command -label {Website} -command { \
+    .txt insert end "Website: http://www.bin-co.com/\n"}
+$m.mnu add command -label {Email} \
+    -command { .txt insert end "E-Mail : binnyva@hotmail.com\n"}
+$m add command -label {Insert All} -underline 7 \
+    -command {
+        .txt insert end {
+            Name : Binny V A
+            Website : http://www.bin-co.com/
+            E-Mail : binnyva@hotmail.com
+        }
+    }
+
+## Help ##
+set m .mbar.help
+$m add command -label {About} -command {
+    .txt delete 1.0 end
+    .txt insert end {
+        About
+        ----------
+        This script created to make a menu for a tcl/tk tutorial.
+        Made by Binny V A
+        Website : http://www.bin-co.com/
+        E-Mail : binnyva@hotmail.com
+    }
+}
+
+#Making a text area
+text .txt -width 50
+pack .txt
+```
+
+将主按钮创建为级联菜单，并将这些菜单，创建为他们的从属菜单。更多信息请参阅手册。
+
+
+## `tk_optionMenu`
+
 
