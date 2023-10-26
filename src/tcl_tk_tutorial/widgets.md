@@ -1,6 +1,6 @@
 # Tk 小部件
 
-关于小部件，有三点需要说明。首先是路径，the path。这一点咱们在前面已经解释过了。所有小部件的路径，都必须是唯一的，并在需要访问该小部件时，会用到。其次是选项，the options。每个部件都有一些选项，可以用来对其进行配置。这通常是在小部件声明时完成的，但也可以在声明后完成。最后便是命令，commands。每个小部件，都有一些命令，这些命令也可以用来配置他，或让他完成某些事情。
+关于小部件，有三点需要说明。首先是路径，the path。这一点咱们在前面已经解释过了。所有小部件的路径，都必须是唯一的，并在需要访问该小部件时，会用到。其次是选项，the options。每个部件都有部分选项，可以用来对其进行配置。这通常是在小部件声明时完成的，但也可以在声明后完成。最后便是命令，commands。每个小部件，都有一些命令，这些命令也可以用来配置他，或让他完成某些事情。
 
 但在开始之前，咱们需要了解一下打包 `pack` 命令。这在前面已经解释过了，但现在要再解释一遍，这样咱们就不用按浏览器返回键了。`pack` 是一种几何管理器。另一种几何管理器是 `grid`，我（作者）更喜欢他 -- 咱们将在后面探讨。`pack` 要比 `grid` 简单得多。
 
@@ -19,7 +19,7 @@
 <button>Push Me</button>
 
 
-**一些选项**
+**部分选项**
 
 | 选项 | 选项描述 |
 | :-- | :-- |
@@ -47,7 +47,7 @@ pack .but
 <input type="text" value="Text can be inputed here." />
 
 
-**一些选项**
+**部分选项**
 
 | 选项 | 描述 |
 | :-- | :-- |
@@ -106,7 +106,7 @@ pack .lab .ent .but
 
 框架是一种简单的部件。其主要用途，是作为复杂窗口布局的间隔或容器。边框的唯一特征，是其背景颜色和可选的三维边框，可使边框看起来凸起或凹陷。
 
-**一些选项**
+**部分选项**
 
 
 | 选项 | 描述 |
@@ -139,7 +139,7 @@ pack .but
 文本小部件显示一或多行文本，并允许对文本进行编辑。与 [输入小部件](#entry) 类似，但尺寸更大。
 
 
-**一些选项**
+**部分选项**
 
 | 选项 | 描述 |
 | :-- | :-- |
@@ -181,4 +181,62 @@ pack .txt
 ```
 
 
+## `scrollbar`
 
+滚动条是一种显示出两个箭头的小部件，箭头位于滚动条的两端，滑块位于滚动条的中间部分。他提供了显示着某种文档（如正在编辑的文件或绘图）的相关视窗中，可见内容的信息。滑块的位置和大小，表示文档哪一部分，在关联窗口中可见。例如，如果竖直滚动条中的滑块，覆盖了两个箭头之间区域的顶部三分之一，就表示滚动条关联的窗口，显示了其文档顶部的三分之一。他可以与文本输入框等，其他部件一起使用。
+
+
+**部分选项**
+
+
+| 选项 | 说明 |
+| :-- | :-- |
+| `-orient DIRECTION` | 对于可按水平，或垂直方向布局的那些小部件（如滚动条），该选项指定了应使用的方向。`DIRECTION` 必须是 `horizontal` 或 `vertical`，或者是其中之一的缩写, an abbreviation of one of these。 |
+| `-command COMMAND` | 在滚动条被移动时，这条命令会被执行。该选项的值几乎总是 `.t xview` 或 `.t yview`，由小部件部件的名称和 `xview`（当滚动条是在水平滚动时）或 `yview`（用于垂直滚动）组成。所有可滚动部件，都有着 `xview` 和 `yview` 命令，并会取与由滚动条所附加的，完全相同的额外参数。 |
+
+
+**示例**
+
+
+```tcl
+proc push_button {} {
+    set name [.ent get]
+    .txt insert end "Hello, $name."
+}
+
+frame .frm -relief groove
+label .lab -text "Enter name:"
+entry .ent
+button .but -text "Push Me" -command "push_button"
+
+frame .textarea
+text .txt -width 20 -height 10 \
+    -yscrollcommand ".srl_y set" -xscrollcommand ".srl_x set"
+
+scrollbar .srl_y -command ".txt yview" -orient v
+scrollbar .srl_x -command ".txt xview" -orient h
+
+pack .lab -in .frm
+pack .ent -in .frm
+pack .frm
+pack .but
+
+grid .txt -in .textarea -row 1 -column 1
+grid .srl_y -in .textarea -row 1 -column 2 -sticky ns
+grid .srl_x -in .textarea -row 2 -column 1 -sticky ew
+pack .textarea
+```
+
+## `grid`
+
+
+正如所看到的，咱们在这里用到了 `grid`。网格不是一个小部件。他是一个类似于 `pack` 的几何管理器，但更加先进。咱们来仔细看看这条命令 -- `grid .txt -in .textarea -row 1 -column 1`。
+
+这一行将告诉解释器，将名为 `.txt` 的部件，放到名为 `.textarea` 的部件中（这是一个框架，还记得吗？）。他将被放在第一行第一列。下面的示意图可以帮助咱们理解。
+
+
+<table>
+<tr><td></td><td>第一列</td><td>第二列</td></tr>
+<tr><td>第一行</td><td>`.txt` 小部件将在这里</td><td>`.srl_y` 小部件的地方</td></tr>
+<tr><td>第二行</td><td>`.srl_x` 小部件的位置</td><td></td></tr>
+</table>
