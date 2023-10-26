@@ -330,3 +330,21 @@ pack .textarea
 ```
 
 现在，我们的小例子越来越像一个程序。因为他变得越来越大，难以理解，咱们已经添加了注释。现在我们添加了一个滑块，可以输入年龄。咱们可能也注意到了，这里增加了一行 `global age`。这不是地球的年龄，也不是每个人类年龄的总和。他表示变量 `age` 应从全局作用域，移至那个 `push_button` 函数的作用域。
+
+
+## `radiobutton`
+
+所谓单选按钮，是一种必须从多个选项中，任选一个的输入方式。在已选择了一个按钮，但又点击了另一个按钮时，则上一个选择的按钮将失去状态，被点击的按钮将被选中。下面是一个图形示例（HTML 形式）。
+
+<form name="frm">Choices
+    <input name="no" id="one" type="radio" value="" CHECKED> 1 |
+    <input name="no" id="two" type="radio" value=""> 2 |
+    <input name="no" id="three" type="radio" value=""> 3
+</form>
+
+
+> *注*：他们之所以被称为无线电按钮，是因为其外观和操作方式，与老式收音机上的按钮类似，如下图所示。
+
+![老式收音机](../images/old-radio.jpg)
+
+-- 摘自 [`<input type="radio">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio)
