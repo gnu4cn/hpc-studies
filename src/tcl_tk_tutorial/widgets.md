@@ -81,4 +81,27 @@ pack .ent .but
 ```
 
 
+## `label`
+
+
+这个小部件显示文本消息。
+
+
+**示例**：
+
+```tcl
+proc push_button {} {
+	.ent insert 0 {Hello }
+}
+
+label .lab -justify left -text {Enter name:}
+entry .ent
+button .but -text {Push Me} -command "push_button"
+
+pack .lab .ent .but
+```
+
+
+## `frame`
+
 
