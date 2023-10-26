@@ -133,6 +133,8 @@ label .mul -justify left -text "乘法表\n\n$table"
 pack .mul
 ```
 
+> **注意**：`-justify` 选项只有当小部件中有着多行文本时，才生效。参考链接：["Justify=LEFT" NOT WORKING on Tkinter Label Widget](https://stackoverflow.com/a/62233664)。
+
 
 ## `foreach`
 
