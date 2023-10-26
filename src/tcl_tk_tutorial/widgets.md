@@ -783,4 +783,31 @@ pack .txt
 
 ## `tk_optionMenu`
 
+构造出一个按钮，其在被点击后，会显示一个包含可用选项的列表。当用户需要在多个选项中，做出一个选择时，非常有用。下面是 HTML 格式的选项菜单。需要注意的是，Tcl/Tk 的选项菜单外观，与此截然不同。
 
+<form name="selecter" action="">
+    <select name="select1">
+        <option value="none">Select from menu</option>
+        <option value="none">--------------------</option>
+        <option value="http://www.bin-co.com/">Main Site</option>
+        <option value="http://www.google.com">Google</option>
+        <option value="../index.php">Tcl Page in my site</option>
+    </select>
+    <input type="button" value="Go" onclick="javascript:void(0)" />
+</form>
+
+
+*语法*
+
+```tcl
+tk_optionMenu path varName value ?value value ...?
+```
+
+**示例**......
+
+```tcl
+set opt {Two}
+
+tk_optionMenu .omn opt {One} {Two} {Three} {Four} {Five} {etc.}
+pack .omn
+```
