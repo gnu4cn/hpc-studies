@@ -667,4 +667,18 @@ grid .textarea -in . -row 5 -column 1 -columnspan 2
 
 ## `menubutton`
 
+菜单按钮，是一个显示文本字符串、位图或图像的部件，并与某个菜单小部件相关联。在一般使用中，左键单击菜单按钮，会使相关菜单显示在该菜单按钮的下方。
+
+
+**部分选项**
+
+| 选项 | 说明 |
+| :-- | :-- |
+| `-direction DIRECTION` | 指定其关联菜单，要弹出的位置。`above` 会尝试将菜单，弹出到菜单按钮上方；`below` 则会尝试将菜单，弹出到菜单按钮下方；`left` 会尝试将菜单，弹出到菜单按钮左侧；`right` 会尝试将菜单，弹出到菜单按钮右侧；`flush` 会将菜单，直接弹出到菜单按钮上方。 |
+| `-menu NAME` | 指定与该菜单按钮关联的菜单路径名，the path name of the menu associated with this menubutton。这个菜单必须是该菜单按钮的子菜单。 |
+
+
+## `menu`
+
+
 
