@@ -153,8 +153,7 @@ pack .but
 
 | 语法 | 描述 | 示例 |
 | :-- | :-- | :-- |
-| `path get index1 ?index2 ...?` | 返回该文本输入框的某个字符范围。返回值将是文本中从索引为 `index1` 的字符开始，到索引为 `index2` 字符之前的所有字符（不会返回索引为 `index2` 的字符）。如果省略 `index2`，则返回 `index1` 处的单个字符。
-请注意，文本的索引与输入 `entry` 部件的索引不同。文本输入框部件的索引格式为 `LINE_NO.CHARECTER_NO`。这意味着 `1.0` 表示第一行第一个字符。 | `set contents [.txt get 1.0 end]` |
+| `path get index1 ?index2 ...?` | 返回该文本输入框的某个字符范围。返回值将是文本中从索引为 `index1` 的字符开始，到索引为 `index2` 字符之前的所有字符（不会返回索引为 `index2` 的字符）。如果省略 `index2`，则返回 `index1` 处的单个字符。<br />请注意，文本的索引与输入 `entry` 部件的索引不同。文本输入框部件的索引格式为 `LINE_NO.CHARECTER_NO`。这意味着 `1.0` 表示第一行第一个字符。 | `set contents [.txt get 1.0 end]` |
 | `path insert index DATA` | 在索引处的字符前，插入所有参数字符。如果索引指向文本输入框的末尾（最后一个换行符之后的字符），那么新文本将插入到最后一个换行符之前。 | `.txt insert end "Hello World"` |
 
 
