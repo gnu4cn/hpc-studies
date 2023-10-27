@@ -915,13 +915,13 @@ pack .pnd -fill both -expand 1
 <script language="Javascript" type="text/javascript">
 <!--
 function incr() {
-	var txt=$("txt");
+	var txt=document.getElementById('txt');
 	var val = txt.value;
 	val++;
 	txt.value = val;
 }
 function decr() {
-	var txt=$("txt");
+	var txt=document.getElementById('txt');
 	var val = txt.value;
 	val--;
 	if(val >= 0) txt.value = val;
