@@ -20,10 +20,4 @@
 | `-icon iconImage` | 指定出要显示的图标。`IconImage` 必须是下列图标之一：`error`、`info`、`question` 或 `warning`。如未指定这个选项，则将显示 `info` 图标。 |
 | `-message string` | 指定要在此消息框中显示的消息。 |
 | `-title string` | 指定作为消息框标题，而要显示的字符串。默认值为空字符串。 |
-| `-type predefinedType` | 安排下要显示的一组预定义按钮。`predefinedType` 可有以下值：<br />
-- `abortretryignore`，显示三个按钮，其符号名称分别为中止（`abort`）、重试（`retry`）和忽略（`ignore`）；<br />
-- `ok`，显示一个按钮，其符号名称为 `ok`；<br />
-- `okcancel`，显示两个按钮，符号名称分别为 `ok` 和 `cancel`；<br />
-- `retrycancel`，显示两个按钮，符号名称分别为重试（`retry`）和取消（`cancel`）；<br />
-- `yesno`，显示两个按钮，符号名称分别为 `yes` 和 `no`；<br />
-- `yesnocancel`，显示三个按钮，符号名称分别为 `yes`、`no` 和 `cancel`。 |
+| `-type predefinedType` | 安排下要显示的一组预定义按钮。`predefinedType` 可有以下值：<br />- `abortretryignore`，显示三个按钮，其符号名称分别为中止（`abort`）、重试（`retry`）和忽略（`ignore`）；<br />- `ok`，显示一个按钮，其符号名称为 `ok`；<br />- `okcancel`，显示两个按钮，符号名称分别为 `ok` 和 `cancel`；<br />- `retrycancel`，显示两个按钮，符号名称分别为重试（`retry`）和取消（`cancel`）；<br />- `yesno`，显示两个按钮，符号名称分别为 `yes` 和 `no`；<br />- `yesnocancel`，显示三个按钮，符号名称分别为 `yes`、`no` 和 `cancel`。 |
