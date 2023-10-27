@@ -13,7 +13,7 @@ renderer = ["html"]
 
 [preprocessor.pagetoc]
 [output.html]
-additional-css = ["theme/pagetoc.css"]
+additional-css = ["theme/pagetoc.css", "theme/default.min.css"]
 additional-js  = ["theme/pagetoc.js", "theme/highlight.min.js"]
 git-repository-url = "https://github.com/gnu4cn/hpc-studies"
 git-repository-icon = "fa-github"
