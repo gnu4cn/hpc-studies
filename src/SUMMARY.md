@@ -26,7 +26,7 @@
     - [Tk 小部件](tcl_tk_tutorial/widgets.md)
         - [交互类](tcl_tk_tutorial/widgets/interactive.md)
         - [文本输入](tcl_tk_tutorial/widgets/text_input.md)
-        - [布局类](tcl_tk_tutorial/widgets/layout.md)
+        - [布局类/几何管理](tcl_tk_tutorial/widgets/layout.md)
         - [消息类](tcl_tk_tutorial/widgets/messaging.md)
         - [数字输入](tcl_tk_tutorial/widgets/digital_input.md)
         - [图形类](tcl_tk_tutorial/widgets/graphics.md)

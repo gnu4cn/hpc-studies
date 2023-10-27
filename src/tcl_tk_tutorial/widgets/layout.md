@@ -36,17 +36,11 @@ pack .but
 ## `grid`
 
 
-正如所看到的，咱们在这里用到了 `grid`。网格不是一个小部件。他是一个类似于 `pack` 的几何管理器，但更加先进。咱们来仔细看看这条命令 -- `grid .txt -in .textarea -row 1 -column 1`。
+正如所看到的，咱们在这里用到了 `grid`。网格不是一个小部件。他是一个类似于 `pack` 的几何管理器，但更加先进。
 
-这一行将告诉解释器，将名为 `.txt` 的部件，放到名为 `.textarea` 的部件中（这是一个框架，还记得吗？）。他将被放在第一行第一列。下面的示意图可以帮助咱们理解。
+`grid` 命令，用于与网格几何管理器通信，communicate with the grid geometry manager，该管理器会在另一个称为几何主窗口（或主窗口），the geometry master(or master window)，的窗口内，按行和列排列部件。根据选项参数的不同，`grid` 命令有多种形式。
 
-
-<table>
-<tr><td></td><td>第一列</td><td>第二列</td></tr>
-<tr><td>第一行</td><td>`.txt` 小部件将在这里</td><td>`.srl_y` 小部件的地方</td></tr>
-<tr><td>第二行</td><td>`.srl_x` 小部件的位置</td><td></td></tr>
-</table>
-
+简而言之，`grid` 是某个小东西的名字，他可以将小部件，放置在咱们想要的位置。
 
 **部分选项**
 
@@ -64,7 +58,44 @@ pack .but
 | `-columnspan N` | 插入从属小部件，使其占据网格中的 `N` 列。 |
 
 
+```tcl
+frame .textarea
+
+text .txt -width 20 -height 10 \
+	 -yscrollcommand ".srl_y set" -xscrollcommand ".srl_x set"
+
+scrollbar .srl_y -command ".txt yview" -orient v
+scrollbar .srl_x -command ".txt xview" -orient h
+
+grid .txt   -in .textarea -row 1 -column 1
+grid .srl_y -in .textarea -row 1 -column 2 -sticky ns
+grid .srl_x -in .textarea -row 2 -column 1 -sticky ew
+
+grid .textarea -in . -row 1 -column 1
+```
+
+咱们来仔细看看这条命令 --
+
+```tcl
+grid .txt -in .textarea -row 1 -column 1
+```
+
+这一行将告诉解释器，将名为 `.txt` 的部件，放到名为 `.textarea` 的部件中（这是一个框架，还记得吗？）。他将被放在第一行第一列。下面的示意图可以帮助咱们理解。
+
+
+<table>
+<tr><td></td><td>第一列</td><td>第二列</td></tr>
+<tr><td>第一行</td><td>`.txt` 小部件将在这里</td><td>`.srl_y` 小部件的地方</td></tr>
+<tr><td>第二行</td><td>`.srl_x` 小部件的位置</td><td></td></tr>
+</table>
+
 使用网格需要一点经验，但如果咱们懂 HTML，就会有很大帮助。网格的行和列，与 HTML 表格中的行和列一样，但代码却截然不同。
+
+
+## `pack`
+
+
+与 `grid` 类似，`pack` 也是一种几何图形管理器，但要简单得多。咱们不必像使用网格那样，指定行和列。这是为懒人准备的。只需输入 `pack <widget_path>`，部件就会被打包起来。如果给出的是两个部件，第二个部件就将被打包到第一个部件下面（默认情况下）。但如果要使用 `pack` 进行更复杂的排列，则必须使用框架 `frame`。
 
 ## `panedwindow`
 
