@@ -811,3 +811,120 @@ set opt {Two}
 tk_optionMenu .omn opt {One} {Two} {Three} {Four} {Five} {etc.}
 pack .omn
 ```
+
+
+## `canvas`
+
+画布小部件，是一个非常重要的部件，因为其上的所有点，都是可寻址的图形绘制区域。画布部件实现了结构化图形，structured graphics。画布可显示任意数量的项目，如矩形、圆形、线条及文本。可以对这些项目进行操作（如移动，或重新着色），也可以将命令与项目关联起来。因此，如果咱们不喜欢 Windows 中的绘画程序，就可以用这个这个小部件，制作自己的程序。
+
+
+命令 `path create type options`，用于构造出一些不同结构。下面给出了几个例子。如需了解更多信息，请阅读 Tcl/Tk 附带的出色手册。
+
+
+**示例**：
+
+
+```tcl
+canvas .cns -relief sunken -background "blue"
+
+.cns create polygon 5 100   50 5   150 5   200 100   5 100 \
+	-joinstyle bevel -fill "red" -outline "white" -width 5
+
+.cns create oval 200 100 300 200 -fill "green"
+.cns create oval 100 150 300 100 -fill "white" -width 0
+.cns create rectangle 10 150 100 250 -dash {6 4 2 4 2 4}
+
+pack .cns
+```
+
+
+## `message`
+
+所谓消息，是一种显示文本字符串的小部件。与标签小部件很相似，但消息小部件，可以用来构造多行文本。
+
+
+`-justify`（对齐）选项，用于指定文本行的对齐方式。必须是 `left`（左对齐）、`center` （居中）或 `right` （右对齐）之一。默认为 `left`。该选项与 `anchor`、`aspect`、`padX`、`padY` 和 `width` 选项配合使用，可在该视窗中，提供多种文本排列方式。
+
+
+## `panedwindow`
+
+窗格视窗，panedwindow，的作用，与框架 `frame` 小部件类似，但有一个明显例外。窗格的边框，可以拖动和展开。该部件包含了任意数量的窗格，根据 `-orient` 选项值，水平或垂直排列起来。每个窗格包含一个视窗小部件，同时每对窗格之间，用可移动的窗框隔开。拖动窗格可以移动边框。这将调整窗框两侧部件的大小。
+
+
+**部分选项**
+
+
+| 选项 | 说明 |
+| :-- | :-- |
+| `-orient DIRECTION` | 此选项指定应使用的方向。方向必须是 **水平，`horizontal`** 或 **垂直，`vertical`**，或者是其中之一的缩写（ `h` 或 `v`）。 |
+| `-opaqueresize BOOLEAN` | 指定窗框移动时，是否应调整窗格大小（`true`），或者是否应推迟调整窗格大小，直到窗框被放下（`false`）。 |
+
+
+**示例**
+
+
+```tcl
+panedwindow .pnd -orient v -opaqueresize 1\
+    -sashwidth 10 -sashrelief groove
+
+listbox .lst
+
+.lst insert end {Item 1}
+.lst insert end {Item 2}
+.lst insert end {Item 3}
+.lst insert end {Item 4}
+.lst insert end {Item 5}
+
+text .txt
+
+.txt insert end {To Hack With It
+
+     To Compute...
+     Or Not To Compute...
+     That Is The Question...
+     Whether 'Tis Nobler In The Memory Bank..
+     To Suffer The Slings And Circuits Of Outrageous Functions...
+     ...Or To Take Up Arms Against A Sea Of..Transistors,
+     Or Rather Transponders...
+     Transcondu--
+     Trans...
+     Er...           Oh, To Hack With It.
+}
+
+.pnd add .lst
+.pnd add .txt
+
+pack .pnd -fill both -expand 1
+```
+
+
+## `spinbox`
+
+这个小工具就像右侧有两个，用于增加或减少输入区域显示数字的按钮的 [输入 `entry` 小部件](#entry)。请看下面的示例 -- 在这个示例中，我（作者）尝试用 HTML 创建一个起作用的输入小部件。这不是一张精确的图片，但却是他在 HTML 中能做到的最好的。单击右侧的任一箭头，便可增加或减少数字。
+
+<table>
+    <tr>
+        <td rowspan="2"><input name="txt" id="txt" type="text" value="1" /></td>
+        <td class="button_type" onClick="incr()">^</td>
+    </tr>
+    <tr>
+        <td class="button_type" onClick="decr()">v</td>
+    </tr>
+</table>
+
+<script language="Javascript" type="text/javascript">
+<!--
+function incr() {
+	var txt=$("txt");
+	var val = txt.value;
+	val++;
+	txt.value = val;
+}
+function decr() {
+	var txt=$("txt");
+	var val = txt.value;
+	val--;
+	if(val >= 0) txt.value = val;
+}
+//-->
+</script>
