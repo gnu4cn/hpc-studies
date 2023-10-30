@@ -33,6 +33,7 @@
         - [对话框](tcl_tk_tutorial/widgets/dialogs.md)
         - [常见的小部件选项](tcl_tk_tutorial/widgets/common_options.md)
     - [部分 Tk 命令](tcl_tk_tutorial/some_tk_commands.md)
+    - [结束语](tcl_tk_tutorial/now_what.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
