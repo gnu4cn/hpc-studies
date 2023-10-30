@@ -50,11 +50,11 @@ listbox .lst
 bind .lst <Double-ButtonPress-1> { double }
 
 label .keys  -justify left -text {Press any of the following...
-Control+A
-Control+Shift+A
-Control+Alt+T
+Ctrl+A
+Ctrl+Shift+A
+Ctrl+Alt+T
 Right click
-Control+Escape}
+Ctrl+Alt+E}
 
 pack .lab .lst .keys -expand 1 -fill x ;#Pack everything
 
@@ -64,16 +64,22 @@ bind . <Key-Escape> { exit }
 bind . <Key-F1> { help }
 #Binds misc keys.
 bind . <Control-Key-a> \
- { tk_messageBox -message "You pressed Control+A, didn't you?" } ;#Control+A
+ { tk_messageBox -message "You pressed Ctrl+A, didn't you?" } ;#Ctrl+A
 bind . <Control-Key-A> \
- { tk_messageBox -message "Control+Shift+A, right?" } ;#Control+Shift+A
+ { tk_messageBox -message "Ctrl+Shift+A, right?" } ;#Ctrl+Shift+A
 bind . <Control-Alt-Key-t> \
- { tk_messageBox -message "Control, Alt and T" } ;#Control+Alt+T
+ { tk_messageBox -message "Control, Alt and T" } ;#Ctrl+Alt+T
 bind . <ButtonPress-3> \
  { tk_messageBox -message "The right way to click." } ;#Right click
-bind . <Control-Key-Escape> \
+bind . <Control-Alt-Key-e> \
  { tk_messageBox -message {You must be a married man.
 What you pressed remindes married men of what they never will have
- - Control or Escape.}
-} ;#Control+Escape
+ - Ctrl Alt e.}
+} ;#Ctrl+Alt+e
 ```
+
+> **注意**：
+>
+> 1. 最后一个绑定为 `Control-Key-Escape`，但 `Ctrl+Esc` 快捷键，在 Windows 10 上已被系统使用，按下时会弹出开始菜单，故会先被系统拦截，导致咱们的程序无法拦截到此快捷键绑定；
+>
+> 2. 当 `Ctrl` 出现在 `modifier-modifier-type-detail` 中时，不能写 `Ctrl`，而必须写出 `Control` 这样的完整形式。
