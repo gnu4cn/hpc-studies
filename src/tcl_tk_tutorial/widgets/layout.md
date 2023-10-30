@@ -97,6 +97,69 @@ grid .txt -in .textarea -row 1 -column 1
 
 与 `grid` 类似，`pack` 也是一种几何图形管理器，但要简单得多。咱们不必像使用网格那样，指定行和列。这是为懒人准备的。只需输入 `pack <widget_path>`，部件就会被打包起来。如果给出的是两个部件，第二个部件就将被打包到第一个部件下面（默认情况下）。但如果要使用 `pack` 进行更复杂的排列，则必须使用框架 `frame`。
 
+
+**部分选项**
+
+
+| 选项 | 说明 |
+| :-- | :-- |
+| `-expand BOLEAN` | 指定是否应扩展从属视窗，以占用主视窗中的额外空间。听起来很像从属视窗，吃掉他们的主视窗，不是吗？不过这只是说，当应用程序调整视窗大小时，部件会自动填满空间。 |
+| `-fill STYLE` | 这将在 **x**、 **y** 或两个方向上 **同时** 拉伸小部件。 |
+| `-in MASTER` | 如果咱们想要将小部件，装入框架或类似的东西中，那么请使用此功能。 |
+| `-side SIDE` | 指定从属视窗，靠主视窗的哪一面打包。必须是 `left`、`right`、`top` 或 `bottom`。默认为 `top`。 |
+
+
+下面是示例：
+
+
+```tcl
+label .lab -text {DO YOU REMEMBER WHEN.......}
+
+text .txt -yscrollcommand ".srl set"
+.txt insert end {A Computer Was Something On TV From A Science Fiction Show
+A Window Was Something You Hated To Clean....
+And Ram Was The Cousin Of A Goat.....
+
+Meg Was The Name Of My Girlfriend
+And Gig Was Your Thumb Upright
+Now They All Mean Different Things
+And That Mega Bytes
+
+An Application Was For Employment
+A Program Was A TV Show
+A Cursor Used Profanity
+A Keyboard Was A Piano
+
+Compress Was Something You Did To The Garbage
+Not Something You Did To A File
+And If You Unzipped Anything In Public
+You'd Be In Jail For A While
+
+Log On Was Adding Wood To The Fire
+Hard Drive Was A Long Trip On The Road
+A Mouse Pad Was Where A Mouse Lived
+And A Backup Happened To Your Commode
+
+Cut You Did With A Pocket Knife
+Paste You Did With Glue
+A Web Was A Spider's Home
+And A Virus Was The Flu
+
+I Guess I'll Stick To My Pad And Paper
+And The Memory In My Head
+I Hear Nobody's Been Killed In A Computer Crash
+But, When It Happens They Wish They Were Dead
+}
+
+scrollbar .srl -command {.txt yview}
+
+#The packing commands
+pack .lab
+pack .txt -expand 1 -fill both -side left
+pack .srl -expand 1 -fill y
+```
+
+
 ## `panedwindow`
 
 窗格视窗，panedwindow，的作用，与框架 `frame` 小部件类似，但有一个明显例外。窗格的边框，可以拖动和展开。该部件包含了任意数量的窗格，根据 `-orient` 选项值，水平或垂直排列起来。每个窗格包含一个视窗小部件，同时每对窗格之间，用可移动的窗框隔开。拖动窗格可以移动边框。这将调整窗框两侧部件的大小。
@@ -147,4 +210,7 @@ text .txt
 
 pack .pnd -fill both -expand 1
 ```
+
+
+
 
