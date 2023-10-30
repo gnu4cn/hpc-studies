@@ -37,5 +37,6 @@
     - [参考资料](tcl_tk_tutorial/references.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
+- [Lua 教程](lua_tutorial.md)
 
 - [术语表](glossories.md)
