@@ -42,7 +42,7 @@ pack .but
 
 > *注*：他们之所以被称为无线电按钮，是因为其外观和操作方式，与老式收音机上的按钮类似，如下图所示。
 
-![老式收音机](../images/old-radio.jpg)
+![老式收音机](../../images/old-radio.jpg)
 
 -- 摘自 [`<input type="radio">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio)
 
