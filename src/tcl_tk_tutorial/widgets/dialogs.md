@@ -125,11 +125,12 @@ switch -- $answer {
 
 ```tcl
 #A procedure to make a toplevel window
-proc makeTop { } {
+proc makeTop {} {
     toplevel .top ;#Make the window
 
     #Put things in it
     label .top.lab -text "This is Toplevel Window" -font "ansi 12 bold"
+
     text .top.txt
     .top.txt insert end "Widgets can be packed in this window."
 
@@ -144,3 +145,5 @@ label .lab -text "This is the root window." -font "ansi 12 bold"
 button .but -text "Click to Create Toplevel" -command { makeTop }
 pack .lab .but
 ```
+
+> **注意**：这里在 `.top.lab`、`.top.text` 与 `.top.but` 中，使用了不同于以往 `-in` 参数的新语法，来表示小部件之间的从属关系。
