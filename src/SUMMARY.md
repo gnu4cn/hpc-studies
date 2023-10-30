@@ -31,6 +31,8 @@
         - [数字输入](tcl_tk_tutorial/widgets/digital_input.md)
         - [图形类](tcl_tk_tutorial/widgets/graphics.md)
         - [对话框](tcl_tk_tutorial/widgets/dialogs.md)
+        - [常见的小部件选项](tcl_tk_tutorial/widgets/common_options.md)
+    - [部分 Tk 命令](tcl_tk_tutorial/some_tk_commands.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
 
