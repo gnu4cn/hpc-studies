@@ -470,3 +470,13 @@ arg[0] = "script"
 arg[1] = "a"
 arg[2] = "b"
 ```
+
+通常情况下，脚本只会用到正索引（例子中的 `arg[1]` 和 `arg[2]`）。
+
+
+脚本还可以通过 `vararg` 表达式，获取参数。在脚本的主体，the main body of a script，中，表达式 `...`（三点）会产生出脚本的参数。(我们将在 “变量函数，Variadic Functions” 小节，讨论 `vararg` 表达式）。
+
+
+## 练习
+
+（略）
