@@ -108,3 +108,46 @@ print(10) --> 10
 > a = 25
 > = a           --> 25
 ```
+
+出于兼容性考虑，Lua 5.3 仍然接受这个等号。
+
+
+最后，本书使用注解 `<-->`，来表示某事物与另一事物等价：
+
+
+```lua
+this <--> that
+```
+
+
+## 运行示例
+
+
+咱们需要 Lua 解释器，来运行本书中的那些示例。理想情况下，咱们应该使用 Lua 5.3，但大多数示例无需修改，即可在旧版本上运行。
+
+
+Lua 网站（[lua.org](https://www.lua.org/) 保存了解释器的源代码。如果咱们有一个 C 语言编译器，并且知道如何在自己机器上编译 C 代码，那么就应该尝试从源代码安装 Lua；这真的很容易。Lua 二进制网站（搜索 `luabinaries`）为大多数主流平台，提供了预编译 Lua 解释器。如果咱们使用的是 Linux，或其他类 UNIX 系统，则可以查看发行版的软件仓库；一些发行版已经提供了包含 Lua 的软件包。
+
+
+有多种 Lua 集成开发环境 (IDE)。同样，咱们也可以通过基本搜索，轻松找到它们。(不过，我（作者）是个老手。我还是更喜欢在一个窗口中，使用命令行界面，在另一个窗口中使用文本编辑器，尤其是在初始学习阶段）。
+
+
+
+## 致谢
+
+
+本书第一版出版至今（2017 年 4 月），已有十余年。这一路走来，有几位朋友和一些机构给予了我（作者）帮助。
+
+
+一如既往，Lua 的合作作者 Luiz Henrique de Figueiredo 和 Waldemar Celes，提供了各种帮助。André Carregal、Asko Kauppi、Brett Kapilik、Diego Nehab、Edwin Moragas、Fernando Jefferson、Gavin Wraith、John D. Ramsdell、Norman Ramsey、Reuben Thomas 和 Robert Day 为本书的不同版本，提供了宝贵建议和有益见解。Luiza Novaes 为封面设计提供了重要支持。
+
+
+Lightning Source Inc.，是印刷和发行本书的可靠而高效的选择。如果没有他们，就不可能选择自行出版这本书。
+
+
+由 Marcelo Gattass 领导的 Tecgraf 公司，从 1993 年 Lua 项目诞生到 2005 年，一直为其提供支持，并继续在多个方面为该项目提供帮助。
+
+我还要感谢 [里约热内卢天主教大学，PUC-Rio](https://www.puc-rio.br/)，和 [巴西国家研究委员会，the Barzilian National Research Council, CNPq](https://www.chistera.eu/cnpq)，对我工作的持续支持。特别是，如果没有里约热内卢天主教大学为我提供的环境，Lua 项目是不可能完成的。
+
+
+最后，我必须向 Noemi Rodriguez 表示深深的谢意，感谢她提供的各种帮助（技术性和非技术性的），感谢她照亮了我的人生。
