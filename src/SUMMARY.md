@@ -43,7 +43,7 @@
 
 - [前言](lua_tutorial.md)
 
-## 第一部分
+# 第一部分，基础知识
 
 - [入门](lua_tut/getting_started.md)
 
