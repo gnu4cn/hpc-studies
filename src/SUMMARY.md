@@ -46,5 +46,6 @@
 # 第一部分，基础知识
 
 - [入门](lua_tut/getting_started.md)
+- [插曲：八皇后问题](lua_tut/interlude.md)
 
 - [术语表](glossories.md)
