@@ -14,7 +14,9 @@
 - [`env-modules` 之于 HPC](04_env-modules.md)
     - [安装 `env-modules`](env-modules/installation.md)
 
-- [Tcl/Tk 教程](tcl_tutorial.md)
+# Tcl/Tk 教程
+
+- [前言](tcl_tutorial.md)
     - [基本语法](tcl_tk_tutorial/basic_syntax.md)
     - [`Hello World`](tcl_tk_tutorial/hello_world.md)
     - [字符串操作](tcl_tk_tutorial/string_manipulation.md)
@@ -37,6 +39,12 @@
     - [参考资料](tcl_tk_tutorial/references.md)
     - [附录](tcl_tk_tutorial/appendix.md)
 
-- [Lua 教程](lua_tutorial.md)
+# Lua 教程
+
+- [前言](lua_tutorial.md)
+
+## 第一部分
+
+- [入门](lua_tut/getting_started.md)
 
 - [术语表](glossories.md)
