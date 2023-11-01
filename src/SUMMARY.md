@@ -65,3 +65,4 @@
 - [入门](lua_tut/getting_started.md)
 - [插曲：八皇后问题](lua_tut/interlude.md)
 - [数字](lua_tut/numbers.md)
+- [字符串](lua_tut/strings.md)
