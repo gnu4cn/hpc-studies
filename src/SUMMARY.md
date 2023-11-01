@@ -14,6 +14,8 @@
 - [`env-modules` 之于 HPC](04_env-modules.md)
     - [安装 `env-modules`](env-modules/installation.md)
 
+---
+
 # Tcl/Tk 教程
 
 - [前言](tcl_tutorial.md)
@@ -39,6 +41,8 @@
 - [参考资料](tcl_tk_tutorial/references.md)
 - [附录](tcl_tk_tutorial/appendix.md)
 
+---
+
 # Lua 教程
 
 - [前言](lua_tutorial.md)
@@ -47,5 +51,6 @@
 
 - [入门](lua_tut/getting_started.md)
 - [插曲：八皇后问题](lua_tut/interlude.md)
+- [数字](lua_tut/numbers.md)
 
 - [术语表](glossories.md)
