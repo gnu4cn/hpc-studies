@@ -510,6 +510,119 @@ true
 
 要强制莫个数为整数，我们可以将其与 `0`，进行 OR 运算：[<sup>注 5</sup>](#尾注)
 
+```lua
+> 2^53
+9.007199254741e+15      --> (float)
+> 2^53 | 0
+9007199254740992        --> (integer)
+```
+
+只有当数可以精确地表示为整数时，Lua 才会进行这种转换，也就是说，其没有小数部分，并且在整数范围内。否则，Lua 会抛出错误：
+
+
+```lua
+> 3.2 | 0
+stdin:1: number has no integer representation
+stack traceback:
+        stdin:1: in main chunk
+        [C]: in ?
+> 2^64 | 0
+stdin:1: number has no integer representation
+stack traceback:
+        stdin:1: in main chunk
+        [C]: in ?
+> math.random(1, 3.5)
+stdin:1: bad argument #2 to 'random' (number has no integer representation)
+stack traceback:
+        [C]: in function 'math.random'
+        stdin:1: in main chunk
+        [C]: in ?
+```
+
+要对小数进行四舍五入，我们必须明确调用某个四舍五入函数。
+
+另一种将数字强制转换为整数的方法，是使用 `math.tointeger`，当数字无法转换时，它会返回 `nil`：
+
+
+```lua
+> math.tointeger(-258.0)
+-258
+> math.tointeger(2^30)
+1073741824
+> math.tointeger(5.01)
+nil
+> math.tointeger(2^64)
+nil
+```
+
+
+当我们需要检查数字是否可被转换时，这个函数特别有用。例如，下面这个函数，会在可能的情况下，将数字转换为整数，否则保持不变：
+
+
+```lua
+function cond2int (x)
+    return math.tointeger(x) or x
+end
+```
+
+
+```lua
+> cond2int(3.05)
+3.05
+> cond2int(-2.0)
+-2
+> cond2int(-2.5)
+-2.5
+> cond2int(2^64)
+1.844674407371e+19
+```
+
+
+## 优先级
+
+**Precedence**
+
+
+Lua 中运算符优先级，如下表所示，从高到低依次排列：
+
+
+```lua
+^
+-   #   ~   not     --（一元运算符，unary operators）
+*   /   //      %
++   -
+..                  --（连接运算符，concatentation）
+<<      >>          --（二进制移位，bitwise shifts）
+&                   --（二进制与，bitwise AND）
+~                   --（二进制异或，bitwise exclusive OR）
+|                   --（二进制或，bitwise OR）
+<   >   <=      >=      ~=      ==
+and
+or
+```
+
+除了指数（幂）运算，和连接运算是右结合运算外，所有二元运算符都是左结合运算。因此，下面左边的表达式，等价于右边的表达式：
+
+
+```lua
+a+i < b/2+1         <-->        (a+i) < ((b/2)+1)
+5+x^2*8             <-->        5+((x^2)*8)
+a < y and y <= 2    <-->        (a < y) and (y <= z)
+-x^2                <-->        -(x^2)
+x^y^z               <-->        x^(y^z)
+```
+
+
+在有疑问时，请务必使用明确的括号。这比在手册中查找，要容易得多，而且别人在阅读你的代码时，也可能会有同样的疑问。
+
+
+## 引入整数之前的 Lua
+
+在 Lua 5.3 中引入整数，并不是偶然的，其与以前的 Lua 版本，几乎没有不兼容的地方。正如我（作者）所说的，程序员大多可以忽略整数和浮点数之间的差异。当我们忽略这些差异时，我们也可以忽略 Lua 5.3 与 Lua 5.2 之间的差异，在 Lua 5.2 中，所有数字都是浮点数。(关于数字，Lua 5.0 和 Lua 5.1 与 Lua 5.2 完全一样）。
+
+
+
+
 
 
 ## 尾注
