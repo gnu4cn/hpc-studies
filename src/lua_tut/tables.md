@@ -319,4 +319,37 @@ blue
 **Arrays, Lists and Sequences**
 
 
+要表示传统的数组或列表，我们只需使用具有整数键的表。我们不需要声明大小，只需初始化所需的元素即可：
+
+
+```lua
+> a = {}; for i = 1, 10 do a[i] = io.read(); end
+this
+that
+he
+she
+I
+test
+they
+those
+these
+here
+> a[10]
+here
+```
+
+既然我们可以用任何值为表编制索引，那么我们也可以用任何我们喜欢的数字，开始数组的索引。不过，在 Lua 中，数组通常以 `1` 开头（而不是像 C 语言中那样以 `0` 开头），Lua 中的许多设施，都遵循了这一约定。
+
+
+> **注意**：建立从 `0` 开始索引的数组，也是可行的。
+
+```lua
+> a = {}; for i = 0, 2 do a[i] = io.read(); end
+He
+She
+They
+> a[0]
+He
+```
+
 
