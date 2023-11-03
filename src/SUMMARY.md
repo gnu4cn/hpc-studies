@@ -67,3 +67,4 @@
 - [数字](lua_tut/numbers.md)
 - [字符串](lua_tut/strings.md)
 - [表，tables](lua_tut/tables.md)
+- [函数](lua_tut/functions.md)
