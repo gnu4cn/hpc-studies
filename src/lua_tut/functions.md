@@ -239,3 +239,197 @@ ax
 
 
 最后，`return f()` 这样的语句，会返回 `f` 所返回的所有值：
+
+
+
+```lua
+> function foo (i)
+>> if i == 0 then return foo0()
+>> elseif i == 1 then return foo1()
+>> elseif i == 2 then return foo2()
+>> end
+>> end
+>
+> print(foo(1))
+a
+> print(foo(2))
+a       b
+> print(foo(0))
+
+> print(foo(3))     -- (没有结果值)
+```
+
+
+通过用一对额外的括号，将调用括起来，咱们就可以强制其只返回一个结果：
+
+
+```lua
+> print((foo0()))
+nil
+> print((foo1()))
+a
+> print((foo2()))
+a
+```
+
+
+请注意，`return` 语句不需要在返回值周围，加上括号；那里所加上的任何一对括号，都会算作额外的一对括号。因此，`return (f(x))` 这样的语句，总是会返回单个值，而无论 `f` 返回多少个值。有时这正是我们想要的，有时却不是。
+
+
+## 可变函数
+
+**Variadic Functions**
+
+
+Lua 中的函数可以是 *可变的, variadic*，这说的是，函数可以接受可变数量的参数。例如，我们已经以一个、两个或更多参数，调用了 `print`。虽然 `print` 是在 C 语言中定义的，但我们也可以在 Lua 中，定义可变函数。
+
+
+
+举个简单的例子，下面的函数，返回所有参数的和：
+
+
+```lua
+function add (...)
+    local sum = 0
+
+    for _, v in ipairs{...} do
+        sum = sum + v
+    end
+
+    return sum
+end
+
+print(add(0, 1, 3, 5, 7, 11))       --> 27
+```
+
+参数列表中的三个点（`...`），表示函数是可变的。当我们调用这个函数时，Lua 会在内部，收集所有参数；我们称这些收集到的参数，为函数的 *额外参数，extra arguments*。函数访问其额外参数时，会再次用到这三个点，现在则是作为表达式了。在我们的示例中，表达式 `{...}` 的结果，是一个包含了所有已收集参数的列表。然后，函数遍历该列表，以累加其中的元素。
+
+
+我们将这种三点表达式，称为 *可变参数表达式，vararg expression*。其行为类似于多重返回函数，会返回当前函数的所有额外参数。例如，命令 `print(...)`，便会打印该函数的所有额外参数。同样，下面这条命令，将以前两个可选参数的值（如果没有可选参数，则为 `nil`），创建出两个局部变量：
+
+
+```lua
+local a, b = ...
+```
+
+
+> **注意**：上面语法的完整示例：
+
+```lua
+function add (...)
+    local sum = 0
+    local a, b = ...
+
+    for _, v in ipairs{...} do
+        sum = sum + v
+    end
+
+    return sum, a+b
+end
+
+add(0, 1, 3, 5, 7, 11, 13)      --> 输出为：40      1
+```
+
+
+其实，对于 Lua 在将
+
+```lua
+function foo (a, b, )
+```
+
+翻译到
+
+
+```lua
+function foo (...)
+    local a, b, c = ...
+```
+
+时的一般的参数传递机制，我们可以加以模拟。
+
+喜欢 Perl 参数传递机制的那些人，可能会喜欢第二种形式。
+
+
+像下一个的这种函数，只会简单地返回所有参数：
+
+
+```lua
+function id (...) return ... end
+```
+
+这是一个多值标识函数。下一个函数的行为，则与另一个函数 `foo` 完全相同，只是在调用之前，会打印一条包含参数的信息：
+
+
+```lua
+function foo1 (...)
+    print("calling foo:", ...)
+    return foo(...)
+end
+```
+
+这是跟踪特定函数调用的一种有用技巧。
+
+
+我们来看另一个有用的例子。Lua 分别提供了格式化文本（`string.format`）和写入文本（`io.write`）两个函数。将这两个函数合并为一个可变函数，就非常简单：
+
+
+```lua
+function f_write (fmt, ...)
+    return io.write(string.format(fmt, ...))
+end
+```
+
+请注意，在三点之前，有一个固定参数 `fmt`。可变函数在可变部分之前，可以有任意数量的固定参数，fixed paramenters。Lua 会将靠前的参数，the first arguments，分配给这些参数，其余参数（如果有的话）作为额外参数。
+
+
+为了遍历额外参数，函数可以使用表达式 `{...}`，将他们全部收集到一个表中，就像我们在 `add` 的定义中所做的那样。然而，在额外参数可能是有效的一些 `nil` 的极少数情况下，用 `{...}` 创建的表，就可能不是正确的序列了。比如，在这样的表中，就无法检测原始参数中，是否有尾部的一些 `nil`。针对这种情况，Lua 提供了函数 `table.pack`。<sup>注 1</sup>这个函数会接收任意数量的参数，并返回一个包含所有参数的新表（就像 `{...}`），但这个表还有一个额外的字段 `"n"`，包含参数的总数。例如，下面的函数就使用了 `table.pack`，来测试是否其参数没有一个为 `nil`：
+
+
+> **注 1**：这个函数时在 Lua 5.2 中引入的。
+
+
+```lua
+function nonils (...)
+    local arg = table.pack(...)
+
+    for i = 1, arg.n do
+        if arg[i] == nil then return false end
+    end
+
+    return true
+end
+
+
+print(nonils(2,3,nil))      --> false
+print(nonils(2,3))          --> true
+print(nonils())             --> true
+print(nonils(nil))          --> false
+```
+
+
+另一种遍历函数可变参数的方法，便是 `select` 函数。对 `select` 函数的调用，总是有着一个固定参数，即 *选择器，selector*，外加数量可变的额外参数。在选择器是个数 `n` 时，`select` 就会返回第 `n` 个参数后的所有参数；否则，选择器就应是字符串 `"#"`，如此 `select` 会返回额外参数的总数目。
+
+
+```lua
+> select(1, "a", "b", "c")
+a       b       c
+> select(2, "a", "b", "c")
+b       c
+> select(3, "a", "b", "c")
+c
+> select("#", "a", "b", "c")
+3
+```
+
+
+通常，我们在使用 `select` 时，会将其结果数调整为 `1`，因此我们可以将 `select(n, ...)`，视为返回第 `n` 个额外参数。
+
+
+```lua
+> (select(1, "a", "b", "c"))
+a
+> (select(2, "a", "b", "c"))
+b
+> (select(3, "a", "b", "c"))
+c
+```
