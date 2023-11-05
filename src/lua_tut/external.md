@@ -93,4 +93,97 @@ file (0x5650b9a53fe0)
 ```
 
 
+但是，`io.lines` 迭代器实现了使用更简单的代码，来逐行迭代整个文件：
+
+
+```lua
+local count = 0
+
+for line in io.lines() do
+    count = count + 1
+    io.write(string.format("%6d ", count), line, "\n")
+end
+```
+
+> **注意**：原文的代码如下，若在 Lua 交互模式下，因为变量作用域的缘故，而报出了在 `nil` 上执行算术运算的错误。
+
+```console
+> local count = 0
+> for line in io.lines() do
+>> count = count + 1
+>> io.write(string.format("%6d ", count), line, "\n")
+>> end
+stdin:2: attempt to perform arithmetic on a nil value (global 'count')
+stack traceback:
+        stdin:2: in main chunk
+        [C]: in ?
+```
+
+作为基于行输入的另一示例，下图 7.1 “对文件进行排序的程序” 给出了对文件行进行排序的一个完整程序。
+
+**图 7.1，一个对文件加以排序的程序**
+
+```lua
+local lines = {}
+
+-- 将文件中的行，读入到表 `lines` 中
+for line in io.lines() do
+    lines[#lines + 1] = line
+end
+
+-- 排序
+table.sort(lines)
+
+-- 写所有行
+for _, l in ipairs(lines) do
+    io.write(l, "\n")
+end
+```
+
+调用 `io.read("n")`，会从当前输入流中，读取一个数字。这是 `read` 返回数字（整数或浮点数，遵循 Lua 扫描器的相同规则），而不是字符串的唯一情况。如果在跳过空格后，`io.read` 在当前文件位置找不到数字（由于格式错误或文件结尾），则返回 `nil`。
+
+除了基本的读取模式之外，咱们还可以使用数字 *n* 作为参数，来调用 `read`：在这种情况下，他会尝试从输入流中，读取 *n* 个字符。如果无法读取任何字符（文件结尾），则调用返回 `nil`；否则，他会从流中返回最多包含 *n* 个字符的字符串。作为此读取模式的示例，以下程序是将文件从 `stdin`，复制到 `stdout` 的有效方法：
+
+
+```lua
+while true do
+    local block = io.read(2^13)         -- 块大小为 8k
+    if not block then break end
+    io.write(block)
+end
+```
+
+作为一种特殊情况，`io.read(0)` 用作文件结尾的测试：如果有更多内容要读取，则返回空字符串，否则返回 `nil`。
+
+我们可以使用多个选项，来调用 `read`；对于每个参数，该函数将返回相应的结果。假设我们有一个文件，每行包含三个数字：
+
+```txt
+6.0     -3.23   15e12
+4.3     234     1000001
+89      95      78
+...
+```
+
+现在我们要打印出每行的最大值。我们可以通过一次 `read` 调用，读取每行的所有三个数字：
+
+```lua
+while true do
+    local n1, n2, n3 = io.read("n", "n", "n")
+    if not n1 then break end
+    print(math.max(n1, n2, n3))
+end
+```
+
+
+输出为:
+
+```console
+15000000000000.0
+1000001
+95
+```
+
+
+## 完整 I/O 模型
+
 
