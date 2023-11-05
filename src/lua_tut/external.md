@@ -186,4 +186,32 @@ end
 
 ## 完整 I/O 模型
 
+简单的 I/O 模型，对于简单的事情来说很方便，但对于更高级的文件操作（例如同时读取或写入多个文件）来说，还不够。对于这些操作，我们需要完整模型。
 
+要打开文件，咱们要使用模仿 C 函数 `fopen` 的 `io.open` 函数。他以要打开的文件名，和 *模式，mode* 字符串作为参数。此模式字符串，可以包含用于读取的 `r`、用于写入的 `w`（这也会删除文件以前的任何内容），或用于追加的 `a`，以及用于打开二进制文件的可选项 `b`。函数 `open` 返回一个文件上的新流。如果发生错误，`open` 会返回 `nil`，加上错误消息，以及与系统相关的错误编号：
+
+
+```console
+> print(io.open("data-num", "r"))
+nil     data-num: No such file or directory     2
+> print(io.open("data-number", "w"))
+nil     data-number: Permission denied  13
+```
+
+一种检查错误的典型习惯用法，便是使用函数 `assert`：
+
+```console
+> f = assert(io.open("data", "r"))
+> f
+file (0x563c8dffcfe0)
+>
+> f = assert(io.open("data-number", "r"))
+> f
+file (0x563c8e03f270)
+> f = assert(io.open("data-number", "w"))
+stdin:1: data-number: Permission denied
+stack traceback:
+        [C]: in function 'assert'
+        stdin:1: in main chunk
+        [C]: in ?
+```
