@@ -62,25 +62,9 @@ file (0x564a2d5a1510)
 
 ```lua
 > io.input("data")
-file (0x55baa3113fe0)
-> io.output("data-encoded")
-file (0x55baa3158f90)
 > t = io.read("a")
-> t
-The function string.gsub will match all non-ASCII bytes (codes from 128 to 255), plus the equals
-sign, and call the given function to provide a replacement. (We will discuss pattern matching in detail in
-Chapter 10, Pattern Matching.)
-
 > t = string.gsub(t, "([\128-\255=])", function (c) return string.format("=%02X", string.byte(c)) end)
-> t
-The function string.gsub will match all non-ASCII bytes (codes from 128 to 255), plus the equals
-sign, and call the given function to provide a replacement. (We will discuss pattern matching in detail in
-Chapter 10, Pattern Matching.)
-
 > io.write(t)
-file (0x55baa3158f90)
-> io.close()
-true
 ```
 
 其中的函数 `string.gsub`，将匹配所有非 ASCII 字节（从 `128` 到 `255` 的代码），加上等号，并调用给定函数来提供替换。 （我们将在第 10 章 [”模式匹配”](pattern_matching.md) 中详细讨论模式匹配。）
