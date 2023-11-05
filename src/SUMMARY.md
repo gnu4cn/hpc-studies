@@ -68,4 +68,4 @@
 - [字符串](lua_tut/strings.md)
 - [表，tables](lua_tut/tables.md)
 - [函数](lua_tut/functions.md)
-- [外界](lua_tut/external.md)
+- [外部世界](lua_tut/external.md)
