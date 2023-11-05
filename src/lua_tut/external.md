@@ -68,3 +68,29 @@ file (0x564a2d5a1510)
 ```
 
 其中的函数 `string.gsub`，将匹配所有非 ASCII 字节（从 `128` 到 `255` 的代码），加上等号，并调用给定函数来提供替换。 （我们将在第 10 章 [”模式匹配”](pattern_matching.md) 中详细讨论模式匹配。）
+
+调用 `io.read("l")`，会返回当前输入流中的下一行，不带换行符；调用 `io.read("L")` 类似，但他会保留换行符（如文件中存在）。当我们到达文件末尾时，调用会返回 `nil`，因为没有下一行要返回。选项 `“l”` 是 `read` 函数的默认选项。通常，仅在算法自然地逐行处理数据时，我（作者）才使用此选项；否则，我喜欢使用选项 `“a”` 立即读取整个文件，或者如我们稍后将看到的，分块读取。
+
+作为基于行输入的运用简单示例，以下程序，会将其当前输入，复制到当前输出，并对每行进行编号：
+
+```lua
+> io.input("data")
+file (0x5650b9a53fe0)
+> for count = 1, math.huge do
+>> local line = io.read("L")
+>> if line == nil then break end
+>> io.write(string.format("%6d ", count), line)
+>> end
+     1 Dozens were killed and many more injured in a blast at the Al-Maghazi refugee camp in the central Gaza Strip late Saturday night, according to hospital officials.
+     2
+     3 The explosion in the camp killed 52 people, said Mohammad al Hajj, the director of communications at the nearby Al-Aqsa Martyr’s hospital in Deir Al-Balah. He told CNN that the explosion was the result of an Israeli airstrike.
+     4
+     5 One resident of the camp told CNN: “We were sitting in our homes, suddenly we heard a very, very powerful sound of an explosion. It shook the whole area, all of it.”
+     6
+     7 The Israel Defense Forces (IDF) says it is looking into the circumstances around the explosion.
+     8
+     9 Dr. Khalil Al-Daqran, the head of nursing at the Al-Aqsa Martyr’s hospital told CNN he had seen at least 33 bodies from what he also claimed was an Israeli airstrike.
+```
+
+
+
