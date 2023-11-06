@@ -69,3 +69,4 @@
 - [表，tables](lua_tut/tables.md)
 - [函数](lua_tut/functions.md)
 - [外部世界](lua_tut/external.md)
+- [填补某些空白](lua_tut/filling_gaps.md)
