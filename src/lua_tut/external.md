@@ -215,3 +215,111 @@ stack traceback:
         stdin:1: in main chunk
         [C]: in ?
 ```
+
+
+如果 `open` 失败了，那么错误信息，就将作为 `assert` 的第二个参数，然后显示错误消息。
+
+
+打开文件后，我们就可以使用 `read` 和 `write` 方法，从其读取或写入到所产生的流。他们与函数 `read` 和 `write` 类似，但我们使用冒号操作符，将他们作为流对象上的方法来调用。例如，要打开一个文件并全部读取，我们可以使用如下的代码片段：
+
+
+```lua
+local f = assert(io.open("data", "r"))
+
+local t = f:read("a")
+f:close()
+```
+
+（我们将在第 21 章 [*面向对象编程*](oop.md) 中，详细讨论冒号运算符。）
+
+
+I/O 库为三个预定义的 C 语言（文件）流提供了句柄，分别名为 `io.stdin`、`io.stdout` 和 `io.stderr`。例如，我们可以直接向错误流，发送信息，代码如下：
+
+
+```lua
+io.stderr:write(message)
+```
+
+函数 `io.input` 和 `io.output`，允许咱们混合使用完整模型与简单模型。我们通过调用 `io.input()`（不带参数），获取当前输入流。通过调用 `io.input(handle)`，我们可以设置输入流。（类似调用也对 `io.output()` 有效。）例如，如果我们想临时更改当前输入流，可以这样写：
+
+
+```lua
+local temp = io.input()     -- 保存当前流
+io.input("newinput")        -- 打开一个新的当前流
+
+-- 对新的流进行一些操作
+io.input():close()          -- 关闭当前流
+io.input(temp)
+```
+
+
+请注意，`io.read(args)` 实际上是 `io.input():read(args)` 的简写，即应用在当前输入流上的 `read` 方法。同样，`io.write(args)` 是 `io.output():write(args)` 的简写。
+
+
+我们还可以使用 `io.lines`，代替 `io.read` 从流中读取数据。正如我们在前面的示例中看到的，`io.lines` 提供了一个迭代器，可以重复从流中读取数据。在给定了某个文件名时，`io.lines` 将以读取模式，在文件上打开一个流，并在文件结束后关闭该流。如果调用时没有参数，`io.lines` 将从当前输入流中，读取数据。我们还可以将 `lines` 作为句柄上的方法使用，as a method over handles。此外，自 Lua 5.2 版起，`io.lines` 也接受与 `io.read` 相同的选项。例如，接下来的代码片段，会将当前输入，复制到当前输出，迭代 `8 KB` 的数据块：
+
+
+```lua
+for block in io.input():lines(2^13) do
+    io.write(block)
+end
+```
+
+
+## 其他文件操作
+
+函数 `io.tmpfile` 会返回一个，以读写模式，read/write mode，打开的临时文件流。程序结束时，该文件将自动删除。
+
+
+函数 `flush` 会执行所有待处理的写入文件操作。与函数 `write` 一样，我们可以函数 `io.flush()` 的形式，调用他来刷新当前输出流，或以方法 `f:flush()` 的形式，调用他来刷新流 `f`。
+
+
+`setvbuf` 方法，用于设置数据流的缓冲模式。他的第一个参数是个字符串： `"no"` 表示不缓冲；`"full"` 表示只有当缓冲区满，或我们显式刷新文件时，才写出流数据；`"line"` 表示在输出换行符，或有来自特殊文件（如终端设备）的输入前，输出会被缓冲。对于后两个选项，`setvbuf` 接受可选的第二个参数，即缓冲区大小，the buffer size。
+
+
+在大多数系统中，标准错误流（`io.stderr`）是不缓冲的，而标准输出流（`io.stdout`）在行模式下，in line mode，是缓冲的。因此，在我们向标准输出，写入不完整的行（如进度指示器），就可能需要刷新流，才能看到输出。
+
+
+`seek` 方法，可以获取及设置文件流的当前位置。他的一般形式是 `f:seek(whence,offset)`，其中 `whence` 参数是个字符串，用于指定如何解释偏移量。其有效值为，`"set"`，用于相对于文件开头的偏移量；`"cur"`，用于相对于文件当前位置的偏移量；`"end"`，用于相对于文件结尾的偏移量。而与 `whence` 的值无关，调用会返回数据流的新当前位置，从文件开头开始以字节为单位计算。
+
+
+`whence` 的默认值是 `"cur"`，偏移量的默认值是零。因此，调用 `file:seek()`，就会在不会改变当前流位置下，返回当前流位置；调用 `file:seek("set")` 会将位置，重置为文件开头（并返回零）；调用 `file:seek("end")` 会将位置设置为文件结尾，并返回文件大小。下面的函数，可以在不改变文件当前位置的情况下，获取文件大小：
+
+
+```lua
+function fsize(file)
+    local current = file:seek()     -- 保存当前位置
+    local size = file:seek("end")   -- 获取文件大小
+
+    file:seek("set", current)       -- 恢复位置
+
+    return size
+end
+```
+
+
+为完善整套的文件操作，`os.rename` 会更改文件名，而 `os.remove` 则会删除文件。请注意，这些函数来自 `os` 库，而不是 `io` 库，因为他们处理的是真实文件，而不是数据流。
+
+
+全部这些函数，在出现错误时，都会返回 `nil` 与错误信息，以及错误代码。
+
+
+## 其他系统调用
+
+函数 `os.exit` 会终止程序的执行。他的第一个可选参数，是程序的返回状态。其可以是一个数字（`0` 表示执行成功）或一个布尔值（`true` 表示执行成功）。当可选的第二个参数为 `true` 时，会关闭 Lua 状态，调用所有终结器，all finalizers，并释放该状态使用的所有内存。(通常这种终结，this finalization，是不必要的，因为大多数操作系统，都会在进程退出时，释放进程使用的所有资源。）
+
+函数 `os.getenv`，会获取环境变量的值。他取变量的名称，并返回一个包含其值的字符串：
+
+
+```console
+> print(os.getenv("HOME"))
+C:\tools\msys64\home\Lenny.Peng
+```
+
+对于未定义的变量，该调用会返回 `nil`。
+
+
+### 运行系统命令
+
+
+
