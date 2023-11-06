@@ -322,4 +322,89 @@ C:\tools\msys64\home\Lenny.Peng
 ### 运行系统命令
 
 
+函数 `os.execute` 运行一条系统命令；他等同于 C 语言函数 `system`。他取一个包含命令的字符串，并返回命令结束的信息，information regarding how the command terminated。第一个结果是布尔值：`true` 表示程序无错误退出。第二个结果是一个字符串：如果程序正常结束，则返回 `"exit"`；如果程序被信号中断，则返回 `"signal"`。第三个结果是返回状态，the return status（在程序正常终止时），或终止程序的信号编号，the number of the signal that terminated the program。举例来说，在 POSIX 和 Windows 中，我们都可以使用下面的函数，来创建新目录：
 
+```lua
+function createDir (dirname)
+    os.execute("mkdir " .. dirname)
+end
+```
+
+
+另一个相当有用的函数，是 `io.popen`。<sup>注 2</sup> 与 `os.execute` 类似，他运行一条系统命令，但同时也将命令的输出（或输入），连接到一个新的本地流，并返回该流，这样我们的脚本就可以，从命令中读取数据（或向命令写入数据）。例如，下面的脚本，会用当前目录中的条目，建立了一个表：
+
+
+> **注 2**：该函数并非在所有 Lua 安装中都可用，因为相应的功能并非 ISO C 的一部分。尽管不是 C 中的标准，但由于其通用性和在主要操作系统中的存在，我们将其包含在标准库中。
+
+
+```lua
+-- 对于 Windows，请使用 'dir /B' 代替 'ls -1'
+local f = io.popen("ls -1", "r")
+-- local f = io.popen("dir /B", "r")
+
+local dir = {}
+for entry in f:lines() do
+    dir[#dir + 1] = entry
+end
+```
+
+其中 `io.popen` 的第二个参数（`"r"`），表示咱们打算，从命令中读取数据。默认情况下是读取，因此在示例中，该参数是可选的。
+
+
+下个示例，会发送一封电子邮件：
+
+
+```lua
+local subject = "Some news"
+local address = "someone@example.com"
+
+local cmd = string.format("mail -s '%s' '%s'", subject, address)
+local f = io.popen(cmd, "w")
+
+f:write([[
+Nothing important to sys.
+-- me
+]])
+f:close()
+```
+
+（此脚本仅适用于安装了相应软件包（`bsd-mailx`）的 POSIX 系统。）现在，`io.popen` 的第二个参数是 `"w"`，表示我们打算写入该命令。
+
+
+从以上两个示例可以看出，`os.execute` 和 `io.popen`，都是功能强大的函数，但他们也是系统高度依赖的。
+
+
+对于扩展的操作系统访问，咱们最好使用某个外部 Lua 库，诸如 `LuaFileSystem`（用于目录和文件属性的基本操作）或 `luaposix`（提供 POSIX.1 标准的大部分功能）。
+
+
+## 练习
+
+练习 7.1：请编写一个读取文本文件，并按字母顺序排序其中的行后，重写该文件。当不带参数调用时，他应该从标准输入读取，并写入标准输出。当使用文件名参数调用时，他应该从该文件读取，并写入标准输出。当使用两个文件名参数调用时，他应该从第一个文件读取，并写入第二个文件。
+
+
+练习 7.2：更改上一程序，使其在用户提供其输出文件的某个既有文件名时，要求用户确认。
+
+
+练习 7.3：比较以下列方式，将标准输入流复制到标准输出流的 Lua 程序性能：
+
+- 逐个字节，byte by byte；
+
+- 逐行，line by line；
+
+- 以 8KB 块方式，in chunks of 8 kB；
+
+- 一次性整个文件方式，the whole file at once。
+
+对于最后一个选项，输入文件可以有多大？
+
+
+练习 7.4：请编写一个程序，打印出文本文件的最后一行。当文件较大且可寻时，when the file is large and seekable，要尽量避免读取整个文件。
+
+
+练习 7.5：将上一程序通用化，以便打印文本文件的最后 `n` 行。同样，当文件较大且可寻时，要尽量避免读取整个文件。
+
+
+练习 7.6：请使用 `os.execute` 和 `io.popen`，编写出创建目录、删除目录和收集目录中项目的函数。
+
+
+练习 7.7：你能使用 `os.execute`，改变咱们 Lua 脚本的当前目录吗？为什么？
