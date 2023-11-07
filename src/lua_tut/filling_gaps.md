@@ -100,4 +100,152 @@ Lua 提供了一小套常规的控制结构，其中 `if` 用于条件执行，�
 
 ### `if-then-else`
 
+`if` 语句会测试其条件，并相应地执行 *`then` 部分，`then`-part* 或 *`else` 部分，`else`-part*。`else` 部分是可选的。
+
+```lua
+if a < 0 then a = 0 end
+
+if a < b then return a else return b end
+
+if line > MAXLINES then
+    showpage()
+    line = 0
+end
+```
+
+要编写嵌套的 `if`，我们可以使用 `elseif`。他类似于一个 `else` 后面跟一个 `if`，但避免了多个 `end` 的需要：
+
+
+```lua
+if op == "+" then
+    r = a + b
+elseif op == "-" then
+    r = a - b
+elseif op == "*" then
+    r = a*b
+elseif op == "/" then
+    r = a/b
+else
+    error("invalid operation")
+end
+```
+
+由于 Lua 没有 `switch` 语句，所以这种链条会比较常见。
+
+
+### `while`
+
+
+顾名思义，`while` 循环，会在条件为真的情况下，重复其循环体，its body。通常，Lua 会首先测试 `while` 条件；如果条件为假，则循环结束；否则，Lua 会执行循环体，并重复循环过程。
+
+
+```lua
+local i = 1
+while a[i] do
+    print(a[i])
+    i = i + 1
+end
+```
+
+## `repeat-util`
+
+
+顾名思义，`repeat-until` 语句，会重复执行其主体，its body，直到条件为真。该语句是在循环体之后，进行测试，因此总是会至少执行一次循环体。
+
+
+```lua
+-- 打印出首个非空的输入行
+local line
+
+repeat
+    line = io.read()
+until line ~= ""
+
+print(line)
+```
+
+
+与大多数其他语言不同，在 Lua 中，循环内声明的局部变量的作用域，会将条件包含起来：
+
+
+```lua
+-- 使用 Newton-Raphson 方法，计算 'x' 的平方根
+function NR_sqrt (x)
+    local sqrt = x / 2
+
+    repeat
+        sqrt = (sqrt + x/sqrt) / 2
+        local error = math.abs(sqrt^2 - x)
+    until error < x/10000       -- 循环体中的本地 'error' 变量，在这里仍然可见
+
+    return sqrt
+end
+```
+
+
+## 数值的 `for`
+
+**Numerical `for`**
+
+
+`for` 语句有两个变体：*数值的，numerical* `for` 和 *泛型的，generic* `for`。
+
+
+数值的 `for`，有着以下语法：
+
+
+```lua
+for var = exp1, exp2, exp3 do
+    something
+end
+```
+
+此循环将对 `var`，从 `exp1` 到 `exp2` 的每个值执行 `something`，将 `exp3` 用作递增 `var` 的 *步长，step*。其中第三个表达式是可选的；在没有第三个表达式时，Lua 将假定步长为 `1`。如果咱们想要一个没有上限的循环，可以使用常量 `math.huge`：
+
+
+```lua
+for i = 1, math.huge do
+    if (0.3*i^3 - 20*i^2 - 500 >=0) then
+        print(i)
+        break
+    end
+end
+```
+
+
+`for` 循环有一些微妙之处，要很好地利用他，咱们就应掌握这些微妙之处。首先，在循环开始之前，所有三个表达式都要求值一次。其次，那个控制变量，是 `for` 语句自动声明的一个局部变量，只在循环内部才可见。典型的错误，便是假定了该变量，在循环结束后仍然存在：
+
+
+```lua
+for i = 1, 10 do print(i) end
+max = i         -- 可能就是错的了！
+
+print(max)      -- 这里将打印出 nil
+```
+
+在循环结束后（通常是在中断循环时），如果咱们需要那个控制变量的值，则必须将其，保存到另一变量中：
+
+
+```lua
+-- 找到列表中的某个值
+a = {0, 1, 3, 5, 7, -1, 9, -13}
+
+local found = nil
+for i = 1, #a do
+    if a[i] < 0 then
+        found = i   -- 保存 'i' 的值
+        break
+    end
+end
+
+print(found, a[found])
+```
+
+第三，咱们不应修改控制变量的值：这种修改的效果，是不可预测的。咱们如果想在 `for` 循环正常结束之前，结束他，可以使用 `break`（就像我们在上一示例中所做的那样）。
+
+
+
+## 泛型的 `for`
+
+
 
