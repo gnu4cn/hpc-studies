@@ -1,4 +1,4 @@
-# 查漏补缺
+# 水到渠成
 
 **Filling some Gaps**
 
@@ -188,7 +188,7 @@ end
 **Numerical `for`**
 
 
-`for` 语句有两个变体：*数值的，numerical* `for` 和 *泛型的，generic* `for`。
+`for` 语句有两个变体：*数值的，numerical* `for` 和 *通用的，generic* `for`。
 
 
 数值的 `for`，有着以下语法：
@@ -245,7 +245,123 @@ print(found, a[found])
 
 
 
-### 泛型的 `for`
+### 通用的 `for`
 
+
+通用的 `for` 循环，会遍历某个迭代器函数所返回的值。我们已经看到过迭代器的一些例子，如 `pairs`、`ipairs`、`io.lines` 等。尽管表面上看似简单，但通用 `for` 功能强大。有了适当的迭代器，以可读方式，咱们几乎可以遍历任何东西。
+
+
+当然，我们也可以编写自己的迭代器。虽然通用 `for` 的使用很简单，但编写迭代器函数，也有其微妙之处；因此，我们将在稍后的第 18 章 [*迭代器和通用 `for`*](iterators_and_the_generic_for.md) 中，介绍这一主题。
+
+
+与数值的 `for` 不同，通用的 `for` 可以有多个变量，每次迭代都会更新所有变量。循环会在第一个变量为 `nil` 时停止，the loop stops when the first variable gets `nil`。与数值循环一样，这些循环变量，是循环体的局部变量，咱们不应在每次迭代中，更改他们的值。
+
+
+### `break`、`return` 与 `goto`
+
+
+通过 `break` 和 `return` 语句，我们可以跳出某个代码块。而通过 `goto` 语句，我们几乎可以跳转到，函数中的任何位置。
+
+
+我们使用 `break` 语句，来结束某个循环。该语句会中断包含着他的内部循环，the inner loop（`for`、`repeat` 或 `while`），其不能在循环外部使用。在中断后，程序将从被中断的循环之后，紧接着的点，继续运行。
+
+
+`return` 语句会返回函数的结果，或者简单地结束该函数。任何函数的结尾，都有一个隐式的返回语句，因此我们不需要为自然结束的函数，编写返回语句，因为这些函数不会返回任何值。
+
+
+由于语法上的原因，`return` 只能作为代码块的最后一条语句出现：换句话说，只能作为代码块的最后一条语句，或者在 `end`、`else` 或 `until` 之前。例如，在下一示例中，`return` 便是其中 `then` 代码块的最后一条语句：
+
+
+```lua
+local i = 1
+while a[i] do
+    if a[i] == v then return i end
+    i = i + 1
+end
+```
+
+
+通常，我们会在这些地方，使用 `return`，因为 `return` 后面所跟的任何语句，都是无法执行的。但有时，在代码块中间，写一个 `return`，可能会很有用；例如，我们可能正在调试某个函数，并希望避免执行他。在这种情况下，我们可以在语句周围，使用一个显式 `do-end` 代码块：
+
+
+```lua
+function foo ()
+    return              --<< 语法错误
+    -- 'return' 是下一代码块中的最后一个语句
+    do return end       -- 没有问题
+    other statements
+end
+```
+
+
+`goto` 语句会将程序的执行，跳转到某个相应的标签。关于 `goto` 语句的争论，由来已久，有些人甚至认为他对编程有害，应禁止在编程语言中使用。尽管如此，目前仍有几种语言，提供了 `goto`，这是有充分理由的。在小心使用时，他们是一种强大的机制，只会提高代码的质量。
+
+
+在 Lua 中，`goto` 语句的语法非常传统：就是后面跟着标签名字的保留字 `goto`，标签名字可以是任何有效的标识符。而标签的语法，则比较复杂：其有着后面跟了标签名称的两个冒号，而标签名字后面，还有两个冒号，如 `::name::`。这种复杂的语法是有意为之，目的是突出程序中的标签。
+
+
+对于咱们能使用 goto 跳转的位置，Lua 有一些限制。首先，标签遵循了一般的可见性规则，the usual visibility rules，因此，我们不能跳转到代码块中，cannot jump into a block，（因为代码块中的标签，在代码块外是不可见的）。其次，我们不能跳出函数。(注意，第一条规则，就已经排除了，跳入函数的可能性。）第三，我们不能跳入某个局部变量的作用域，the scope of a local variable。
+
+
+典型的、表现良好的 `goto` 用法，便是模拟一些咱们在其他语言中了解到的，却在 Lua 中没有的结构，例如 `continue`、多级中断，multi-level `break`、多级继续，multi-level `continue`、重做，redo、局部错误处理，local error handling 等。所谓 `continue` 语句，简单地说就是，跳转到循环代码块末尾的标签；而 `redo` 语句，则是跳转到循环代码块的起始位置：
+
+
+```lua
+while some_condition do
+    ::redo::
+
+    if some_other_condition then goto continue
+    else if yet_another_condition then goto redo
+    end
+
+    some code
+
+    ::continue::
+end
+```
+
+
+Lua 规范中，有个有用的细节，即局部变量的作用域，会定义出该变量的代码块的，最后一条 *非空* 语句处结束，ends on the last *non-void* statement；而标签，就被视为空语句，void statements。要了解这一细节的用处，请看下个片段：
+
+
+```lua
+while some_condition do
+    if some_other_condition then goto continue end
+
+    local var = something
+    some code
+
+    ::continue::
+end
+```
+
+咱们可能会认为，这个 `goto` 跳转到了变量 `var` 的作用域内。但是， `continue` 标是出现在这个代码块的最后一个非空语句之后的，因此他不在 `var` 的作用域内。
+
+
+`goto` 对于编写状态机，state machines，也很有用。例如，下图 8.1，“使用 `goto` 的状态机示例” 就给出了一个程序，该程序会检查其输入，是否有偶数个零。
+
+
+**图 8.1，使用 `goto` 的状态机示例**
+
+
+```lua
+::s1:: do
+    local c = io.read(1)
+    if c == '0' then goto s2
+    elseif c == nil then print'ok'; return
+    else goto s1
+    end
+end
+
+::s2:: do
+    local c = io.read(1)
+    if c == '0' then goto s1
+    elseif c == nil then print'not ok'; return
+    else goto s2
+    end
+end
+
+goto s1
+```
 
 
