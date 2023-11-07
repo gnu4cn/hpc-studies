@@ -125,3 +125,39 @@ Lib = {
     goo = function (x, y) return x - y end
 }
 ```
+
+
+此外，Lua 提供了一种特别语法，来定义此类函数：
+
+```lua
+Lib = {}
+function Lib.foo (x, y) return x + y end
+function Lib.goo (x, y) return x - y end
+```
+
+如同在第 21 章 [*面向对象编程*](oop.md) 中咱们将看到的，字段中函数的使用，是 Lua 中面向对象编程的关键要素。
+
+
+当我们将某个函数，存储到局部变量中时，我们就会得到一个 *局部函数，local function*，即限制在给定范围内的一个函数。这样的定义，对软件包特别有用：因为 Lua 将每个代码片，each chunk，视为一个函数，所以代码片可以声明出一些局部函数，这些函数只在分片内部可见。词法的作用域，lexical scoping，可以确保该分片中的其他函数，可以使用这些局部函数。
+
+
+Lua 通过局部函数的一种语法糖，支持局部函数的这种用法：
+
+
+```lua
+local function f (params)
+    body
+end
+```
+
+在递归的局部函数定义中，会出现一个微妙的问题，因为简单方法在这里行不通。请看下面的定义：
+
+```lua
+local fact = function (n)
+    if n == 0 then return 1
+    else return n*fact(n-1)     -- 问题代码
+    end
+end
+
+```
+

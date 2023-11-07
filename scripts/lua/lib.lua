@@ -128,7 +128,7 @@ Lib.nr_sqrt = function (x)
 end
 
 
-Lib.derivative = function (f, delta)
+function Lib.derivative (f, delta)
     delta = delta or 1e-4
     return function (x)
         return (f(x + delta) - f(x))/delta
