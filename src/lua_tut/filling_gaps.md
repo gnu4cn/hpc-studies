@@ -147,7 +147,7 @@ while a[i] do
 end
 ```
 
-## `repeat-util`
+### `repeat-util`
 
 
 顾名思义，`repeat-until` 语句，会重复执行其主体，its body，直到条件为真。该语句是在循环体之后，进行测试，因此总是会至少执行一次循环体。
@@ -183,7 +183,7 @@ end
 ```
 
 
-## 数值的 `for`
+### 数值的 `for`
 
 **Numerical `for`**
 
@@ -245,7 +245,7 @@ print(found, a[found])
 
 
 
-## 泛型的 `for`
+### 泛型的 `for`
 
 
 
