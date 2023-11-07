@@ -70,3 +70,8 @@
 - [函数](lua_tut/functions.md)
 - [外部世界](lua_tut/external.md)
 - [水到渠成](lua_tut/filling_gaps.md)
+
+
+# 第二部分，真实编程
+
+- [闭包](lua_tut/closures.md)

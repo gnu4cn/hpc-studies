@@ -364,4 +364,100 @@ end
 goto s1
 ```
 
+虽然有更好的方法，来编写这个特定程序，但如果我们想将有限自动机，a finite automaton，自动转化为 Lua 代码（想想动态代码生成，think about dynamic code generation），这种技巧还是很有用的。
 
+
+再举一个简单的迷宫游戏，a simple maze game，为例。迷宫中有几个房间，每个房间最多有四个门：北门、南门、东门和西门。每走一步，用户都要输入一个移动方向。如果在这个方向上有一扇门，用户就会进入相应的房间；否则，程序会打印出告警信息。游戏目标，是从初始房间到最终房间。
+
+
+这个游戏，就是一种典型的状态机，其中的当前房间，就是所谓的状态。用代码块表示各个房间，咱们就可以实现这个迷宫，而用 `goto` 从一个房间，移动到另一个房间。下图 8.2 “迷宫游戏”，给出了我们如何编写一个，有四个房间的小型迷宫。
+
+
+**图 8.2，迷宫游戏**
+
+
+```lua
+goto room1          -- 初始房间
+
+::room1:: do
+    local move = io.read()
+    if move == "south" then goto room3
+    elseif move == "east" then goto room2
+    else
+        print("Invalid move")
+        goto room1
+    end
+end
+
+::room2:: do
+    local move = io.read()
+    if move == "south" then goto room4
+    elseif move == "west" then goto room1
+    else
+        print("Invalid move")
+        goto room2
+    end
+end
+
+::room3:: do
+    local move = io.read()
+    if move == "north" then goto room1
+    elseif move == "east" then goto room4
+    else
+        print("Invalid move")
+        goto room3
+    end
+end
+
+::room4:: do
+    print("Congratulations, you won!")
+end
+```
+
+对于这种简单游戏，咱们可能会发现，其中用表来描述房间和移动的数据驱动程序，a data-driven program，会是更好的设计。不过，如果在每个房间种，游戏都有几种特殊情形，那么这种状态机的设计，就非常合适了。
+
+
+
+## 练习
+
+练习 8.1：大多数有着类似 C 语法的语言，都没有提供 `elseif` 结构。为什么相比这些语言，Lua 更需要这种构造？
+
+
+练习 8.2：请描述四种使用 Lua 语言，编写不带条件循环，an unconditional loop，的不同方法。你更喜欢哪一种？
+
+
+练习 8.3：许多人认为，`repeat-until` 很少使用，因此不应该出现在像 Lua 这样的简约语言中。你怎么看？
+
+
+练习 8.4：正如我们在 [“正确的尾部调用”](functions.md#正确的尾部调用) ，一节中所看到的尾部调用，就是变相的 `goto`。利用这一思想，请使用尾部调用，重新实现 [`break`、`return` 和 `goto`](#breakreturn-与-goto) 一节中，那个简单迷宫游戏。每个代码块都应成为一个新函数，而每个 `goto` 都应成为尾部调用。
+
+
+练习 8.5：你能解释为什么 Lua 有 `goto` 不能跳出函数的限制吗？(提示：咱们应如何实现这一功能？）
+
+
+练习 8.6：假设 `goto` 可以跳出函数，请解释下图 8.3 “`goto` 的一种奇怪（无效）用法” 中的程序会做什么。
+
+
+**图 8.3，`goto` 的一种奇怪（无效）使用**
+
+```lua
+function getlabel ()
+    return function () goto L1 end
+    ::L1::
+    return 0
+end
+
+function f (n)
+    if n == 0 then return getlabel()
+    else
+        local res = f(n - 1)
+        print(n)
+        return res
+    end
+end
+
+x = f(10)
+x()
+```
+
+(要尝试使用局部变量用到同一作用域规则，the same scoping rules used for local variables，对标签进行推理。）
