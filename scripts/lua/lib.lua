@@ -1,22 +1,24 @@
-exit = os.exit
-x = os.execute
+Lib = {}
 
-function norm (x, y)
+Lib.exit = os.exit
+Lib.x = os.execute
+
+Lib.norm = function (x, y)
     return math.sqrt(x^2 + y^2)
 end
 
-function twice (x)
+Lib.twice = function (x)
     return 2.0 * x
 end
 
 local tolerance = 0.17
-function isturnback (angle)
+Lib.isturnback = function (angle)
     angle = angle % (2*math.pi)
     return (math.abs(angle - math.pi) < tolerance)
 end
 
 
-function round (x)
+Lib.round = function (x)
     local f = math.floor(x)
 
     if x == f
@@ -26,12 +28,12 @@ function round (x)
     end
 end
 
-function cond2int (x)
+Lib.cond2int = function (x)
     return math.tointeger(x) or x
 end
 
 -- 将序列 'a' 的元素相加
-function add (a)
+Lib.addd = function (a)
     local sum = 0
 
     for i = 1, #a do
@@ -42,13 +44,13 @@ function add (a)
 end
 
 
-function incCount (n)
+Lib.incCount = function (n)
     n = n or 1
     globalCounter = globalCounter + n
 end
 
 
-function maxium (a)
+Lib.maxium = function (a)
     local mi = 1            -- 最大值的索引
     local m = a[mi]         -- 最大值
 
@@ -62,7 +64,7 @@ function maxium (a)
 end
 
 
-function add (...)
+Lib.sum = function (...)
     local sum = 0
 
     for i = 1, select("#", ...) do
@@ -73,12 +75,12 @@ function add (...)
 end
 
 
-function f_write (fmt, ...)
+Lib.f_write = function (fmt, ...)
     return io.write(string.format(fmt, ...))
 end
 
 
-function nonils (...)
+Lib.nonils = function (...)
     local arg = table.pack(...)
 
     for i = 1, arg.n do
@@ -89,7 +91,7 @@ function nonils (...)
 end
 
 
-function _unpack (t, i, n)
+Lib._unpack = function (t, i, n)
     i = i or 1
     n = n or #t
     if i <= n then
@@ -98,7 +100,7 @@ function _unpack (t, i, n)
 end
 
 
-function fsize (file)
+Lib.f_size = function (file)
     local current = file:seek()     -- 保存当前位置
     local size = file:seek("end")   -- 获取文件大小
 
@@ -108,13 +110,13 @@ function fsize (file)
 end
 
 
-function createDir (dirname)
+Lib.createDir = function (dirname)
     os.execute("mkdir " .. dirname)
 end
 
 
 -- 使用 Newton-Raphson 方法，计算 'x' 的平方根
-function NR_sqrt (x)
+Lib.nr_sqrt = function (x)
     local sqrt = x / 2
 
     repeat
@@ -123,4 +125,12 @@ function NR_sqrt (x)
     until error < x/10000       -- 循环体中的本地 'error' 变量，在这里仍然可见
 
     return sqrt
+end
+
+
+Lib.derivative = function (f, delta)
+    delta = delta or 1e-4
+    return function (x)
+        return (f(x + delta) - f(x))/delta
+    end
 end
