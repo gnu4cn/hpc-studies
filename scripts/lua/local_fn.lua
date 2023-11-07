@@ -1,8 +1,9 @@
 #!/usr/bin/env lua
 
-local fact = function (n)
+local function fact (n)
     if n == 0 then return 1
-    else return n*fact(n-1)     -- 问题代码
+    else return n*fact(n-1)
     end
 end
 
+print(fact(3))

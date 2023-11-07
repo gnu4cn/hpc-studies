@@ -1,11 +1,11 @@
 # 闭包
 
-Lua 中的函数，是具有适当词法作用域的一些头等值，functions in Lua are first-class values with proper lexical scoping。
+Lua 中的函数，是具有适当词法界定的一些头等值，functions in Lua are first-class values with proper lexical scoping。
 
 函数是 “头等值”，是什么意思？这意味着，在 Lua 中，函数是与数字和字符串等常规值，具有相同权利的值。程序可以将函数，存储在变量（包括全局变量与局部变量）和表中，将函数作为参数，传递给其他函数，以及将函数作为结果返回。
 
 
-函数具有“词法作用域，lexical scoping”，是什么意思？这意味着函数可以访问其外层函数的变量，functions can access variables of their enclosing functions。(这也意味着，Lua 正确地包含了 [lambda/λ 演算，the lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus)。）
+函数具有“词法的范围界定，lexical scoping”，是什么意思？这意味着函数可以访问其外层函数的变量，functions can access variables of their enclosing functions。(这也意味着，Lua 正确地包含了 [lambda/λ 演算，the lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus)。）
 
 
 这两个特性一起，赋予了 Lua 语言极大的灵活性；例如，在运行一段不被信任的代码（比如通过网络接收的代码）时，程序就可以重新定义一个函数，来添加新的功能，或删除某个函数，来创建出安全的环境。更重要的是，这两种特性，允许我们在 Lua 中，应用函数式语言世界中的许多强大编程技术。即使咱们对函数式编程完全毫无兴趣，也值得学习一下如何探索这些技术，因为他们可以让咱们的程序，变得更小更简单。
@@ -160,4 +160,58 @@ local fact = function (n)
 end
 
 ```
+
+当 Lua 编译函数体中的调用 `fact(n - 1)` 时，这个局部的 `fact` 尚未定义。因此，该表达式将尝试调用全局的 `fact`，而不是局部的 `fact`。我们可以通过先定义局部变量，然后再定义函数，来解决这个问题：
+
+
+```lua
+local fact
+fact = function (n)
+    if n == 0 then return 1
+    else return n*fact(n-1)
+    end
+end
+```
+
+
+现在，函数中的那个 `fact`，指向了这个局部变量。函数定义时的值并不重要；函数执行时，`fact` 已经有了正确的值。
+
+当 Lua 展开局部函数的语法糖时，他不会使用简单（朴素）定义，the naive definition。取而代之的是：
+
+```lua
+local function foo (params) body end
+```
+
+会展开为
+
+```lua
+local foo; foo = function (params) body end
+```
+
+因此，我们可以放心地将这种语法，用于递归函数。
+
+
+当然，在我们使用的是间接递归函数，indirect recursive function，时，这种技巧就不起作用了。在这种情况下，我们必须使用等同于显式前向声明，the equivalent of an explicit forward declaration，的方法：
+
+
+```lua
+local f         -- “前向” 声明
+
+local function g ()
+    some code   f()   some code
+end
+
+function f ()
+    some code   g()     some code
+end
+```
+
+注意不要在最后一个定义中，写下 `local`。否则，Lua 将创建一个新的局部变量 `f`，而原来的 `f`（即 `g` 绑定的那个）就会是未定义的了。
+
+
+## 词法范围界定
+
+**Lexical Scoping**
+
+
 
