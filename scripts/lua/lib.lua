@@ -134,3 +134,8 @@ function Lib.derivative (f, delta)
         return (f(x + delta) - f(x))/delta
     end
 end
+
+function Lib.degreesin (x)
+    local k = math.pi / 180
+    return math.sin(x * k)
+end
