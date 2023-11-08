@@ -351,7 +351,131 @@ end
 
 为给出更具体的函数式编程示例，我们将在本节中，开发一个简单的几何区域系统，a simple system for geometric regions。<sup>注 1</sup>我们的目标，是开发出一个表示几何区域的系统，其中区域是一组点。我们希望能够表示各种形状，并以多种方式（旋转、平移、合并等），组合及修改形状。
 
+> **注 1**：此示例改编自 Paul Hudak 和 Mark P. Jones 撰写的研究报告 *Haskell vs. Ada vs. C++ vs. Awk vs. ... An Experiment in Software Prototyping Productivity*。
+
 
 为了实现这个系统，我们可以开始寻找表示形状的，一些良好数据结构；我们可以尝试面向对象的方法，而开发出形状的一些层次结构来。或者，我们可以在更高的抽象层次上工作，直接用集合的特征函数（或指标函数）来表示集合，represent our sets directly by their characteristic(or indicator) function。(某个集合 *A* 的特征函数，是这样的一个函数 <i>f<sub>A</sub></i>：当且仅当 *x* 属于 *A* 时，<i>f<sub>A</sub>(x)</i> 为真）。鉴于几何区域是一些点的集合，我们就可以用其特征函数，来表示某个区域；也就是说，我们会用这样一个函数，来表示某个区域：对于某个给定点，当且仅当该点属于那个区域时，函数的返回值才为真。
 
+例如，下面这个函数，表示一个圆盘面（即圆形区域），圆心为 *(1.0, 3.0)*，半径为 *4.5*：
 
+
+```lua
+function disk1 (x, y)
+    return (x - 1.0)^2 + (y - 3.0)^2 <= 4.5^2
+end
+```
+
+
+在高阶函数，和词法范围下，定义出以给定中心和半径，创建出某个圆盘面的圆盘面工厂，a disk factory，就很容易：
+
+
+```lua
+function disk (cx, cy, r)
+    return function (x, y)
+        return (x - cx)^2 + (y - cy)^2 <= r^2
+    end
+end
+```
+
+
+像 `disk(1.0, 3.0, 4.5)` 这样的调用，就将创建出一个等于 `disk1` 的圆盘面。
+
+
+下面这个函数，将根据给定的边界，创建出与轴对齐的矩形：
+
+
+```lua
+function rect (left, right, bottom, up)
+    return function (x, y)
+        return left <= x
+            and x <= right
+            and bottm <= x
+            and x <= up
+    end
+end
+```
+
+以类似的方式，我们可以定义出创建其他基本形状，例如三角形和非轴对齐矩形等的函数。每个形状都有完全独立的实现，只需要正确的特征函数。
+
+
+现在我们来看看，如何修改和组合区域。创建任何区域的补集，the complement of any region，都很简单：
+
+
+```lua
+function complement (r)
+    return function (x, y)
+        return not r(x, y)
+    end
+end
+```
+
+如下图 9.1，“区域的并集、交集和差集” 所示，并集，union、交集，intersection 和差集，difference，同样简单。
+
+
+**图 9.1，Union, intersection, and difference of regions**
+
+
+```lua
+function union (r1, r2)
+    return function (x, y)
+        return r1(x, y) or r2(x, y)
+    end
+end
+
+function intersection (r1, r2)
+    return function (x, y)
+        return r1(x, y) and r2(x, y)
+    end
+end
+
+
+function difference (r1, r2)
+    return function (x, y)
+        return r1(x, y) and not r2(x, y)
+    end
+end
+```
+
+下面的函数会按照给定的 delta 值，平移某个区域：
+
+
+```lua
+function translate (r, dx, dy)
+    return function (x, y)
+        return r(x - dx, y - dy)
+    end
+end
+```
+
+要可视化某个区域，我们可以遍历视口，traverse the viewport，对每个像素进行；区域内的像素，会被涂成黑色，区域外的像素则涂成白色。为了简单地说明这一过程，我们将编写一个函数，来生成一个 PBM（*便携式位图，portable bitmap*）文件，其中带有某个给定区域的绘图。
+
+
+PBM 文件的结构，非常简单。(这种结构的效率也非常低，但我们在此强调的是简单。）在其文本模式的变种里，文件以标题为 `"P1"` 字符串的单行标题开始；然后是有着单位为像素的，绘制高度和宽度的一行。最后是一串数字，每个图像像素为一个数字（黑色为 `1`，白色为 `0`），像素与行，以空格和行尾分隔。下图 9.2 中的函数，“在 PBM 文件中绘制区域”，会为给定区域创建出一个 PBM 文件，将虚拟绘图区域 *(-1,1], [-1,1)*，映射到视口区域 *[1,M], [1,N]*。
+
+
+**图 9.2，在 PBM 文件中绘制区域**
+
+
+```lua
+function plot (r, M, N)
+    io.write("P1\n", M, " ", N, "\n")       -- PBM 文件头部
+    for i = 1, N do                 -- 对于每行
+        local y = (N - i*2)/N
+        for j = 1, M do         -- 对于每列
+            local x = (j*2 -M)/M
+            io.write(r(x, y) and "1" or "0")
+        end
+        io.write("\n")
+    end
+end
+```
+
+为了完成我们的示例，下面的命令绘制了一弯新月（从南半球看）：
+
+
+```lua
+c1 = disk(0, 0, 1)
+plot(difference(c1, translate(c1, 0.3, 0)), 500, 500)
+```
+
+![绘制出的新月](../images/neo_lunar.png)
