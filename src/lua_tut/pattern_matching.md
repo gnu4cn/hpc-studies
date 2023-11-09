@@ -591,3 +591,4 @@ print(expandTabs("name\tage\tnationality\tgender", 8))
 为了完整起见，我们来看看，如何反转此操作，将空格转换为制表符。第一种方法还是可能涉及到，使用空捕获来操作位置，但有一个更简单的解决办法：咱们在字符串的每八个字符处，插入一个标记。然后，只要标记前面有空格，我们就用一个制表符，替换掉该空格-标记序列，wherever the mark is preceded by spaces, we replace the sequence spaces-mark by a tab：
 
 ```lua
+```
