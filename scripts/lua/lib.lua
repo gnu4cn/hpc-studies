@@ -139,3 +139,10 @@ function Lib.degreesin (x)
     local k = math.pi / 180
     return math.sin(x * k)
 end
+
+function Lib.trim(s)
+    s = string.gsub(s, "^%s*(.-)%s*$", "%1")
+    return s
+end
+
+

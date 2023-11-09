@@ -244,3 +244,241 @@ word, word word; word word
 test = "int x; /* x */  int y; /* y */"
 print((string.gsub(test, "/%*.*%*/", "")))  --> int x;
 ```
+
+相反，模式 `'.-'` 将仅尽可能地以找到第一个 "*/" 进行扩展，从而咱们就会得到所期望的结果：
+
+```lua
+test = "int x; /* x */  int y; /* y */"
+print((string.gsub(test, "/%*.-%*/", "")))  --> int x;  int y;
+```
+
+最后一个修饰符，即问号，the question mark，`?`，用于匹配某个可选字符。举个例子，假设我们想在文本中查找，其中数字可以包含某个可选符号的整数。模式 `"[+-]?%d+"` 可以匹配 `"-12"`、`"23"` 和 `"+1009"` 等数字。字符类 `"[+-]"` 可以匹配加号或减号；接着的 `"?"` 使这个符号成为可选的。
+
+
+与其他系统不同的是，在 Lua 中，我们只能将修饰符，应用于某个字符类；而在修改器下，不能对模式进行分组，there is no way to grup patterns under a modifier。例如，匹配某个可选单词的模式，就不存在（除非该单词只有一个字母）。通常情况下，我们可以使用本章最后将介绍的一些高级技巧，来规避这一限制。
+
+
+如果某个模式以插入符号（`"^"`）开头，则他将仅在主题字符串的开头匹配。与此类似，如果他以美元符号（`"$"`）结尾，则他仅在主题字符串的末尾匹配。我们可以使用这些符号，来限制我们找到的匹配项，以及锚定模式，anchor patterns。例如，下一个测试，会检查字符串 `s` 是否以数字开头：
+
+
+```lua
+if string.find(s, "^%d") then ...
+```
+
+下一个则是检查该字符串，是否表示某个不含任何其他前导，或尾随字符的整数：
+
+
+```lua
+if string.find(s, "^[+-]?%d+$") then ...
+```
+
+插入符号和美元符号，仅在模式的开头或结尾使用时，才具有魔力。否则，他们将充当与自身匹配的常规字符。
+
+
+模式中的另一个项目，便是 `"%b"`，他会匹配到平衡字符串，balanced strings。我们将此项目写为 `"%bxy"`，其中 `x` 和 `y` 是任意两个不同的字符； `x` 充当开始字符，`y` 充当结束字符。例如，模式 `'%b()'`，会匹配字符串中，以左括号开头并以对应的右括号结束的部分：
+
+
+```lua
+s = "a (enclosed (in) parentheses) line"
+print((string.gsub(s, "%b()", "")))     --> a  line
+```
+
+通常，我们将这种模式用作 `"%b()"`、`"%b[]"`、`"%b{}"`或 `"%b<>"`，但也可以使用任意两个不同的字符，作为分隔符。
+
+
+最后，项目 `"%f[char-set]"` 表示 *先锋模式，frontier pattern*。只有当下一字符在 `char-set` 中，且上一字符不在 `char-set` 中时，他才会匹配到空字符串：
+
+
+```lua
+s = "the anthem is the theme"
+print((string.gsub(s, "%f[%w]the%f[%W]", "one")))   --> one anthem is one theme
+```
+
+模式 `"%f[%w]"` 会匹配到，非字母数字字符与字母数字字符之间的边界，而模式 `"%f[%W]"` 则会匹配到，字母数字字符与非字母数字字符之间的边界。因此，上面所给定的模式，只会匹配作为整个单词的字符串 `"the"`。请注意，即使是单个字符集，我们也必须将字符集写在方括号内。
+
+> **注意**：要进一步了解 `%f` 边界模式，请参阅 [Frontier Pattern](http://lua-users.org/wiki/FrontierPattern)。
+
+边界模式将主题字符串中，第一个字符之前和最后一个字符之后的那些位置，视为他们具有空字符（即 ASCII 代码零）。在前面的示例中，第一个 `"the"`，就以空字符（不在集合 `"[%w]"` 中），和 `t`（在集合中）之间的边界开始。
+
+
+## 捕获
+
+
+*捕获，capture* 机制，允许某个模式，将主题字符串中，与该模式的部分匹配的部分提取出来，以供进一步使用。通过在括号中写下想要捕获的部分，咱们就可以指定出某个捕获。
+
+
+当模式有捕获值时，函数 `string.match` 会将每个捕获值，作为一个单独的结果返回；换句话说，他会将字符串，分解成其捕获到的部分。
+
+
+```lua
+pair = "name = Anna"
+k, v = string.match(pair, "(%a+)%s*=%s*(%a+)")
+print(k, v)     --> name    Anna
+```
+
+其中的模式 `"%a+"`，指定一个非空的字母序列；模式 `"%s*"` 指定了一个可能为空的空格序列。因此，在上面的示例中，整个模式指定了一串字母，后面是一串空格，后面是等号，再度后面是空格，再加上另一串字母。这两个字母序列，都用括号括了起来，以便在出现匹配时捕获他们。下面是一个类似的示例：
+
+
+```lua
+d, m, y = string.match(date, "(%d+)/(%d+)/(%d+)")
+print(d, m, y)  --> 09      11      2023
+```
+
+在此示例中，我们使用了三个捕获，每个数字序列一个。
+
+
+在模式中，`"%n"` 这样的项目（其中 `n` 是一位数字），只会匹配第 `n` 个捕获的副本。一个典型的例子是，假设我们想在一个字符串中，查找一个由单引号或双引号括起来的子串。我们可以尝试使用 `"["'].-["']"` 这样的模式，即一个引号后跟任何内容，然后再跟一个引号；但我们在处理 `"it's all right"` 这样的字符串时，会遇到问题。为了解决这个问题，我们可以捕捉第一个引号，并利用他来指定出第二个引号：
+
+
+```lua
+s = [[then he said: "it's all right"!]]
+q, quotedPart = string.match(s, "([\"'])(.-)%1")
+print(q, quotedPart)    --> "       it's all right
+```
+
+第一个捕获的是引号字符本身，第二个捕获的是引号的内容（与 `".-"` 匹配的子串）。
+
+
+类似的例子还有下面这个模式，他可以匹配 Lua 中的长字符串：
+
+
+```lua
+%[(=*)%[(.-)%]%1%]
+```
+
+他将匹配一个开头的方括号，然后是零个或多个等号，接着是另一个开头方括号，接着是任何内容（字符串内容），接着是一个结尾方括号，接着是相同数量的等号，接着是另一个结尾方括号：
+
+
+```lua
+p = "%[(=*)%[(.-)%]%1%]"
+s = "a = [=[[[ something ]] ]==] ]=]; print(a)"
+print(string.match(s, p))   --> =       [[ something ]] ]==]
+```
+
+第一个捕获，是等号序列（本例中只有一个等号）；第二个捕获就是字符串内容。
+
+
+捕获到值的第三种用途，是在 `gsub` 的替换字符串中。与模式一样，替换字符串也可以包含类似 `"%n"` 这样的项目，在替换时，这些项目会被修改为相应的捕获值。特别的，`"%0"` 这个项目，会成为整个匹配项。(顺便说一下，替换字符串中的百分号，必须被转义为 `"%%"`。）例如，下面的命令，会复制字符串中的每个字母，并在副本之间，加上连字符：
+
+
+```lua
+print((string.gsub("hello lua!", "%a", "%0-%0")))
+    --> h-he-el-ll-lo-o l-lu-ua-a!
+```
+
+下面这个示例，会交换相邻的字符：
+
+
+```lua
+print((string.gsub("hello Lua", "(.)(.)", "%2%1")))
+    --> ehll ouLa
+```
+
+举个更有用的例子，咱们来编写一个原始的格式转换器，a primitive format converter，他可以获取带有以 LaTeX 风格编写的命令的一个字符串，并将其转换为 XML 风格的格式：
+
+
+```text
+\command{some text}     -->     <command>some text</command>
+```
+
+在我们不允许嵌套命令的情况下，下面的这个对 `string.gsub` 的调用，就可以完成这项工作：
+
+
+```lua
+s = [[the \quote{task} is to \em{change} that.]]
+s = string.gsub(s, "\\(%a+){(.-)}", "<%1>%2<%1>")
+print(s)    --> the <quote>task<quote> is to <em>change<em> that.
+```
+
+（下一小节，我们将看到如何处理嵌套的命令。）
+
+另一个有用的例子，是如何修剪字符串，how to trim a string：
+
+```lua
+function Lib.trim(s)
+    s = string.gsub(s, "^%s*(.-)%s*$", "%1")
+    return s
+end
+```
+
+用法：
+
+```console
+> Lib.trim("This is a string with tail spaces.    ")
+This is a string with tail spaces.
+```
+
+请注意其中模式修饰符的明智使用。两个锚点（`^` 和`$`），确保了我们得到整个字符串。由于中间的 `'.-'` 会尽量少地扩展，因此两个封闭模式 `'%s*'`，会匹配到两端的所有空格。
+
+
+## 替代物
+
+**Replacements**
+
+
+如同我们已经看到的，除了字符串外，咱们可以使用函数或表，作为 `string.gsub` 的第三个参数。在以某个函数调用到他时，`string.gsub` 会在每次找到匹配的字符串时，调用该函数；每次调用的参数，都是捕获到的字符串，函数返回的值，将成为替换字符串。在使用表调用到他时，`string.gsub` 会将首个捕获物用作键，查找表格，并使用关联的值，作为替换字符串。如果调用或表查找的结果为空，`gsub` 就不会更改该次匹配。
+
+
+作为第一个例子，下面的函数会执行变量的展开：他会将字符串中出现的每一个 `$varname`，替换为全局变量 `varname` 的值：
+
+
+```lua
+function expand (s)
+    return (string.gsub(s, "$(%w+)", _G))
+end
+
+name = "Lua"; status = "great"
+print(expand("$name is $status, isn't it?"))
+    --> Lua is great, isn't it?
+```
+
+
+(如同我们将在第 22 章 [*环境*](environment.md) 中将详细讨论到的，`_G` 是个包含了所有全局变量的预定义表。）对于每个与 `"$(%w+)"`（美元符号后跟一个名字）匹配项，`gsub` 都会在全局表 `_G` 中，查找捕获到的名字；插座结果会替换掉匹配项。如果表中没有那个键，则不会进行替换：
+
+
+```lua
+print(expand("$othername is $status, isn't it?"))
+    --> $othername is great, isn't it?
+```
+
+在我们不能确定，给定变量是否具有字符串值时，我们可能会希望，对其值应用 `tostring`。在这种情况下，我们可以使用函数，作为替代值：
+
+
+```lua
+function expand (s)
+    return (string.gsub(s, "$(%w+)", function (n)
+        return tostring(_G[n])
+    end))
+end
+
+name = "Lua"; status = "great"
+print(expand("$name is $status, isn't it?"))
+    --> Lua is great, isn't it?
+
+
+print(expand("print = $print; a = $a"))
+    --> print = function: 00007ffdc4d0f640; a = nil
+```
+
+在 `expand` 里，每当匹配到 `"$(%w+)"` 时，`gsub` 就会调用那个以捕获到的名字，为参数给到的函数；返回的字符串，会替换匹配的字符串。
+
+
+最后一个例子，又回到了上一节的格式转换器。我们要再次将 LaTeX 风格（`\example{text}`）的命令，转换为 XML 风格（`<example>text</example>`），但这次会允许嵌套的命令。下面的函数，使用了递归，来完成这项工作：
+
+
+```lua
+function toxml (s)
+    s = string.gsub(s, "\\(%a+)(%b{})", function (tag, body)
+        body = string.sub(body, 2, -2)  --> 移除花括号
+        body = toxml(body)              --> 处理嵌套的命令
+        return string.format("<%s>%s</%s>", tag, body, tag)
+    end)
+    return s
+end
+
+print(toxml("\\title{The \\bold{big} example}"))
+    --> <title>The <bold>big</bold> example</title>
+```
+
+
+## URL 编码

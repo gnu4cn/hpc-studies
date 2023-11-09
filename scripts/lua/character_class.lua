@@ -21,3 +21,13 @@ print(nvow)
 
 test = "int x; /* x */  int y; /* y */"
 print((string.gsub(test, "/%*.*%*/", "")))
+
+test = "int x; /* x */  int y; /* y */"
+print((string.gsub(test, "/%*.-%*/", "")))
+
+s = "a (enclosed (in) parentheses) line"
+print((string.gsub(s, "%b()", "")))
+
+
+s = "the anthem is the theme"
+print((string.gsub(s, "%f[%w]the%f[%W]", "one")))
