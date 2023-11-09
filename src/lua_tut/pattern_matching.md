@@ -110,7 +110,7 @@ print(s, n)     --> "axx xii"       3
 ```
 
 
-## 函数 `string.gmatch`
+### 函数 `string.gmatch`
 
 
 函数 `string.gmatch` 会返回，对字符串中某种模式的全部存在，加以迭代的一个函数（即：迭代器，iterator？）。例如，下面的示例，会收集给定字符串 `s` 的所有单词：
@@ -165,6 +165,31 @@ print(string.match(s, date))    --> 30/11/2023
 | `%u` | 大写字母 |
 | `%w` | 字母和数字字符 |
 | `%x` | 十六进制数字，`0-9a-fA-F`？ |
+
+
+
+任意这些类的大写版本，表示该类的补集，the complement of the class。例如，`"%A"`，就表示所有的非字母字符：
+
+
+```lua
+> print((string.gsub("hello, up-down!", "%A", ".")))
+hello..up.down.
+>
+> print((string.gsub("hello, 1, 2, 3...up-down!", "%A", ".")))
+hello............up.down.
+```
+
+（在打印 `gsub` 的结果时，我<作者>使用了额外括号，来丢弃第二个结果，即替换次数。）
+
+
+有些称为 *魔法字符，magic characters* 的字符，在模式中使用时，有着特殊含义。Lua 中的模式，用到以下这些魔法字符：
+
+
+```lua
+( ) . % + - * ? [ ] ^ $
+```
+
+如同我们所看到的，百分号可作为这些魔法字符的转义字符。因此，`"%?"` 会匹配问号，而 `"%%"` 会匹配百分号本身。我们不仅可以转义魔法字符，还可以转义任何的非字母数字字符，non-alphanumeric character。在不确定时，就要谨慎行事，而使用转义。
 
 
 
