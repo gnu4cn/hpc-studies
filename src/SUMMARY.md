@@ -75,3 +75,4 @@
 # 第二部分，真实编程
 
 - [闭包](lua_tut/closures.md)
+- [模式匹配](lua_tut/pattern_matching.md)

@@ -521,7 +521,7 @@ print(f(10))    --> 103
 >
 > 1. [Currying](https://javascript.info/currying-partials)
 >
-> 2. [Wikipedia: Curry](https://en.wikipedia.org/wiki/Currying)
+> 2. [Wikipedia: Currying](https://en.wikipedia.org/wiki/Currying)
 
 
 练习 9.4：使用咱们的几何区域系统，绘制从北半球看到的上弦新月，a waxing crescent moon as seen from the Northern Hemishpere。
