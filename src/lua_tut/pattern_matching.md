@@ -482,3 +482,11 @@ print(toxml("\\title{The \\bold{big} example}"))
 
 
 ## URL 编码
+
+咱们的下一个示例，将用到作为 HTTP 用于发送 URL 中所嵌入参数编码的 *URL 编码，URL encoding*。这种编码，会将特殊字符（如 `=`、`&` 和 `+`），表示为 `"%xx"`，其中的 `xx`，是字符的十六进制代码。之后，他会将空格修改为加号。例如，他会将字符串 `"a+b = c "`，编码为 `"a%2Bb+%3D+c"`。最后，它会在写下每对参数名和参数值时，在中间加上等号，并在所有结果对 `name = value` 之间，加上一个 `&` 符号。例如，下面这些值
+
+```url
+name = "a1"; query = "a+b = c"; q="yes or no"
+```
+
+会被编码为 `name=a1&query=a%2Bb+%3D+c&q=yes+or+no`。
