@@ -222,7 +222,7 @@ _, nvow = string.gsub(text, "[aeiouAEIOU]", "")
 加号修饰符，the plus modifier, `+`，会匹配原始类的一或多个字符。他总是会获取与该模式相匹配的最长序列（贪婪模式，greedy）。例如，模式 `"%a+"` 表示一或多个的字母（即某个单词）：
 
 
-```console
+```lua
 > print((string.gsub("one, and two; and three", "%a+", "word")))
 word, word word; word word
 ```
@@ -230,7 +230,7 @@ word, word word; word word
 模式 `'%d+'` 会匹配一或多个的数字（即某个整数）：
 
 
-```console
+```lua
 > print(string.match("the number 1298 is even", "%d+"))
 1298
 ```
@@ -301,7 +301,7 @@ print((string.gsub(s, "%f[%w]the%f[%W]", "one")))   --> one anthem is one theme
 边界模式将主题字符串中，第一个字符之前和最后一个字符之后的那些位置，视为他们具有空字符（即 ASCII 代码零）。在前面的示例中，第一个 `"the"`，就以空字符（不在集合 `"[%w]"` 中），和 `t`（在集合中）之间的边界开始。
 
 
-## 捕获
+## 捕获物
 
 
 *捕获，capture* 机制，允许某个模式，将主题字符串中，与该模式的部分匹配的部分提取出来，以供进一步使用。通过在括号中写下想要捕获的部分，咱们就可以指定出某个捕获。
@@ -403,7 +403,7 @@ end
 
 用法：
 
-```console
+```lua
 > Lib.trim("This is a string with tail spaces.    ")
 This is a string with tail spaces.
 ```
@@ -591,4 +591,20 @@ print(expandTabs("name\tage\tnationality\tgender", 8))
 为了完整起见，我们来看看，如何反转此操作，将空格转换为制表符。第一种方法还是可能涉及到，使用空捕获来操作位置，但有一个更简单的解决办法：咱们在字符串的每八个字符处，插入一个标记。然后，只要标记前面有空格，我们就用一个制表符，替换掉该空格-标记序列，wherever the mark is preceded by spaces, we replace the sequence spaces-mark by a tab：
 
 ```lua
+function unexpandTabs (s, tab)
+    tab = tab or 8
+    s = expandTabs(s, tab)
+
+    local pat = string.rep(".", tab)
+    s = string.gsub(s, pat, "%0\1")
+    s = string.gsub(s, " +\1", "\\t")
+    s = string.gsub(s, "\1", "")
+    return s
+end
 ```
+
+该函数以展开字符串，删除任何先前的选项卡开始。然后，他计算出用于匹配所有的八个字符序列的一种辅助模式，并使用该模式在每八个字符后，添加一个标记（控制字符 `\1`）。然后，他用一个制表符，替换掉后跟标记的一或多个空格的所有序列。最后，他删除了留下的标记（那些前面没有空格的标记）。
+
+> **注意**，`s = string.gsub(s, pat, "%0\1")` 语句中的 `%0`，是 [捕获物](#捕获物) 小节中，提到的 `%n` 语法，表示全部匹配项。
+>
+> **译注**：原文中，`s = string.gsub(s, " +\1", "\\t")` 这条语句原本为 `s = string.gsub(s, " +\1", "\t")`，少了一个字符串的反斜杠转义，但不到逆展开的目的。

@@ -14,7 +14,7 @@ function expandTabs (s, tab)
     return s
 end
 
-print(expandTabs("name\tage\tnationality\tgender", 8))
+s = expandTabs("name\tage\tnationality\tgender", 8)
 
 
 function unexpandTabs (s, tab)
@@ -23,7 +23,11 @@ function unexpandTabs (s, tab)
 
     local pat = string.rep(".", tab)
     s = string.gsub(s, pat, "%0\1")
-    s = string.gsub(s, " +\1", "\t")
+    print(s)
+    s = string.gsub(s, " +\1", "\\t")
+    print(s)
     s = string.gsub(s, "\1", "")
     return s
 end
+
+print(unexpandTabs(s))
