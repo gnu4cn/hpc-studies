@@ -479,3 +479,52 @@ plot(difference(c1, translate(c1, 0.3, 0)), 500, 500)
 ```
 
 ![绘制出的新月](../images/neo_lunar.png)
+
+
+## 练习
+
+
+练习 9.1：请写取一个函数 `f`，并返回其积分的近似值的函数 `integral`。
+
+
+练习 9.2：下面代码块的输出是什么？
+
+
+```lua
+function F (x)
+    return {
+        set = function (y) x = y end,
+        get = function () return x end
+    }
+end
+
+o1 = F(10)
+o2 = F(20)
+print(o1.get(), o2.get())
+
+o2.set(100)
+o1.set(300)
+print(o1.get(), o2.get())
+```
+
+练习 9.3：[练习 5.4](tables.md#练习) 要求咱们编写出接收某个多项式（用表表示）和变量值，并返回该多项式值的一个函数。请编写该函数的 *柯里化* 版本，the *curried* version of that function。<sup>注 2</sup>咱们的函数，应接收多项式并返回一个函数，在以 `x` 值调用该函数时，就会返回该 `x` 的多项式值：
+
+```lua
+f = newpoly({3, 0, 1})
+print(f(0))     --> 3
+print(f(5))     --> 28
+print(f(10))    --> 103
+```
+
+
+> **注 2**：所谓柯里化，是使用函数的一种高级技巧。参见：
+>
+> 1. [Currying](https://javascript.info/currying-partials)
+>
+> 2. [Wikipedia: Curry](https://en.wikipedia.org/wiki/Currying)
+
+
+练习 9.4：使用咱们的几何区域系统，绘制从北半球看到的上弦新月，a waxing crescent moon as seen from the Northern Hemishpere。
+
+
+练习 9.5：请在咱们的几何区域系统中，添加一个将给定区域，旋转给定角度的函数。
