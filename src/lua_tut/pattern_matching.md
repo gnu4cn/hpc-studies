@@ -481,7 +481,7 @@ print(toxml("\\title{The \\bold{big} example}"))
 ```
 
 
-## URL 编码
+### URL 编码
 
 咱们的下一个示例，将用到作为 HTTP 用于发送 URL 中所嵌入参数编码的 *URL 编码，URL encoding*。这种编码，会将特殊字符（如 `=`、`&` 和 `+`），表示为 `"%xx"`，其中的 `xx`，是字符的十六进制代码。之后，他会将空格修改为加号。例如，他会将字符串 `"a+b = c "`，编码为 `"a%2Bb+%3D+c"`。最后，它会在写下每对参数名和参数值时，在中间加上等号，并在所有结果对 `name = value` 之间，加上一个 `&` 符号。例如，下面这些值
 
@@ -490,3 +490,102 @@ name = "a1"; query = "a+b = c"; q="yes or no"
 ```
 
 会被编码为 `name=a1&query=a%2Bb+%3D+c&q=yes+or+no`。
+
+现在，假设我们打算解码此 URL，并按每个值所对应的名称进行索引，将他们存储在一个表中。以下函数会执行基本的解码：
+
+
+```lua
+function unescape (s)
+    s = string.gsub(s, "+", " ")
+    s = string.gsub(s, "%%(%x%x)", function (h)
+        return string.char(tonumber(h, 16))
+    end)
+    return s
+end
+
+print(unescape("a%2Bb+%3D+c"))  --> a+b = c
+```
+
+首个 `gsub`，会将字符串中的每个加号，更改为空格。第二个 `gsub`，则会匹配前面带有百分号的所有两位十六进制数字，并为每个匹配，调用一个匿名函数。该函数将十六进制数字，转换为数字（使用基数为 16 的 `tonumber`），并返回相应的字符（`string.char`）。
+
+为了解码 `name=value` 这样键值对，我们要用到 `gmatch`。因为名称和值，都不能包含 `&` 符号或等号，所以我们可以将他们与模式 `"[^&=]+"` 相匹配：
+
+```lua
+cgi = {}
+function decode (s)
+    for n, v in string.gmatch(s, "([^&=]+)=([^&=]+)") do
+        n = unescape(n)
+        v = unescape(v)
+        cgi[n] = v
+    end
+end
+```
+
+对 `gmatch` 的调用，会匹配到 `name=value` 形式的所有对。而对于每一对，迭代器都会返回相应的捕获（由匹配字符串中的括号标记），作为 `n` 和 `v` 的值。循环体只是将 `unescape`，应用于这两个字符串，并将该对存储在 `cgi` 表中。
+
+与此对应的编码，也很容易编写。首先，我们要编写 `escape` 函数；该函数会将所有特殊字符，编码为百分号，后跟十六进制的字符代码（`format` 选项 `"%02X"`，会生成有着两位的十六进制数，使用 `0` 进行填充），然后将空格更改为加号：
+
+
+```lua
+function escape (s)
+    s = string.gsub(s, "[&=+%%%c]", function (c)
+        return string.format("%%%02X", string.byte(c))
+    end)
+    s = string.gsub(s, " ", "+")
+    return s
+end
+```
+
+`encode` 函数，会遍历要编码的表，构建出结果字符串：
+
+
+```lua
+function encode (t)
+    local b = {}
+    for k, v in pairs(t) do
+        b[#b + 1] = (escape(k) .. "=" .. escape(v))
+    end
+
+    -- 连接 'b' 中所有的条目，以 ”&“ 分开
+    return table.concat(b, "&")
+end
+
+t = {name = "al", query = "a+b = c", q = "yes or no"}
+print(encode(t))    --> query=a%2Bb+%3D+c&name=al&q=yes+or+no
+```
+
+### 制表符的展开
+
+**Tab expansion**
+
+
+像 `"()"` 这样的空捕获，在 Lua 中具有特殊含义。该模式并非不捕获任何内容（无用的任务），而是捕获其在主题字符串中，作为一个数字的其位置：
+
+```lua
+print(string.match("hello", "()ll()"))  --> 3       5
+```
+
+（请注意，此示例的结果，并不同于与我们从 `string.find` 得到的结果，因为第二个空捕获的位置，是在匹配 *之后*。）
+
+位置捕获运用的一个很好的例子，便是展开字符串中的制表符：
+
+```lua
+function expanTabs (s, tab)
+    tab = tab or 8      -- 制表符的 ”大小“ （默认为 8）
+    local corr = 0      -- 校准量
+
+    s = string.gsub(s, "()\t", function (p)
+        local sp = tab - (p - 1 + corr)%tab
+        corr = corr - 1 + sp
+        return string.rep(" ", sp)
+    end)
+    return s
+end
+
+print(expandTabs("name\tage\tnationality\tgender", 8))
+    --> name    age     nationality     gender
+```
+
+其中 `gsub` 的模式，会匹配字符串中的所有制表符，捕获到他们的位置。对于每个制表符，匿名函数会使用此位置，来计算出到达为制表符倍数的列，所需的空格数：他从位置中减去 `1`，以使其相对于零，并加上 `corr`，以补偿先前的制表符。 （每个制表符的展开，都会影响后续制表符的位置。）然后更新下一个制表符的校准量：减去 `1` 是因为这个正要被删除选项卡，而加上 `sp` 则是因为那些正要添加的空格。最后，他返回了一个要替换制表符的，有着正确数量空格的字符串。
+
+
