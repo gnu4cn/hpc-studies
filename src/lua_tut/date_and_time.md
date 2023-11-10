@@ -45,3 +45,19 @@ print(date % 60)                      --> 20
 ```
 
 > **注 1**：除非另有说明，我（作者）的日期，都是来自于在里约热内卢运行的一台 POSIX 系统。
+
+我们还可以日期表，调用 `os.time`，将表表示法，转换为数字。`year`、`month`、`day` 三个字段，是必填字段。在没有提供 `hour`、`min` 和 `sec` 字段时，会默认为中午 (12:00:00)。其他字段（包括 `wday` 和 `yday`），都将被忽略。
+
+
+```lua
+> os.time({year=2023, month=11, day=10, hour=12, min=45, sec=35})
+1699591535
+> os.time({year=1970, month=1, day=1, hour=0})
+-28800
+> os.time({year=1970, month=1, day=1, hour=0, sec=1})
+-28799
+> os.time({year=1970, month=1, day=1})
+14400
+```
+
+> **注意**：原文 `os.time({year=1970, month=1, day=1, hour=0})` 的输出为 `10800`。根据上面的输出，纪元应是 1970 年 1 月 1 日 08：00 UTC。
