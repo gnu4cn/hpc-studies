@@ -76,3 +76,4 @@
 
 - [闭包](lua_tut/closures.md)
 - [模式匹配](lua_tut/pattern_matching.md)
+- [插曲：高频词](lua_tut/interlude_most_frequent_words.md)
