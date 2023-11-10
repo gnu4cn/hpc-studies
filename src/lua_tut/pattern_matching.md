@@ -629,4 +629,17 @@ print((string.gsub(test, "/%*.-%*/", "<COMMENT>")))
 
 > **注 1**：“我的新机器” 是台英特尔酷睿 i7-4790 3.6 GHz，8 GB 内存的机器。我（作者）在这台机器上，测量了本书中的所有性能数据。
 >
-> **注 2**：这个“次方时间”，讲的是时间复杂度问题，参阅：[[演算法]Big O and Time Complexity](https://medium.com/@yunyubee/%E6%BC%94%E7%AE%97%E6%B3%95-big-o-and-time-complexity-65f2dfafe9d1)
+> **注 2**：这个“次方时间”，讲的是算法的时间复杂度问题，参阅：[[演算法]Big O and Time Complexity](https://medium.com/@yunyubee/%E6%BC%94%E7%AE%97%E6%B3%95-big-o-and-time-complexity-65f2dfafe9d1)
+
+还要小心空模式，即匹配到空字符串的模式。例如，如果我们尝试用 `"%a*"` 这样的模式来匹配名称，我们就会发现，到处都是名称：
+
+
+```lua
+i, j = string.find(";$%  **#$hello13", "%a*")
+print(i, j)     --> 1       0
+```
+
+在这个示例中，对 `string.find` 的调用，就正确地发现了字符串开头的空字母序列，an empty sequence of letters at the beginning of the string。
+
+
+
