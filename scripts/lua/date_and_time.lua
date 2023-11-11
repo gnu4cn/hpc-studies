@@ -17,3 +17,13 @@ print(date % sec2hour // 60)          --> 45
 
 -- 秒
 print(date % 60)                      --> 20
+
+t = 906000490
+-- ISO 8601 的日期
+print(os.date("%Y-%m-%d", t))           --> 1998-09-17
+
+-- 组合了日期和时间的 ISO 8601 格式
+print(os.date("%Y-%m-%dT%H:%M:%S", t))  --> 1998-09-17T10:48:10
+
+-- ISO 8601 的序数日期
+print(os.date("%Y-%j", t))              --> 1998-260
