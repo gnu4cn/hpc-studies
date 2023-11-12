@@ -45,3 +45,23 @@ print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/11/12
 t.month = t.month + 6       -- 此后 6 个月
 print(os.date("%Y/%m/%d", os.time(t)))        --> 2024/05/12
 
+
+local t5_3 = os.time({year=2015, month=1, day=12})
+local t5_2 = os.time({year=2011, month=12, day=16})
+local d = os.difftime(t5_3, t5_2)
+print(d // (24 * 3600))
+
+myepoch = os.time {year = 2000, month = 1, day = 1, hour = 0}
+now = os.time {year = 2023, month = 11, day = 12}
+t = os.difftime(now, myepoch)
+print(t)       --> 753105600.0
+
+T = {year = 2000, month = 1, day = 1, hour = 0}
+T.sec = 753105600
+print(os.date("%d/%m/%Y", os.time(T)))  --> 12/11/2023
+
+local x = os.clock()
+local s = 0
+for i = 1, 100000 do s = s+ i end
+print(string.format("经过时间：%.8f\n", os.clock() - x))
+    --> 经过时间：0.00035900
