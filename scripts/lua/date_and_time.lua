@@ -27,3 +27,21 @@ print(os.date("%Y-%m-%dT%H:%M:%S", t))  --> 1998-09-17T10:48:10
 
 -- ISO 8601 的序数日期
 print(os.date("%Y-%j", t))              --> 1998-260
+
+t = os.date("*t")           -- 获取当前日期
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/11/12
+t.day = t.day + 40
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/12/22
+
+t = os.date("*t")
+print(t.day, t.month)               --> 12      11
+t.day = t.day - 40
+print(t.day, t.month)               --> -28     11
+t = os.date("*t", os.time(t))
+print(t.day, t.month)               --> 3       10
+
+t = os.date("*t")           -- 获取当前日期
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/11/12
+t.month = t.month + 6       -- 此后 6 个月
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2024/05/12
+

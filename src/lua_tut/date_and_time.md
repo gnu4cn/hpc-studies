@@ -159,3 +159,60 @@ print(os.date("%Y-%m-%dT%H:%M:%S", t))  --> 1998-09-17T10:48:10
 -- ISO 8601 的序数日期
 print(os.date("%Y-%j", t))              --> 1998-260
 ```
+
+如果格式字符串以感叹号开头，那么 `os.date` 会将时间，解释为世界协调时间（UTC）：
+
+```lua
+-- 纪元，the Epoch
+> print(os.date("!%c", 0))
+Thu Jan  1 00:00:00 1970
+> print(os.date("%A"))
+Sunday
+> print(os.date("!%A"))
+Saturday
+```
+
+如果我们不带任何参数调用 `os.date`，他就会使用 `%c` 格式，即合理格式的日期和时间信息。请注意，`%x`、`%X` 和 `%c` 的表示形式，会根据区域设置（`locale`）和系统而变化。如果咱们想要固定的表示形式，例如 `dd/mm/yyyy`，请使用显式的格式字符串，例如 `"%d/%m/%Y"`。
+
+
+## 日期时间操作
+
+**Date-Time Manipulation**
+
+
+当 `os.date` 创建出日期表时，其字段都会在适当的范围内。然而，当我们给 `os.time` 一个日期表时，该表的字段不需要标准化，its fields do not need to be normalized。这一特性，是操作日期和时间的重要工具。
+
+
+举个简单的例子，假设我们想要知道，40 天后的日期。按照以下方式，咱们就可以计算出该日期：
+
+
+```lua
+t = os.date("*t")           -- 获取当前日期
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/11/12
+t.day = t.day + 40
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/12/22
+```
+
+如果我们将数字时间，转换回表，我们就会得到该日期时间的规范化版本：
+
+```lua
+t = os.date("*t")
+print(t.day, t.month)               --> 12      11
+t.day = t.day - 40
+print(t.day, t.month)               --> -28     11
+t = os.date("*t", os.time(t))
+print(t.day, t.month)               --> 3       10
+```
+
+在此示例中，11 月 -28 日，就已被标准化为 10 月 3 日，即 11 月 12 日之前 40 天。
+
+在大多数系统中，我们也可以在数字时间上，加上或减去 3456000（40 天，以秒为单位）。但是，C 标准不保证此操作的正确性，因为他未要求数字时间，来表示自某个纪元的秒数。此外，如果我们想添加几个月，而不是几天，直接操作秒就会出现问题，因为不同月份有不同的持续时间。相比之下，标准化（归一化）方法，the normalization method，就不存在下面这些问题：
+
+```lua
+t = os.date("*t")           -- 获取当前日期
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2023/11/12
+t.month = t.month + 6       -- 此后 6 个月
+print(os.date("%Y/%m/%d", os.time(t)))        --> 2024/05/12
+```
+
+
