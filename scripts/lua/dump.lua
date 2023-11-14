@@ -9,7 +9,7 @@ for bytes in f:lines(blocksize) do
         io.write(string.format("%02X ", b))
     end
 
-    io.write(string.rep(" ", blocksize - #bytes))
+    io.write(string.rep("   ", blocksize - #bytes))
     bytes = string.gsub(bytes, "%c", ".")
     io.write(" ", bytes, "\n")
 end
