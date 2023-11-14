@@ -188,3 +188,106 @@ Lua 5.3 还引入了一些二进制数据和基本值（数字和字符串）之
 ```
 
 这个对 `string.pack` 的调用，创建了一个其中有着，三个整数二进制码（根据描述 `"iii"`）的字符串，每个二进制编码，都编码了其对应的参数。字符串的长度，将是本机的整数大小的三倍（在我（作者）的机器上，就是4 字节的 3 倍）。而对 `string.unpack` 的调用，则会从给定的字符串中，解码出三个整数（同样根据 `"iii"`），并返回解码后的值。
+
+
+为了简化迭代，函数 `string.unpack` 还会返回最后一个读取项之后，字符串中的位置。（这解释了上一个示例中，结果中为何有个 `13`。）相应地，他接受可选的，告知从何处开始读取的第三个参数。例如，下一示例，将打印出，打包在指定字符串内的全部字符串：
+
+
+```lua
+s = "hello\0Lua\0world\0"
+
+local i = 1
+while i <= #s do
+    local res
+    res, i = string.unpack("z", s, i)
+    print(res)
+end
+    --> hello
+    --> Lua
+    --> world
+```
+
+正如我们将看到的，其中的选项 `z`，表示以零结尾的字符串，因此那个到 `unpack` 的调用，会从 `s` 中，提取出位置 `i` 处的字符串，并返回该字符串，以及循环的下一位置。
+
+
+### 整数
+
+对于整数的编码，有着好几个选项，每种都对应了一种本机的整数大小：`b`（`char`）、`h`（`short`）、`i`（`int`）和 `l`（`long`）；其中的选项 `j`，使用了 Lua 整数的大小。要使用某种固定的、与机器相关的大小，我们可以在 `i` 选项上，加上从一到 16 的数字。例如，`i7` 将产生出七个字节的整数。全部大小，都会检查是否溢出：
+
+
+```lua
+> x = string.pack("i7", 1 << 54)
+> n, p = string.unpack("i7", x)
+> n
+18014398509481984
+> string.format("0x%X", n)
+0x40000000000000
+> x = string.pack("i7", -(1 << 54))
+> n, p = string.unpack("i7", x)
+> n
+-18014398509481984
+> string.format("0x%X", n)
+0xFFC0000000000000
+> x = string.pack("i7", 1 << 55)
+stdin:1: bad argument #2 to 'pack' (integer overflow)
+stack traceback:
+        [C]: in function 'string.pack'
+        stdin:1: in main chunk
+        [C]: in ?
+```
+
+我们可以打包和解包，比本机 Lua 整数更大的整数，但在解包时，其实际值，必须要适合 Lua 整数：
+
+
+```lua
+> x = string.pack("i12", 2^61)
+> string.unpack("i12", x)
+2305843009213693952     13
+> x = "aaaaaaaaaaaa"            -- 伪造一个大型 12 字节的数字
+> string.unpack("i12", x)
+stdin:1: 12-byte integer does not fit into Lua Integer
+```
+
+每个整数选项都有一个，与相同大小的无符号整数相对应的大写版本：
+
+
+```lua
+> s = "\xFF"
+> string.unpack("b", s)
+-1      2
+> string.unpack("B", s)
+255     2
+```
+
+
+此外，无符号整数还有一个，用于表示 `size_t` 的额外选项 `T`（ISO C 中的 `size_t` 类型，是个无符号整数，其大小足以容纳任何对象的大小）。
+
+
+### 字符串
+
+我们可以用三种表示法，打包字符串：
+
+- 零端字符串，zero-terminated strings
+
+- 固定长度字符串，fixed-length strings
+
+- 以及显式长度字符串，strings with explicit length
+
+零端字符串使用 `z` 选项。对于固定长度的字符串，我们使用 <code>c<i>n</i></code> 选项，其中 `n` 是打包字符串的字节数。字符串的最后一个选项，存储了之前带有其长度的该字符串。在这种情况下，选项的格式为 <code>s<i>n</i></code>，其中 `n` 即为用于存储长度的无符号整数的大小。例如，选项 `s1`，就会用一个字节，存储字符串长度：
+
+
+```lua
+s = string.pack("s1", "hello")
+for i = 1, #s do print((string.unpack("B", s, i))) end
+    --> 5                       （长度）
+    --> 104                     （'h'）
+    --> 101                     （'e'）
+    --> 108                     （'l'）
+    --> 108                     （'l'）
+    --> 111                     （'o'）
+```
+
+在长度不符合给定的大小，Lua 会抛出错误。我们也可以使用纯 `s` 作为选项；在这种情况下，长度会存储为大小足以容纳任何字符串长度的`size_t`。(在 64 位机器中，`size_t` 通常是个 8 字节的无符号整数，对于小字符串来说，这可能会浪费空间。）
+
+
+
