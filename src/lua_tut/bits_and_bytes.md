@@ -290,4 +290,36 @@ for i = 1, #s do print((string.unpack("B", s, i))) end
 在长度不符合给定的大小，Lua 会抛出错误。我们也可以使用纯 `s` 作为选项；在这种情况下，长度会存储为大小足以容纳任何字符串长度的`size_t`。(在 64 位机器中，`size_t` 通常是个 8 字节的无符号整数，对于小字符串来说，这可能会浪费空间。）
 
 
+### 浮点数
 
+对于浮点数，有着三个选项：用于单精度的 `f`，用于双精度的 `d`，而对于 Lua 的浮点数，则是 `n`。
+
+
+格式字符串，还有着一些控制二进制数据的字节序和对齐方式的选项，options to control the endianese and the alignment of the binary data。默认情况下，某种格式会使用机器的本机字节顺。 `>` 选项，会将该格式中的全部后续编码，转换为大端序或 *网络字节顺序*，big endian or *network byte order*：
+
+
+```lua
+s = string.pack(">i4", 1000000)
+for i = 1, #s do print((string.unpack("B", s, i))) end
+    --> 0
+    --> 15
+    --> 66
+    --> 64
+> string.format("0x%X", (string.unpack("i4", s)))
+0x40420F00
+> string.format("0x%X", (string.unpack(">i4", s)))
+0xF4240
+```
+
+
+`<` 选项，则会转换为小端序，little endian：
+
+
+```lua
+s = string.pack("<i2 i2", 500, 24)
+for i = 1, #s do print((string.unpack("B", s, i))) end
+    --> 244
+    --> 1
+    --> 24
+    --> 0
+```
