@@ -79,3 +79,4 @@
 - [插曲：高频词](lua_tut/interlude_most_frequent_words.md)
 - [日期与时间](lua_tut/date_and_time.md)
 - [位与字节](lua_tut/bits_and_bytes.md)
+- [数据结构](lua_tut/data_structure.md)
