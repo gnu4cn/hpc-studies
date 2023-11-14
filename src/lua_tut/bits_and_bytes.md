@@ -248,7 +248,7 @@ stack traceback:
 stdin:1: 12-byte integer does not fit into Lua Integer
 ```
 
-每个整数选项都有一个，与相同大小的无符号整数相对应的大写版本：
+每个整数选项都有一个，与相同大小的无符号整数相对应的大写版本（`B`）：
 
 
 ```lua
@@ -295,6 +295,8 @@ for i = 1, #s do print((string.unpack("B", s, i))) end
 对于浮点数，有着三个选项：用于单精度的 `f`，用于双精度的 `d`，而对于 Lua 的浮点数，则是 `n`。
 
 
+### 字节序与对齐方式
+
 格式字符串，还有着一些控制二进制数据的字节序和对齐方式的选项，options to control the endianese and the alignment of the binary data。默认情况下，某种格式会使用机器的本机字节顺。 `>` 选项，会将该格式中的全部后续编码，转换为大端序或 *网络字节顺序*，big endian or *network byte order*：
 
 
@@ -322,4 +324,158 @@ for i = 1, #s do print((string.unpack("B", s, i))) end
     --> 1
     --> 24
     --> 0
+```
+
+最后，`=` 选项会转换回默认的机器本机字节序。
+
+对于对齐，<code>!<i>n</i></code> 选项，会强制数据以 `n` 的倍数索引处对齐。更具体地说，如果数据小于 `n`，则按其自己的大小对齐；否则，就会在 `n` 处对齐。例如，假设我们以 `!4` 开启格式字符串，那么那些一字节的整数，将被写入一的倍数索引中（即任意索引），那些二字节的整数，将被写入二的倍数的索引中，那些四字节或更大的整数，则将被写入四的倍数索引中。选项 `!`（不带数字），会将对齐方式设置为，机器的本机对齐方式，the machine's native alignment。
+
+
+函数 `string.pack` 是通过往生成的字符串添加零，直到索引有了合适的值，来完成对齐。函数 `string.unpack` 在读取字符串时，会跳过填充。对齐方式只适用于二的幂次：如果我们将对齐方式设置为四，而尝试操作一个三字节的整数，Lua 将抛出错误。
+
+任何格式字符串在冠以 `"=!1"` 时都会工作，`"=!1"` 表示本机字节序及无对齐方式（因为每个索引，都是一的倍数）。在转换过程中的任何时候，我们都可以更改字节序和对齐方式。
+
+
+如果需要，咱们可以手动添加填充。选项 `x` 表示一个字节的填充；`string.pack` 往生成的字符串，添加一个零字节；`string.unpack` 则会从主题字符串，跳过一个字节。
+
+
+
+## 二进制文件
+
+函数 `io.input` 和 `io.output`，始终会以 *文本模式，text mode*，打开文件。在 POSIX 中，二进制文件和文本文件没有区别。但在 Windows 这类系统中，咱们必须在 `io.open` 的模式字符串中，使用字母 `b` 这种特殊方式，打开二进制文件。
+
+
+通常，我们会以 `"a"` 模式（读取整个文件）或 `"n"` 模式（读取 `n` 个字节），读取二进制数据。(行在二进制文件中没有意义。）举个简单的例子，下面的程序，会将某个文本文件，从 Windows 格式转换为 POSIX 格式，也就是将回车-换行序列，转换为换行符：
+
+
+```lua
+local inp = assert(io.open(arg[1], "rb"))
+local out = assert(io.open(arg[2], "wb"))
+
+local data = inp:read("a")
+data = string.gsub(data, "\r\n", "\n")
+out:write(data)
+
+assert(out:close())
+```
+
+这个程序就无法使用标准 I/O 流（`stdin`/`stdout`），因为这些流是以文本模式打开的。相反，其假定了输入和输出文件的名称，是程序的参数。我们可以用下面的命令行，调用该程序：
+
+
+```bash
+> lua prog.lua file.dos file.unix
+```
+
+> **注意**：`> ./prog.lua file.dos file.unix` 运行方式与此一致。
+
+
+再比如，下面的程序会打印出，在某个二进制文件中找到的全部字符串：
+
+
+```lua
+local f = assert(io.open(arg[1], "rb"))
+local data = f:read("a")
+
+local validchars = "[%g%s]"
+local pat = "(" .. string.rep(validchars, 6) .. "+)\0"
+
+for w in string.gmatch(data, pat) do
+    print(w)
+end
+```
+
+> *注*：对经由 Chocolatey 包包管理器安装的 PUTTY.exe 程序运行，运行这个程序的输入如下：
+
+```zsh
+$ ./str_in_bin.lua PUTTY.exe
+!This program cannot be run in DOS mode.
+$
+`.rsrc
+@.reloc
+v4.0.30319
+#Strings
+<Module>
+PUTTY.EXE
+CommandExecutor
+ShimProgram
+EventHandler
+SignalControlType
+StringExtensions
+mscorlib
+System
+Object
+MulticastDelegate
+System.Diagnostics
+Process
+get_RunningProcess
+set_RunningProcess
+execute
+<RunningProcess>k__BackingField
+RunningProcess
+ERROR_ELEVATION_REQUIRED
+ERROR_CANCELLED
+System.Collections.Generic
+IEnumerable`1
+strip_shim_gen_args
+quote_arg_value_if_required
+SetConsoleCtrlHandler
+_handler
+SetHandler
+Handler
+Invoke
+......（省略）
+```
+
+
+程序假定了，字符串是由六或更多个有效字符，所组成的零端序列，其中所谓有效字符，是指模式 `validchars` 接受的任何字符。在咱们的示例中，该模式包含了可打印字符。我们使用了 `string.rep` 和连接，来创建出与以零结尾的，六或六个以上 `validchars` 序列相匹配的模式。模式中的括号，捕捉的是不带那个零的字符串。
+
+
+咱们的最后示例，是一个以十六进制显示出文件内容的，对某个二进制文件进行转储的程序。下图 13.2 “转储 `dump` 程序，dump the `dump` program”，显式了在 POSIX 机器上，应用该程序的结果。
+
+
+**图 13.2，转储 `dump` 程序**
+
+```lua
+23 21 2F 75 73 72 2F 62 69 6E 2F 65 6E 76 20 6C  #!/usr/bin/env l
+75 61 0A 0A 6C 6F 63 61 6C 20 66 20 3D 20 61 73  ua..local f = as
+73 65 72 74 28 69 6F 2E 6F 70 65 6E 28 61 72 67  sert(io.open(arg
+5B 31 5D 2C 20 22 72 62 22 29 29 0A 6C 6F 63 61  [1], "rb")).loca
+6C 20 62 6C 6F 63 6B 73 69 7A 65 20 3D 20 31 36  l blocksize = 16
+0A 0A 66 6F 72 20 62 79 74 65 73 20 69 6E 20 66  ..for bytes in f
+3A 6C 69 6E 65 73 28 62 6C 6F 63 6B 73 69 7A 65  :lines(blocksize
+29 20 64 6F 0A 20 20 20 20 66 6F 72 20 69 20 3D  ) do.    for i =
+20 31 2C 20 23 62 79 74 65 73 20 64 6F 0A 20 20   1, #bytes do.
+20 20 20 20 20 20 6C 6F 63 61 6C 20 62 20 3D 20        local b =
+73 74 72 69 6E 67 2E 75 6E 70 61 63 6B 28 22 42  string.unpack("B
+22 2C 20 62 79 74 65 73 2C 20 69 29 0A 20 20 20  ", bytes, i).
+20 20 20 20 20 69 6F 2E 77 72 69 74 65 28 73 74       io.write(st
+72 69 6E 67 2E 66 6F 72 6D 61 74 28 22 25 30 32  ring.format("%02
+58 20 22 2C 20 62 29 29 0A 20 20 20 20 65 6E 64  X ", b)).    end
+0A 0A 20 20 20 20 69 6F 2E 77 72 69 74 65 28 73  ..    io.write(s
+74 72 69 6E 67 2E 72 65 70 28 22 20 22 2C 20 62  tring.rep(" ", b
+6C 6F 63 6B 73 69 7A 65 20 2D 20 23 62 79 74 65  locksize - #byte
+73 29 29 0A 20 20 20 20 62 79 74 65 73 20 3D 20  s)).    bytes =
+73 74 72 69 6E 67 2E 67 73 75 62 28 62 79 74 65  string.gsub(byte
+73 2C 20 22 25 63 22 2C 20 22 2E 22 29 0A 20 20  s, "%c", ".").
+20 20 69 6F 2E 77 72 69 74 65 28 22 20 22 2C 20    io.write(" ",
+62 79 74 65 73 2C 20 22 5C 6E 22 29 0A 65 6E 64  bytes, "\n").end
+0A                 .
+```
+
+完整程序如下：
+
+```lua
+local f = assert(io.open(arg[1], "rb"))
+local blocksize = 16
+
+for bytes in f:lines(blocksize) do
+    for i = 1, #bytes do
+        local b = string.unpack("B", bytes, i)
+        io.write(string.format("%02X ", b))
+    end
+
+    io.write(string.rep(" ", blocksize - #bytes))
+    bytes = string.gsub(bytes, "%c", ".")
+    io.write(" ", bytes, "\n")
+end
 ```
