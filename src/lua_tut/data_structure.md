@@ -122,3 +122,22 @@ end
 
 
 **图 14.1，稀疏矩阵的乘法**
+
+```lua
+function Lib.mt_mult (a, b)
+    local c = {}        -- 得到的矩阵
+    for i = 1, #a do
+        local resultline = {}                   -- 将是 'c[i]'
+        for k, va in pairs(a[i]) do             -- 'va' 为 a[i][k]
+            for j, vb in pairs(b[k]) do         -- 'vb' 为 b[k][j]
+                local res = (resultline[j] or 0) + va * vb
+                resultline[j] = (res ~= 0) and res or nil
+            end
+        end
+        c[i] = resultline
+    end
+    return c
+end
+```
+
+图 14.1，“稀疏矩阵的乘法” 给出了上面算法的完整实现，用到了 `pairs`，并顾及到了那些稀疏条目。这个实现只会访问那些非 `nil` 的元素，结果自然是稀疏的。此外，代码会删除偶然计算出为零的那些结果条目。

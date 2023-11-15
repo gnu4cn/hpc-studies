@@ -160,15 +160,39 @@ end
 
 function Lib.mt_mult (a, b)
     local c = {}        -- 得到的矩阵
+
     for i = 1, #a do
-        local resultline = {}
-        for k, va in pairs(a[i]) do
-            for j, vb in pairs(b[k]) do
+        local resultline = {}                   -- 将是 'c[i]'
+        for k, va in pairs(a[i]) do             -- 'va' 为 a[i][k]
+            for j, vb in pairs(b[k]) do         -- 'vb' 为 b[k][j]
                 local res = (resultline[j] or 0) + va * vb
                 resultline[j] = (res ~= 0) and res or nil
             end
         end
         c[i] = resultline
     end
-    return c
+
+    print(#c)
+
+    local d = {}
+    local temp = 0
+
+    for i = 1, (#c + 2) do
+        for j = 1, #(c[1]) do
+            local line = {}
+
+            if j <= #a then line[j] = (a[i] and a[i][j] or 0) end
+            if ( j > (#a + 1) and j <= (#a + 1 + #b)) then
+                temp = j - #a - 1
+                line[j] = (b[i] and b[i][temp] or 0)
+            end
+            if j >= (#a + #b + 2) then
+                temp = j - #a - #b - 2
+                line[j] = (c[i] and c[i][temp] or 0)
+            end
+        end
+        d[i] = line
+    end
+
+    return d
 end
