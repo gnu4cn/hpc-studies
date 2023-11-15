@@ -157,3 +157,18 @@ function Lib.udiv (n, d)
     if not math.ult(r, d) then q = q + 1 end
     return q
 end
+
+function Lib.mt_mult (a, b)
+    local c = {}        -- 得到的矩阵
+    for i = 1, #a do
+        local resultline = {}
+        for k, va in pairs(a[i]) do
+            for j, vb in pairs(b[k]) do
+                local res = (resultline[j] or 0) + va * vb
+                resultline[j] = (res ~= 0) and res or nil
+            end
+        end
+        c[i] = resultline
+    end
+    return c
+end
