@@ -306,4 +306,69 @@ reserved = Set {"while", "end", "function", "local", }
 
 我们还可以使用另一个集合，来收集标识符：
 
+```lua
+local ids = {}
+for w in string.gmatch(s, "[%a_][%w_]*") do
+    if not reserved[w] then
+        ids[w] = true
+    end
+end
 
+-- 每个标识符打印一次
+for w in pairs(ids) do print(w) end
+```
+
+包，也称为 *多重集，multisets*，不同于常规集合之处在于，其中的每个元素，都可以出现多次。 Lua 中包的简单表示，类似之前的集合表示，但每个键，都有个关联的计数器。<sup>1</sup> 要插入某个元素，我们就会递增其计数器：
+
+
+> **注 1**：我们已经在第 11 章，[“插曲：高频词”](interlude_most_frequent_words.md) 中，将这种表示法，用于那个最常见的单词程序。
+
+```lua
+function insert (bag, element)
+    bag[element] = (bag[element] or 0) + 1
+end
+```
+
+而要删除一个元素，我们就会递减其计数器：
+
+```lua
+function remove (bag, element)
+    local count = bag[element]
+    bag[element] = (count and count > 1) and count - 1 or nil
+end
+```
+
+只有在计数器已经存在，且仍大于零时，我们才保留该计数器。
+
+
+## 字符串缓冲
+
+**String Buffers**
+
+
+假设我们正在逐步构建一个字符串，例如逐行读取某个文件。我们的典型代码，可能如下所示：
+
+
+```lua
+local buff = ""
+for line in io.lines() do
+    buff = buff .. line .. "\n"
+end
+```
+
+尽管他看起来无害，despite its innocent look，但Lua 中的这段代码，对于大文件可能会造成巨大的性能损失：例如，在我（作者）的新机器上，读取一个4.5 MB 的文件，需要超过 30 秒。
+
+这是为什么呢？为了理解发生了什么，我们就要来设想一下，我们正处于那个读取循环的中间；每行有 20 个字节，咱们已经读取了大约 2500 行，所以 `buff` 就是是个 50 kB 的字符串了。当 Lua 连接 `buff..line.."\n"` 时，他就会分配一个 50020 字节的新字符串，并将 `buff` 中的 50000 字节，复制到这个新字符串中。也就是说，对于每一个新行，Lua 都会移动大约 50 kB 的内存，并且还在不断增加。这个算法是次方开销的。读取 100 个新行（仅 2 kB）后，Lua 就已经移动了，超过 5 MB 的内存。当 Lua 读取完 350 kB 时，他已经移动了大约 50 GB 左右的内存。 （这个问题并不是 Lua 特有的：其他那些，其中字符串为不可变值的语言，也存在类似的行为，Java 就是一个著名的例子。）
+
+
+在咱们继续之前，我们应该指出，尽管我说了这么多，这种情况却并不是个常见问题。对于那些小的字符串，上面的循环没有什么问题。Lua 为读取整个文件，提供了一次性读取文件的 `io.read("a")` 选项。然而，有时我们必须面对这个问题。 Java 提供了 `StringBuffer` 类来改善这个问题。在 Lua 中，我们可以使用表作为字符串缓冲区。这种方法的关键，是函数 `table.concat`，他会返回给定列表中，所有字符串的连接。使用 `concat`，我们可以将之前的循环，编写如下：
+
+```lua
+local = {}
+for line in io.lines() do
+    t[#t + 1] = line .. "\n"
+end
+local s = table.concat(t)
+```
+
+使用原先代码读取需要半分钟以上的同一文件，这种算法只需不到 0.05 秒即可读取。（尽管如此，为了读取整个文件，最好使用带有 `"a"` 选项的 `io.read`。）
