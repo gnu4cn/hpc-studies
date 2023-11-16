@@ -141,3 +141,169 @@ end
 ```
 
 图 14.1，“稀疏矩阵的乘法” 给出了上面算法的完整实现，用到了 `pairs`，并顾及到了那些稀疏条目。这个实现只会访问那些非 `nil` 的元素，结果自然是稀疏的。此外，代码会删除偶然计算出为零的那些结果条目。
+
+
+## 链表
+
+**Linked Lists**
+
+
+因为表属于动态实体，所以在 Lua 中实现链表很容易。我们用一个表，来表示每个节点（不然？）；链接就只是一些，包含了对其他表引用的字段。例如，咱们来实现一个单链表，a singly-linked list，其中每个节点，都有两个字段：`value` 和 `next`。一个简单的变量，为该列表的根，the list root：
+
+
+```lua
+list = nil
+```
+
+要在列表开头，插入一个值为 `v` 的元素，我们这样做：
+
+```lua
+list = {next = list, value = v}
+```
+
+要遍历列表，我们可以这样写：
+
+```lua
+local l = list
+while l do
+    visit l.value
+    l = l.next
+end
+```
+
+我们还可以轻松实现，一些其他类型的列表，例如双链表或循环列表，doubly-linked lists or circular lists。不过，在 Lua 中，我们很少需要这些结构，因为通常有更简单的方法，来表示我们的数据，而无需使用链表。例如，我们可以用（无边界）数组，来表示堆栈，represent a stack with an (unbounbed) array。
+
+
+## 队列和双端队列
+
+**Queues and Double-Ended Queues**
+
+在 Lua 中实现队列的一种简单方法，是使用表库中的 `insert` 和 `remove` 函数。正如我们在 [“表库”](tables.md#关于表库) 一节中所看到的，这两个函数会在数组的任意位置，插入和移除元素，同时移动其他元素，以满足操作。然而，对于大型结构而言，这些移动的代价可能会很高。一种更有效的实现方法，是使用两个索引，一个表示首个元素，另一个表示最后一个元素。如下图 14.2 “双端队列” 所示，在这种表示方法下，我们就可以在恒定时间，插入或移除两端的元素。
+
+
+```lua
+function listNew ()
+    return {first = 0, last = -1}
+end
+
+function pushFirst (list, value)
+    local first = list.first - 1
+    list.first = first
+    list[first] = value
+end
+
+function pushLast (list, value)
+    local last = list.last + 1
+    list.last = last
+    list[last] = value
+end
+
+function popFirst (list, value)
+    local first = list.first
+    if first > list.last then error("list is empty") end
+    local value = list[first]
+    list[first] = nil       -- 以允许垃圾回收，to allow garbage collection
+    list.first = first + 1
+    return value
+end
+
+function popLast (list, value)
+    local last = list.last
+    if list.first > last then error("list is empty") end
+    local value = list[last]
+    list[last] = nil       -- 以允许垃圾回收，to allow garbage collection
+    list.last = last - 1
+    return value
+end
+```
+
+
+如果我们以严格队列规则，使用此结构，即只调用 `pushLast` 和 `popFirst`，那么 `first` 和 `last` 都会不断增加。不过，由于我们在 Lua 中，使用了表来表示数组，因此我们既可以从 1 到 20，也可以从 16,777,201 到 16,777,220，对数组进行索引。在 64 位整数下，在每秒插入 1000 万次时，这样一个队列可以运行三万年，然后才会出现溢出问题。
+
+
+## 反转表
+
+**Reverse Tables**
+
+
+正如我（作者）之前所说，我们很少在 Lua 中进行搜索/检索。相反，我们使用所谓的索引表或反向表，an index or a reverse table。
+
+假设我们有一个有着，一周中各天名字的表：
+
+
+```lua
+days = {"Sunday", "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday"}
+```
+
+现在，我们打算把某个名字，转换成他在一周中的位置。我们可以在表中，搜索给定的名称。不过，一种更有效的方法，是建立一个比方说 `revDays` 的，将名称作为索引，将数字作为值的反向表。这个表看起来是这样的：
+
+```lua
+revDays = {["Sunday"] = 1, ["Monday"] = 2,
+           ["Tuesday"] = 3, ["Wednesday"] = 4,
+           ["Thursday"] = 5, ["Friday"] = 6,
+           ["Saturday"] = 7}
+```
+
+那么，我们只需要索引这个反向表，即可找到某个名称的顺序：
+
+```lua
+x = "Tuesday"
+print(revDays[x])       --> 3
+```
+
+当然，我们不需要手动声明那个反向表。我们可以根据原始表，自动创建出他：
+
+
+```lua
+revDays = {}
+for k, v in pairs(days) do
+    revDays[v] = k
+end
+```
+
+其中的循环，将就 `days` 的每个元素，进行赋值，变量 `k` 会获得键（`1`、`2`、......），`v` 获得值（ `"Sunday"`、`"Monday"`，......）。
+
+
+## 集合与包
+
+**Sets and Bags**
+
+
+假设我们打算列出某个程序源代码中，用到的所有标识符；为此，我们需要从咱们的列表中，过滤出那些保留字。一些 C 语言程序员，可能会倾向于用字符串数组，来表示保留字的集合，并通过搜索该数组，来获悉某个给定的单词，是否在该集合中。要加快搜索速度，他们甚至可以使用二叉树，a binary tree，来表示这个集合。
+
+
+在 Lua 中，表示此类集合的一种高效而简单的方法，是将集合元素作为 *索引，indices* 放在表中。这样，我们就不用在表中，搜索给定的元素，而只需索引表，并测试结果是否为 `nil`。在咱们的示例中，我们可以编写下面的代码：
+
+
+```lua
+reserved = {
+    ["while"] = true, ["if"] = true,
+    ["else"] = true, ["do"] = true,
+}
+
+for w in string.gmatch(s, "[%a_][%w_]*") do
+    if not reserved[w] then
+        do somthing with 'w'    -- 'w' 不是保留字
+    end
+end
+```
+
+(在 `reserved` 的定义中，我们不能写下 `while = true`，因为在 Lua 中，`while` 不是一个有效的名称。相反，我们使用了 `["while"] = true` 的写法。）
+
+
+使用一个辅助函数，来构建这个集合，咱们就可以有一个，更清晰的初始化了：
+
+```lua
+function Set (list)
+    local set = {}
+    for _, l in ipairs(list) do set[l] = true end
+    return set
+end
+
+reserved = Set {"while", "end", "function", "local", }
+```
+
+我们还可以使用另一个集合，来收集标识符：
+
+

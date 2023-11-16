@@ -172,27 +172,5 @@ function Lib.mt_mult (a, b)
         c[i] = resultline
     end
 
-    print(#c)
-
-    local d = {}
-    local temp = 0
-
-    for i = 1, (#c + 2) do
-        for j = 1, #(c[1]) do
-            local line = {}
-
-            if j <= #a then line[j] = (a[i] and a[i][j] or 0) end
-            if ( j > (#a + 1) and j <= (#a + 1 + #b)) then
-                temp = j - #a - 1
-                line[j] = (b[i] and b[i][temp] or 0)
-            end
-            if j >= (#a + #b + 2) then
-                temp = j - #a - #b - 2
-                line[j] = (c[i] and c[i][temp] or 0)
-            end
-        end
-        d[i] = line
-    end
-
-    return d
+    return c
 end
