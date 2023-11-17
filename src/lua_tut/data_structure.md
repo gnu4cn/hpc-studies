@@ -401,5 +401,118 @@ local s = table.concat(t, "\n")
 
 **Graphs**
 
+> **注**：著名的 [迪杰斯特拉算法，Dijkstra 算法](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)，就是基于图数据结构。
+
+与其他正式语言一样，Lua 做到了图数据结构的多种实现，每种实现，都能更好地适应某些特定算法。在这里，我们将看到一种简单的，面向对象的实现，其中咱们会将节点，表示为对象（当然，实际上是表），将一些弧形，作为节点之间的引用。
 
 
+我们将用包含了 `name`（节点名称）和 `adj`（邻接节点的集合），两个字段的表，表示每个节点。由于我们将从文本文件中，读取图，因此我们需要一种根据节点的名称，找到该节点的方法。因此，我们将使用一个将名称映射到节点的额外表。函数 `name2node` 会根据名称，返回相应的节点：
+
+
+```lua
+local function name2node (graph, name)
+    local node = graph[name]
+
+    if not node then
+        -- 节点不存在；要创建一个新的节点
+        node = {name = name, adj = {}}
+        graph[name] = node
+    end
+
+    return node
+end
+```
+
+下图 14.3 “从文件读取某个图” 给出了构建图的函数。
+
+
+**图 14.3，从文件读取某个图**
+
+
+```lua
+function readgraph (filename)
+    local graph = {}
+    local f = assert(filename, "r")
+
+    for line in f:lines() do
+        -- 将行拆分为两个名字
+        local namefrom, nameto = string.match(line, "(%S+)%s+(%S+)")
+        -- 找到相应节点
+        local from = name2node(graph, namefrom)
+        local to = name2node(graph, nameto)
+        -- 将 'to' 添加到 `from` 的邻接集合
+        from.adj[to] = true
+    end
+    f:close()
+
+    return graph
+end
+```
+
+他会其中每一行都有两个节点名称的文件，这意味着，从第一节点到第二节点之间，有一条弧线。对于每一行，该函数使用了 `string.match`，将该行拆分为两个名字，找出了与这些名字，相对应的节点（在需要时，创建出这些节点），并将节点连接起来。
+
+下图 14.4，“找出两个节点之间的路径” 演示了运用这种图的一种算法。
+
+
+**图 14.4，找出两个节点之间的路径**
+
+
+```lua
+function findpath (curr, to, path, visited)
+    path = path or {}
+    visited = visited or {}
+
+    if visited[curr] then       -- 节点已被访问过？
+        return nil              -- 此处无路径
+    end
+
+    visited[curr] = true       -- 将节点标记为已访问过
+    path[#path + 1] = curr      -- 将其添加到路径
+    if curr == to then          -- 最终节点？
+        return path
+    end
+    -- 尝试全部邻接节点
+    for node in pairs(curr.adj) do
+        local p = findpath(node, to, path, visited)
+        if p then return p end
+    end
+    table.remove(path)          -- 从路径种移除节点
+end
+```
+
+函数 `findPath` 采用深度优先遍历法，using a depth-first traversal，搜索两个节点之间的路径。他的第一个参数，是当前节点；第二个参数是目标节点；第三个参数保留了从原节点，到当前节点的路径；最后参数，是个有着所有已访问节点的集合，以避免循环。请注意，该算法是如何直接操作节点，而不使用节点名字的。例如，`visited` 是个节点集合，而不是节点名。同样，`path` 是个节点的列表。
+
+
+为测试这段代码，我们添加了一个打印路径的函数，以及一些代码，来使其工作：
+
+
+```lua
+function printpath (path)
+    for i = 1, #path do
+        print(path[i].name)
+    end
+end
+
+g = readgraph("demo.graph")
+a = name2node(g, "a")
+b = name2node(g, "b")
+p = findpath(a, b)
+if p then printpath(p) end
+```
+
+
+## 练习
+
+练习 14.1：请编写一个，将两个稀疏矩阵相加的函数。
+
+
+练习 14.2：请修改图 14.2，“双端队列” 中的队列实现，实现在队列为空时，两个索引都返回零。
+
+
+练习 14.3：请修改那个图数据结构，使其能为每条弧，保留一个标签。该数据结构，还应该用带有两个字段：弧的标签，和弧所指向节点，两个字段的对象表示每个弧。每个节点保存的不是邻接节点集合，而是包含了从该节点出发，弧的事件集合，an incident set that contains the ars that originate at that node。
+
+
+要将函数 `readgraph`，调整为从输入文件的每一行，读取两个节点名字，和以及一个标签。(假设标签是个数字。）
+
+
+练习 14.4：假定使用前一练习的，其中每个弧的标签，表示该弧两端节点之间的距离。请使用 Dijkstra 算法，编写一个函数，找出两个给定节点之间，最短的路径。
