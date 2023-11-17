@@ -122,7 +122,7 @@ end
 
 
 ```lua
-function seralize (o)
+function serialize (o)
     if type(o) == "number" then
         io.write(tonumber(o))
     else other cases
@@ -136,7 +136,7 @@ end
 ```lua
 local fmt = {integer = "%d", float = "%a"}
 
-function seralize (o)
+function serialize (o)
     if type(o) == "number" then
         io.write(string.format(fmt[math.type(o)], o))
     else other cases
@@ -186,7 +186,7 @@ print(string.format("%q", a))   --> "a \"problematic\" \\string"
 
 
 ```lua
-function seralize (o)
+function serialize (o)
     if type(o) == "number" then
         io.write(string.format(fmt[math.type(o)], o))
     elseif type(o) == "string" then
@@ -196,11 +196,11 @@ function seralize (o)
 end
 ```
 
-Lua 5.3.3 扩展了格式选项 `"%q"`，使其也能处理数字（以及 `nil` 和布尔值），再次以 Lua 可读回的正确方式写入他们（特别是，他会将浮点数格式化为十六进制，来确保完全的精度。）因此，从该版本开始，我们可以进一步简化和扩展 `seralize` 函数：
+Lua 5.3.3 扩展了格式选项 `"%q"`，使其也能处理数字（以及 `nil` 和布尔值），再次以 Lua 可读回的正确方式写入他们（特别是，他会将浮点数格式化为十六进制，来确保完全的精度。）因此，从该版本开始，我们可以进一步简化和扩展 `serialize` 函数：
 
 
 ```lua
-function seralize (o)
+function serialize (o)
     local t = type(o)
 
     if t == "number"
@@ -248,4 +248,71 @@ end
 他会取一个任意字符串，并将其格式化为长字符串后返回。对 `gmatch` 的调用，会创建出一个遍历字符串 `s` 中，所有出现 `"]=*%f[%]]"`（即一个结尾方括号，后面是一个由零或多个等号组成的序列，后面是一个带有结尾方括号的边界），模式的地方的迭代器。循环结束后，我们使用 `string.rep`，将等号复制 `n + 1` 次，即比字符串中出现的最大次数，多一次。最后，`string.format` 会用一对，其中有着正确数量等号的括号，将 `s` 括起来，并在引号字符串前后，添加了额外空格，还在括起来的字符串开头，添加了换行符。
 
 
+（我们可能会倾向于，使用更简单的，未用到第二个方括号边界模式的模式 `']=*]'`，但这里有一个微妙之处。假设目标为 `"]=]==]"`。第一个匹配项，会是 `"]=]"`。在他之后，字符串中剩下的是 `"==]"`，因此没有其他匹配项；在循环结束时，`n` 就将是一而不是二。边界模式则不会消费那个括号，因此括号仍会保留在目标中，供后面的匹配使用。）
 
+
+## 保存没有循环的表
+
+
+**Saving tables without cycles**
+
+
+我们的下一项（也是更难的一项）任务，是保存表。依据咱们对表结构的假设，有几种保存表的方法。似乎没有一种算法，适合所有情况。简单的表，不仅可以使用更简单的算法，而且输出也可以更短更清晰。
+
+咱们的首次尝试，见图 15.2，“序列化没有循环的表”
+
+
+
+```lua
+function serialize (o)
+    local t = type(o)
+
+    if t == "number"
+        or t == "string"
+        or t == "boolean"
+        or t == "nil"
+        then
+            io.write(string.format("%q", o))
+    elseif t == "table" then
+        io.write("{\n")
+        for k, v in pairs(o) do
+            io.write("\t", k, " = ")
+            serialize(v)
+            io.write(",\n")
+        end
+        io.write("}\n")
+    else
+        error("cannot serialize a " .. type(o))
+    end
+end
+```
+
+尽管他简单，但其工作却很合理。只要表结构是树形的，即不存在共用的子表，也没有循环，他甚至可以处理嵌套表（即在其他表中的表）。(美观上的一个小改进，将是缩进那些嵌套表，参见 [练习 15.1](#练习)）。
+
+上面那个函数，假定了表中的所有键，都是有效的标识符。在表有着数字的键，或不是语法上有效的 Lua 标识符的字符串键时，我们就有麻烦了。解决这一问题的简单方法，是使用以下代码，编写每个键：
+
+```lua
+            io.write(string.format("\t[%s] = ", serialize(k)))
+```
+
+通过这一改动，我们提高了咱们函数的健壮性，但代价是牺牲了生成文件的美观性。请看接下来这个调用：
+
+
+```lua
+serialize{a=12, b='Lua', key='another "one"'}
+```
+
+> **译注**：这样写是错误的，会报出以下错误：
+>
+```console
+"a"ser.lua:17: bad argument #2 to 'format' (no value)
+stack traceback:
+        [C]: in function 'string.format'
+        ser.lua:17: in function 'serialize'
+        ser.lua:27: in main chunk
+        [C]: in function 'dofile'
+        stdin:1: in main chunk
+        [C]: in ?
+```
+>
+> 原因在于，`io.write(string.format("\t[%s] = ", serialize(k)))` 中，`string.format` 的第二个参数，`serialize(k)`，并未返回一个字符串，而是往 `io` 写入字符串。
