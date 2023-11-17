@@ -4,4 +4,173 @@
 
 > **译注 1**：此处原文为：In this chapter, we will see how we can use Lua to eliminate all code for reading data from our programs, simply by writing the data in an appropriate format. More specifically, we write data as Lua programs that, when run, rebuild the data.
 
+自 1993 年创建以来，数据描述，data description，一直是 Lua 的主要应用之一。当时，文本式数据描述语言的主要选择，还是 SGML。<sup>译注 2</sup>对于许多人（包括我们）来说，SGML 既臃肿又复杂。1998 年的时候，一些人对其进行了简化，创建出了 XML，但在我们看来，XML 仍然臃肿而复杂。其他一些人赞同我们的观点，其中一些人又创建出了 JSON（2001 年）。JSON 基于 Javascript，与受限制过后的 Lua 数据文件，restricted Lua data files，非常相似。一方面，JSON 有一个很大的优势，那就是他是个国际标准，而且好几种语言（包括 Lua），都有着操作 JSON 文件的库。另一方面，Lua 的文件，易于读取且更加灵活。
+
+> **译注 2**：标准通过标记语言，Standard Generalized Markup Language。参见：[Wikipedia: SGML](https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language)。
+
+使用完整编程语言进行数据描述，当然会很灵活，但也带来了两个问题。一个是安全问题，因为 “数据” 文件可以在我们的程序中，肆意运行。我们可以通过在沙箱中运行文件，来解决这个问题，我们将在 [“沙箱”](#沙箱) 小节，讨论这个问题。
+
+另一个问题是性能。Lua 不仅运行速度快，编译速度也很快。例如，在我（作者）的新机器上，Lua 5.3 读取、编译和运行一个，有着 1 千万个赋值的程序，只需 4 秒，使用 240 MB 内存。相比之下，Perl 5.18 需要 21 秒和 6 GB 内存，Python 2.7 和 Python 3.4，则会让机器崩溃，Node.js 0.10.25，会在 8 秒后出现 “内存不足，out of memory” 错误，Rhino 1.7 也会在 6 分钟后，出现 “内存不足” 错误。
+
+
+
+## 数据文件
+
+表构造器，table constructor，为文件格式提供了一种有趣的选择。只需在写入数据时，做一点额外的工作，读取数据就会变得轻而易举。方法是将数据文件，写成在运行时，将数据重建到程序中的 Lua 代码，the technique is to write our data file as Lua code that, when run, rebuilds the data into the program。在表构造器下，这些数据块，看起来就像普通的数据文件了。
+
+
+咱们来看一个例子，来说明问题。如果我们的数据文件，是预定义格式的，如 CSV（Comma-Separated Values）或 XML，我们就没有什么选择。但是，如果我们打算创建自己使用的文件，我们就可以使用 Lua 构造器，作为我们的格式。在这种格式中，我们会将每条数据记录，表示为一个 Lua 构造器。而不是在数据文件中，写入下面这样的内容：
+
+
+```txt
+Donald E. Knuth,Literate Programming,CSLI,1992
+Jon Bentley,More Programming Pearls,Addison-Wesley,1990
+```
+
+
+咱们会这样写：
+
+```lua
+Entry{"Donald E. Knuth",
+"Literate Programming",
+"CSLI",
+1992}
+
+Entry{"Jon Bentley",
+"More Programming Pearls",
+"Addison-Wesley",
+1990}
+```
+
+请记住，`Entry{code}` 与 `Entry({code})` 相同，即调用某个以表为单一参数的函数 `Entry`。因此，前面的数据，就是一个 Lua 程序。要读取该文件，我们只需以 `Entry` 的一种合理定义，运行他即可。例如，下面的程序，会计算数据文件中，条目的数目：
+
+```lua
+local count = 0
+function Entry () count = count + 1 end
+
+dofile("data")
+
+print("number of entries: " .. count)
+```
+
+下一程序则将会把在该文件中找到的所有作者姓名，收集到一个集合中，然后打印出来：
+
+
+```lua
+local authors = {}      -- 收集作者的一个集合
+function Entry (b) authors[b[1]] = true end
+
+dofile("data")
+for name in pairs(authors) do print(name) end
+```
+
+请留意这些程序片段中的，事件驱动方法，the event-driven approach：函数 `Entry` 充当了，在 dofile 过程中，对于数据文件中的每个条目，都会被调用的一个回调函数。
+
+
+在文件大小不是个大问题时，我们可以为咱们的表示法，使用一些名称-值对：<sup>1</sup>
+
+```lua
+Entry{
+    author = "Donald E. Knuth",
+    title = "Literate Programming",
+    publisher = "CSLI",
+    year = 1992
+}
+
+Entry{
+    author = "Jon Bentley",
+    title = "More Programming Pearls",
+    year = 1990,
+    publisher = "Addison-Wesley",
+}
+```
+
+> **注 1**：如果这种格式让咱们想起 BibTeX，那就不是巧合了。BibTeX 是 Lua 中，构造器语法的灵感来源之一。
+
+这种格式，就是我们所说的，*自描述数据，self-decribing data* 格式，因为每条数据，都附有其含义的简短描述。自描述数据，比 CSV 或其他紧凑记法，都更具可读性（至少，对于人类而言）；在必要时，可以轻松手动编辑他们；同时他们允许咱们，对基本格式进行小的修改，而无需更改数据文件。例如，如果我们添加一个新字段，我们只需要对读取程序，进行很小的更改，从而在该字段不存在时，提供一个默认值。
+
+
+在名字-值格式下，咱们收集作者的程序，就变成了这样：
+
+
+```lua
+local authors = {}      -- 收集作者的一个集合
+function Entry (b) authors[b.author] = true end
+
+dofile("data")
+for name in pairs(authors) do print(name) end
+```
+
+现在，字段顺序已经无关紧要。即使有些条目没有作者，我们也只需调整一下函数 `Entry` 函数：
+
+
+```lua
+function Entry (b)
+    authors[b.author or "unknown"] = true
+end
+```
+
+
+## 序列化
+
+**Serialization**
+
+
+我们经常会需要，将一些数据序列化，也就是将数据，转换成字节流或字符流，以便将其保存到文件中，或通过网络连接发送。我们可以将序列化数据，表示为 Lua 代码，这样当我们运行该代码时，他就会将保存的值，重建到读取的程序中。
+
+通常，在我们打算恢复出，某个全局变量的值时，我们的代码块，就会类似于 <code>varname = <i>exp</i></code> 这种形式，其中 <code><i>exp</i></code>，为创建才该值的 Lua 代码。`varname` 是比较简单的部分，我们来看看，如何编写创建出值的代码。对于数值来说，这项任务非常简单：
+
+
+```lua
+function seralize (o)
+    if type(o) == "number" then
+        io.write(tonumber(o))
+    else other cases
+    end
+end
+```
+
+然而，如果用十进制格式写浮点数，我们就有可能丢失一些精度。我们可以使用十六进制格式，来避免这个问题。使用格式 `("%a")`，读取的浮点数，就将与原始浮点数的位数完全相同。此外，自 Lua 5.3 起，我们应区分整数和浮点数，以便以正确的子类型，还原出他们：
+
+
+```lua
+local fmt = {integer = "%d", float = "%a"}
+
+function seralize (o)
+    if type(o) == "number" then
+        io.write(string.format(fmt[math.type(o)], o))
+    else other cases
+    end
+end
+```
+
+对于字符串值，一种单纯的方法，会是下面这样：
+
+
+```lua
+    if type(o) == "string" then
+        io.write("'", o, "'")
+```
+
+但是，如果字符串包含特殊字符（如引号或换行符），生成的代码则将不会是有效的 Lua 程序。
+
+
+咱们可能会想通过修改引号，来解决此问题：
+
+
+```lua
+    if type(o) == "string" then
+        io.write("[[", o, "]]")
+```
+
+当心代码注入！如果某个恶意用户，设法引导咱们的程序，保存类似 `"]].os.execute('rm *').[["` 的内容（例如，她可以将这个字符串，提供作她的地址），咱们的最终代码块，就会像下面这样：
+
+
+```lua
+varname = [[ ]]..os.execute('rm *')..[[ ]]
+```
+
+当尝试加载此 “数据” 时，咱们就将会大吃一惊。
+
+
 
