@@ -316,3 +316,24 @@ stack traceback:
 ```
 >
 > 原因在于，`io.write(string.format("\t[%s] = ", serialize(k)))` 中，`string.format` 的第二个参数，`serialize(k)`，并未返回一个字符串，而是往 `io` 写入字符串。推测应写为：`io.write(string.format("\t[%q] = ", k))`
+
+
+使用 `serialize` 的第一个版本的调用，结果为下面这样：
+
+```lua
+{
+        key = "another \"one\"",
+        a = 12,
+        b = "Lua",
+}
+```
+
+将其与使用第二个版本的结果比较：
+
+```lua
+{
+        ["key"] = "another \"one\"",
+        ["b"] = "Lua",
+        ["a"] = 12,
+}
+```
