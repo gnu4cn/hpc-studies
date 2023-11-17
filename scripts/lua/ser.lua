@@ -14,7 +14,7 @@ function serialize (o)
     elseif t == "table" then
         io.write("{\n")
         for k, v in pairs(o) do
-            io.write(string.format("\t[%s] = ", serialize(k)))
+            io.write(string.format("\t[%q] = ", k))
             serialize(v)
             io.write(",\n")
         end

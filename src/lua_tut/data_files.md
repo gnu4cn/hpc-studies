@@ -315,4 +315,4 @@ stack traceback:
         [C]: in ?
 ```
 >
-> 原因在于，`io.write(string.format("\t[%s] = ", serialize(k)))` 中，`string.format` 的第二个参数，`serialize(k)`，并未返回一个字符串，而是往 `io` 写入字符串。
+> 原因在于，`io.write(string.format("\t[%s] = ", serialize(k)))` 中，`string.format` 的第二个参数，`serialize(k)`，并未返回一个字符串，而是往 `io` 写入字符串。推测应写为：`io.write(string.format("\t[%q] = ", k))`
