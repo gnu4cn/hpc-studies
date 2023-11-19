@@ -65,4 +65,27 @@ f = function () i = i + 1 end
 不过，第二行要快得多，因为 Lua 会将函数与其外层代码块，一起编译。而在第一行中，到 `load` 的调用，则需要单独编译。
 
 
-由于 `load` 不会以词法范围（作用域）编译，因此上个示例中的两行，可能并不真正等价。为了弄清其中的区别，咱们来稍微修改一下那个示例：
+由于 `load` 不会以词法范围（作用域）编译，does not compile with lexical scoping，因此上个示例中的两行，可能并不真正等价。为了弄清其中的区别，咱们来稍微修改一下那个示例：
+
+```lua
+i = 32
+local i = 0
+f = load("i = i + 1; print(i)")
+g = function () i = i + 1; print(i) end
+f()             --> 33
+g()             --> 1
+```
+
+函数 `g` 如预期那样，操作了局部变量 `i`，但函数 `f` 操作的，是全局的 `i`，因为 `load`，总是在全局环境中，编译他的代码块。
+
+加载的最典型用途，是运行外部代码（即来自咱们程序外部的，一些代码片段），或动态生成的代码。例如，我们可能想要绘制某个用户定义的函数；用户输入该函数的代码，然后我们使用 `load`，对其进行计算。请注意，`load` 预期得到是个代码块，即一些语句。在打算计算某个表达式时，我们可以在表达式前，加上 `return`，这样我们就能得到，返回给定表达式值的一个语句。请看示例：
+
+```lua
+print "enter your expression:"
+local line = io.read()
+local func = assert(load("return " .. line))
+print("the value of your express ion is " .. func())
+```
+
+
+
