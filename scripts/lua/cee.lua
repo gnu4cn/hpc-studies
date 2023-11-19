@@ -29,4 +29,10 @@ local line = io.read()
 local func = assert(load("return " .. line))
 print("the value of your express ion is " .. func())
 
-os.exit(0)
+print "enter function to be plotted (with variable 'x'):"
+local line = io.read()
+local f = assert(load("return " .. line))
+for i = 1, 20 do
+    x = i   -- 全局的 'x' (要对该代码块可见)
+    print(string.rep("*", f()))
+end
