@@ -521,4 +521,58 @@ end
 ## 练习
 
 
-练习 16.1：在加载代码时，给代码块添加一些前缀，经常是有用的。(我们早先在本章中，先前曾看过一个，其中咱们在加载表达式时，我们就往那个表达式，添加了一个前缀 `return`）。请编写一个 loadwithprefix 函数，它的工作方式与 load 类似，只是在加载代码块时增加了第一个参数（字符串）作为前缀。
+练习 16.1：在加载代码块时，添加一些前缀，经常是有用的。(在本章中，咱们先前曾看到过，在一个表达式被加载时，我们就往那个表达式，添加了前缀 `return`）。请编写一个工作方式与 `load` 类似，只是在加载代码块时，会添加其第一个参数（一个字符串）作为前缀的函数 `loadwithprefix`。
+
+`loadwithprefix` 应与原本的 `load` 一样，既接受字符串形式的代码块，也应接受读取函数。即使在原始代码块是字符串时，`loadwithprefix` 也不应将前缀，与数据块连接起来。相反，他应使用适当的，首先返回前缀，然后返回原始代码块的读取函数，来调用 `load`。
+
+练习 16.2：请编写一个函数 `multiload`，通过接收读取函数列表，来使得 `loadwithprefix` 通用化，如下面的例所示：
+
+```lua
+f = multiload("loacal x = 10;",
+               io.lines("temp", "*L"),
+               " print(x)")
+```
+
+在上面的示例中，`multiload` 应加载一个相当于，字符串 `"local..."`、`temp` 文件内容与字符串 `" print(x)"`三者连接的代码块。与前面练习中的 `loadwithprefix` 一样，`multiload` 不应具体连接任何内容。
+
+
+练习 16.3：下图 16.2，”字符串重复“ 中的函数 `stringrep`，使用了一种二进制乘法算法，a binary multiplication algorithm，来连接给定字符串 `s` 的 `n` 份副本。
+
+
+**图 16.2，字符串重复**
+
+
+```lua
+function stringrep (s, n)
+    local r = ""
+
+    if n > 0 then
+        while n > 1 do
+            if n % 2 ~= 0 then r = r .. s end
+            s = s .. s
+            n = math.floor(n / 2)
+        end
+        r = r .. s
+    end
+
+    return r
+end
+```
+
+对于任何固定的 `n`，我们都可以通过将循环展开为 `r = r .. s`，与 `s = s .. s` 的指令序列，而创建出一个专门版本的 `stringrep` 函数：
+
+
+```lua
+function stringrep_5 (s)
+    local r = ""
+    r = r .. s
+    s = s .. s
+    s = s .. s
+    r = r .. s
+    return r
+end
+```
+
+请编写一个函数，在给定 `n` 的情况下，返回专门函数 `stringrep_n`。咱们的函数不应使用闭包，而应使用适当的指令序列（`r = r .. s` 和 `s = s .. s` 的混合），构建一个 Lua 函数的文本，然后使用 `load`，生成最终函数。请将通用函数 `stringrep`（或使用该函数的闭包），与咱们定制的函数，做性能的比较。
+
+练习 16.4： 能找到任何的 `f` 值，使调用 `pcall(pcall, f)` 的第一个结果返回 `false` 吗？为什么会这样？
