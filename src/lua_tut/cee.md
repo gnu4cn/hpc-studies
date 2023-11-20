@@ -482,4 +482,43 @@ stdin:4: my error
 ```
 
 
+函数 `error`，有个额外的，给出应报告错误级别的第二参数。我们会使用这个参数，将错误归咎于他人。例如，假设我们编写了下面这个，其第一项任务，是检查他是否被正确调用的函数：
 
+
+```lua
+function foo (str)
+    if type(str) ~= "string" then
+        error("string expected")
+    end
+
+    -- regular code
+end
+```
+
+然后，有人用错误的参数调用了这个函数：
+
+
+```lua
+foo({x=1})
+```
+
+现在，Lua 就会将矛头指向了 `foo` -- 毕竟是他调用了 `error` -- 而不是指向真正的罪魁祸首，调用者。为了纠正这个问题，我们就要告诉 `error`，他所报告的错误，发生在调用层次结构的第二层，occured on level two in the calling hierarchy（第一层，是咱们自己的函数）：
+
+
+```lua
+function foo (str)
+    if type(str) ~= "string" then
+        error("string expected", 2)
+    end
+
+    -- regular code
+end
+```
+
+通常，当发生错误时，我们会需要更多的调试信息，而不仅仅是错误发生的位置。至少，我们会想要一个，给出了导致错误的完整调用栈的栈回溯。当 `pcall` 返回错误消息时，他会销毁栈的一部分（从 `pcall` 本身，到错误点的部分）。因此，如果我们想要一个栈回溯，我们就必须在 `pcall` 返回之前，构建出栈回溯。为此，Lua 提供了 `xpcall` 函数。他的工作方式类似于 `pcall`，但他的第二个参数，是个 *消息处理函数，message hanlder funciton*。如果发生错误，Lua 就会在栈展开之前，before the stack unwinds，调用这个消息处理器函数，以便该函数可以使用调试库，来收集他想要的，有关错误的任何额外信息。两个常见的消息处理器函数，一个是会给到我们一个 Lua 提示符，以便我们可以自己检查，发生错误时发生了什么的 `debug.debug`；以及另一个会使用栈回溯，构建出扩展的错误消息的 `debug.trackback`。后者就是独立解释器，用来构建其错误消息的函数。
+
+
+## 练习
+
+
+练习 16.1：在加载代码时，给代码块添加一些前缀，经常是有用的。(我们早先在本章中，先前曾看过一个，其中咱们在加载表达式时，我们就往那个表达式，添加了一个前缀 `return`）。请编写一个 loadwithprefix 函数，它的工作方式与 load 类似，只是在加载代码块时增加了第一个参数（字符串）作为前缀。

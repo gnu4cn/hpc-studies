@@ -1,4 +1,12 @@
 #!/usr/bin/env lua
 
-local status, err = pcall(function () error({code=121}) end)
-print(err.code)
+function foo (str)
+    if type(str) ~= "string" then
+        error("string expected", 2)
+    end
+
+    print(str)
+end
+
+foo("test")
+foo({x=1})
