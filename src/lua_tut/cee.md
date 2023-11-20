@@ -107,3 +107,43 @@ end
 ```lua
 f = load(io.lines(filename, "*L"))
 ```
+
+正如我们在第 7 章，[“外部世界”](external.md) 中所看到的，那个 `io.lines(filename, "*L")` 调用，在每次调用时，都会返回一个，从给定文件返回一行新内容的函数。因此，`load` 就会，逐行读取文件中的代码块。以下版本与之类似，但效率略高：
+
+
+```lua
+f = load(io.lines(filename, 1024))
+```
+
+这里，`io.lines` 所返回的迭代器，会以 1024 字节的块，读取该文件。
+
+
+Lua 会将任何独立的代码块，都视为 [可变函数](functions.md#可变函数) 的主体。例如，`load("a = 1")` 会返回，以下表达式的等价内容：
+
+
+```lua
+function (...) a = 1 end
+```
+
+与其他函数一样，代码块可以声明出一些局部变量：
+
+```lua
+f = load("local a = 10; print(a + 20)")
+f()         --> 30
+```
+
+运用这些特性，咱们就可以重写上面的绘图示例，以避免使用全局变量 `x`：
+
+
+```lua
+print "enter function to be plotted (with variable 'x'):"
+local line = io.read()
+local f = assert(load("local x = ...; return " .. line))
+for i = 1, 20 do
+    print(string.rep("*", f(i)))
+end
+```
+
+这段代码中，我们在那个代码块的开头，添加了 `"local x = ..."` 的声明，从而将 `x` 声明为了，一个局部变量。然后，我们以参数 `i`，调用 `f`，参数 `i` 就将成为那个可变参数表达式（`...`）的值。
+
+> **译注**：这里，若把行 `local f = assert(load("local x = ...; return " .. line))`，修改为 `local f = assert(load("local x = ...; return " .. line .. " + x"))`，将更能反应出 `load` 的代码块中，可变参数表达式 `...` 的意义。

@@ -24,15 +24,12 @@ f()
 g()
 
 
-print "enter your expression:"
-local line = io.read()
-local func = assert(load("return " .. line))
-print("the value of your express ion is " .. func())
+f = load("local a = 10; print(a + 20)")
+f()
 
 print "enter function to be plotted (with variable 'x'):"
 local line = io.read()
-local f = assert(load("return " .. line))
+local f = assert(load("local x = ...; return " .. line .. " + x"))
 for i = 1, 20 do
-    x = i   -- 全局的 'x' (要对该代码块可见)
-    print(string.rep("*", f()))
+    print(string.rep("*", f(i)))
 end
