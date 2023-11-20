@@ -25,3 +25,12 @@ end
 
 print(arg[1], arg[2])
 print(stringrep(arg[1], tonumber(arg[2])))
+
+function stringrep_5 (s)
+    local r = ""
+    r = r .. s
+    s = s .. s
+    s = s .. s
+    r = r .. s
+    return r
+end

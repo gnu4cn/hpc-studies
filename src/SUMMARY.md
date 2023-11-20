@@ -82,3 +82,4 @@
 - [数据结构](lua_tut/data_structure.md)
 - [数据文件与序列化](lua_tut/data_files.md)
 - [编译，执行及报错](lua_tut/cee.md)
+- [模组与包](lua_tut/modules_and_packages.md)
