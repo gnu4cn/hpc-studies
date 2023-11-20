@@ -381,3 +381,62 @@ repeat
     if not file then print(msg) end
 until file
 ```
+
+如果我们不想处理这种情况，但仍然想要确保安全，我们可以简单地使用 `assert`，来保护该操作：
+
+
+```lua
+file = assert(io.open(name, "r"))
+    -->  cee.lua:6: 1: No such file or directory
+    --> stack traceback:
+    -->         [C]: in function 'assert'
+    -->         cee.lua:6: in main chunk
+    -->         [C]: in ?
+```
+
+这是一种典型的 Lua 习惯用法：如果 `io.open` 失败，`assert` 将抛出错误。请注意，`io.open` 第二个返回结果的错误消息，会作为 `assert` 的第二个参数。
+
+
+## 错误处理与异常
+
+**Error Handling and Exceptions**
+
+
+虽然我们可以将任何类型的值，用作错误对象，error object，但错误对象，则通常是一些描述出错原因的字符串。当出现内部错误，internal error（例如某次索引非表值的尝试）时，Lua 会生成一个，在这种情况下总会是个字符串的错误对象；否则，错误对象就会是，传递给函数 `error` 的值。只要对象是个字符串，Lua 就会尝试添加一些，关于错误发生位置的信息：
+
+
+```lua
+local status, err = pcall(function () error("my error") end)
+print(err)          --> cee.lua:4: my error
+```
+
+位置信息给出了代码块的名字（示例中为 `cee.lua`）和行号（示例中为 1）。
+
+
+> **译注**：原文示例代码块名字为 `stdin`，要获得原文这样的代码块名字，需要运行 `cat cee.lua | lua -`，其中的 `-`，与 `luac -` 中的一样，是 `lua` 解释器的一种输入参数：
+
+```bash
+$ lua -h
+C:\tools\msys64\mingw64\bin\lua.exe: unrecognized option '-h'
+usage: C:\tools\msys64\mingw64\bin\lua.exe [options] [script [args]]
+Available options are:
+  -e stat   execute string 'stat'
+  -i        enter interactive mode after executing 'script'
+  -l mod    require library 'mod' into global 'mod'
+  -l g=mod  require library 'mod' into global 'g'
+  -v        show version information
+  -E        ignore environment variables
+  -W        turn warnings on
+  --        stop handling options
+  -         stop handling options and execute stdin
+```
+
+> 此时，`$ cat cee.lua | lua -` 的输出为：
+
+```bash
+$ cat cee.lua | lua -
+stdin:4: my error
+```
+
+
+
