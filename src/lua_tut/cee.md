@@ -147,3 +147,73 @@ end
 这段代码中，我们在那个代码块的开头，添加了 `"local x = ..."` 的声明，从而将 `x` 声明为了，一个局部变量。然后，我们以参数 `i`，调用 `f`，参数 `i` 就将成为那个可变参数表达式（`...`）的值。
 
 > **译注**：这里，若把行 `local f = assert(load("local x = ...; return " .. line))`，修改为 `local f = assert(load("local x = ...; return " .. line .. " + x"))`，将更能反应出 `load` 的代码块中，可变参数表达式 `...` 的意义。
+
+
+函数 `load` 与 `loadfile`，从不抛出错误。在出现任何类型的错误时，他们都会返回 `nil`，与一条错误信息：
+
+
+```lua
+print(load("i i"))
+    --> nil     [string "i i"]:1: syntax error near 'i'
+```
+
+此外，这两个函数从不会产生，任何类别的副作用，也就是说，他们不会修改，或创建变量，不会写入文件等。他们只是将代码块，编译成某种内部表示，并将该结果，作为匿名函数返回。一种常见的错误认识，是认为加载某个代码块，就会定义出一些函数。在 Lua 中，函数的定义，是一些赋值操作；因此，他们发生于运行时，而不是在编译时。例如，假设我们有个名为 `foo.lua` 的文件，内容如下：
+
+
+```lua
+-- 文件 'foo.lua'
+function foo (x)
+    print(x)
+end
+```
+
+我们随后运行命令
+
+```lua
+f = loadfile("foo.lua")
+```
+
+这条命令会编译 `foo`，但不会定义出他。要定义出 `foo`，我们就必须运行那个代码块：
+
+
+```lua
+> f = loadfile("foo.lua")
+> print(foo)
+nil
+> f()
+> foo("ok")
+ok
+> print(foo)
+function: 000001ab70327280
+```
+
+这种行为，听起来可能奇怪，但如果我们在不使用语法糖下，重写该文件，就会明白了：
+
+
+```lua
+-- 文件 'foo.lua'
+foo = funtion (x)
+    print(x)
+end
+```
+
+在需要运行外部代码的生产级程序中，in a production-quality program that needs to run external code,我们应该那些，在处理加载代码块时，所报告的任何错误。此外，我们可能希望在受保护的环境中，运行新的代码块，以避免一些不愉快的副作用。我们将在第 22 章 [“环境”](environment.md) 中，详细讨论那些环境。
+
+
+## 预编译的代码
+
+**Precompiled Code**
+
+
+正如我（作者）在本章开头曾提到的，在运行源代码之前，Lua 会对其进行预编译。Lua 还允许我们，以预编译的形式，发布代码。
+
+
+生成预编译文件（在 Lua 术语中，也称为 *二进制代码块，binary chunk*）的最简单方法，是使用标准发布中的 `luac` 程序，the `luac` program that comes in the standard distribution。例如，下面这个调用，将创建出新文件 `prog.lc`，其中包含了文件 `prog.lua` 的预编译版本：
+
+
+```bash
+$ luac -o prog.lc prog.lua
+```
+
+
+

@@ -33,3 +33,7 @@ local f = assert(load("local x = ...; return " .. line .. " + x"))
 for i = 1, 20 do
     print(string.rep("*", f(i)))
 end
+
+print(load("i i"))
+
+
