@@ -402,6 +402,49 @@ file = assert(io.open(name, "r"))
 **Error Handling and Exceptions**
 
 
+对于许多应用程序来说，我们不需要在 Lua 中，进行任何错误处理；应用程序会完成这种处理。自应用程序的某个调用开始后，全部 Lua 的活动，都通常是要求 Lua 运行某个代码块。如果出现任何错误，该调用会返回一个错误代码，以便应用程序采取适当的措施。对于独立解释器，其主循环就只会打印出错误信息，然后继续显示提示符，和运行所给的命令。
+
+
+但是，如果我们打算在 Lua 代码内，处理错误，就应该使用函数 `pcall`（ *受保护的调用，protected call*），来封装我们的代码。
+
+假设我们打算运行某段 Lua 代码，并要捕捉运行该代码时，出现的任何错误。第一步就是要将这段代码，封装在某个函数中；通常我们会使用匿名函数，来实现这点。然后，我们就要通过 `pcall`，调用该函数：
+
+
+```lua
+local ok, msg = pcall(function ()
+    -- some code
+    if unexpected_condition then error() end
+    -- some code
+    print(a[i])     -- 潜在的错误：'a' 可能不是个表
+    -- some code
+end)
+
+if ok then      -- 在运行受保护代码期间没有错误发生
+    -- regular code
+else        -- 受保护代码抛出了某个错误：就要采取恰当措施
+    -- error-handling code
+end
+```
+
+函数 `pcall` 会在保护模式下，调用其第一个参数，这样其就能在函数运行时，捕捉到任何错误。无论如何，函数 `pcall` 都不会抛出任何错误。如果没有错误，`pcall` 会返回 `true`，以及该调用所返回的任何值。否则，他将返回 `false`，以及错误信息。
+
+
+尽管名称如此，但错误信息，却并不一定是字符串；更好的名称，是 *错误对象，error object*，因为 `pcall` 将返回，咱们传递给 `error` 的任何 Lua 值：
+
+
+```lua
+local status, err = pcall(function () error({code=121}) end)
+print(err.code)     --> 121
+```
+
+这些机制提供了，咱们在 Lua 中，进行异常处理所需的一切。我们会以 `error`，抛出异常，以 `pcall` 捕捉异常。错误信息，则会标识出，错误的类别。
+
+
+## 错误消息与栈回溯
+
+**Error Messages and Tracebacks**
+
+
 虽然我们可以将任何类型的值，用作错误对象，error object，但错误对象，则通常是一些描述出错原因的字符串。当出现内部错误，internal error（例如某次索引非表值的尝试）时，Lua 会生成一个，在这种情况下总会是个字符串的错误对象；否则，错误对象就会是，传递给函数 `error` 的值。只要对象是个字符串，Lua 就会尝试添加一些，关于错误发生位置的信息：
 
 
