@@ -215,5 +215,88 @@ end
 $ luac -o prog.lc prog.lua
 ```
 
+Lua 解释器可以像执行普通 Lua 代码一样，执行这个新文件，其执行方式，与原始源代码完全相同：
 
 
+```bash
+$ lua prog.lc "file1" "file2"
+```
+
+Lua 在接受源代码的任何地方，都会接受预编译代码。特别是，`loadfile` 和 `load`，二者都接受预编译代码。
+
+我们可以直接以 Lua，编写一个最小 `luac`：
+
+
+```lua
+p = loadfile(arg[1])
+f = io.open(arg[2], "wb")
+f:write(string.dump(p))
+f:close()
+```
+
+这里的关键函数，是 `string.dump`：他接收一个 Lua 函数，在为今后由 Lua 加载而适当格式化后，返回该函数的预编译代码。
+
+这个 `luac` 程序，还提供了其他一些有趣的选项。其中，选项 `-l` 会列出，对于给定代码块，编译器所生成的操作码，the opcodes that the compiler generates for a given chunk。例如，下图 16.1，“`luac - l` 的输出示例”，显示了在以下单行文件上，带有 `-l` 选项 `luac` 的输出：
+
+
+```lua
+a = x + y - z
+```
+
+
+**图 16.1，`luac -l` 的示例输出**
+
+
+```txt
+
+main <stdin:0,0> (10 instructions at 00000192bdc12970)
+0+ params, 2 slots, 1 upvalue, 0 locals, 4 constants, 0 functions
+        1       [1]     VARARGPREP      0
+        2       [1]     GETTABUP        0 0 1   ; _ENV "x"
+        3       [1]     GETTABUP        1 0 2   ; _ENV "y"
+        4       [1]     ADD             0 0 1
+        5       [1]     MMBIN           0 1 6   ; __add
+        6       [1]     GETTABUP        1 0 3   ; _ENV "z"
+        7       [1]     SUB             0 0 1
+        8       [1]     MMBIN           0 1 7   ; __sub
+        9       [1]     SETTABUP        0 0 0   ; _ENV "a"
+        10      [1]     RETURN          0 1 1   ; 0 out
+```
+
+> **译注**：其中的 `<stdin:0,0>` 是这样得到的，首先以 `echo "a = x + y -z" | lua -` 命令，会将这个字符串，编译到 `luac` 的默认输出 `luac.out`，注意其中的 `luac -` 子命令，其中的 `-` 是个 `luac` 的参数：
+
+```bash
+$ luac
+C:\tools\msys64\mingw64\bin\luac.exe: no input files given
+usage: C:\tools\msys64\mingw64\bin\luac.exe [options] [filenames]
+Available options are:
+  -l       list (use -l -l for full listing)
+  -o name  output to file 'name' (default is "luac.out")
+  -p       parse only
+  -s       strip debug information
+  -v       show version information
+  --       stop handling options
+  -        stop handling options and process stdin
+```
+
+> 然后运行 `luac -l luac.out`，或直接运行 `luac -l`（此命令会默认读取并列出 `luac.out` 的操作码），即可看到上面的输出。
+>
+>
+> 还需注意，上面的输出，是在 Windows 系统下（运行了 MSYS2）环境中的输出，而在 Linux 系统下的输出，则为：
+
+
+```console
+$ luac -l
+
+main <stdin:0,0> (7 instructions at 0x55b6b5651c50)
+0+ params, 2 slots, 1 upvalue, 0 locals, 4 constants, 0 functions
+        1       [1]     GETTABUP        0 0 -2  ; _ENV "x"
+        2       [1]     GETTABUP        1 0 -3  ; _ENV "y"
+        3       [1]     ADD             0 0 1
+        4       [1]     GETTABUP        1 0 -4  ; _ENV "z"
+        5       [1]     SUB             0 0 1
+        6       [1]     SETTABUP        0 -1 0  ; _ENV "a"
+        7       [1]     RETURN          0 1
+```
+
+> 二者之间，有较大的不同。
