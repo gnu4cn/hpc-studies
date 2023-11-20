@@ -1,44 +1,14 @@
 #!/usr/bin/env lua
 
-function dofile (filename)
-    local f = assert(loadfile(filename))
-    return f()
+local file, msg
+repeat
+    print "enter a file name:"
+    local name = io.read()
+    if not name then return end     -- 无输入
+    file, msg = io.open(name, "r")
+    if not file then print(msg) end
+until file
+
+for line in file:lines() do
+    print(line)
 end
-
-f = load("i = i + 1")
-
-i = 0
-f(); print(i)   --> 1
-f(); print(i)   --> 2
-
-s = "i = i + 1"
-load(s)(); print(i)     --> 3
-
-f = function () i = i + 1 end
-
-i = 32
-local i = 0
-f = load("i = i + 1; print(i)")
-g = function () i = i + 1; print(i) end
-f()
-g()
-
-
-f = load("local a = 10; print(a + 20)")
-f()
-
-print "enter function to be plotted (with variable 'x'):"
-local line = io.read()
-local f = assert(load("local x = ...; return " .. line .. " + x"))
-for i = 1, 20 do
-    print(string.rep("*", f(i)))
-end
-
-print(load("i i"))
-
-
-p = loadfile(arg[1])
-f = io.open(arg[2], "wb")
-f:write(string.dump(p))
-f:close()
-```

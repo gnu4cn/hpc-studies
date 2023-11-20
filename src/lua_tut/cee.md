@@ -313,5 +313,71 @@ main <stdin:0,0> (7 instructions at 0x55b6b5651c50)
 
 ## 错误
 
+*人无完人，Errare humanum est.*<sup>译注</sup>因此，我们必须以最佳方式处理错误。由于 Lua 是一门扩展语言，a extension language，经常被嵌入到应用中，因此当发生错误时，他不能简单地崩溃或退出。相反，只要发生错误，Lua 就必须提供处理方法。
+
+> **译注**：参见：[Wikipedia: Errare humanum est](https://az.wikipedia.org/wiki/Errare_humanum_est)"Errare (Errasse) humanum est, sed in errare (errore) perseverare diabolicum." "犯错（犯了错）是人之常情，但固执于错误（错误）是魔鬼的行为。"
 
 
+Lua 遇到的任何意外情况，都会抛出错误。当程序尝试对非数字值相加、调用非函数的值、对非表的值进行索引等时，都会发生错误。（我们可以使用 *元表，metatables*，修改这种行为，稍后咱们就会看到。）通过调用函数 `error`，并将错误信息作为参数，咱们也可以显式地抛出错误。通常，这个函数是在咱们代码中，发出错误信号的适当方式：
+
+
+```lua
+print "enter a number:"
+n = io.read("n")
+if not n then error("invalid input") end
+```
+
+这种根据某个条件，调用 `error` 的结构非常常见，以至于 Lua 专门为此，设计了一个内置函数，名为 `assert`：
+
+
+```lua
+print "enter a number:"
+n = assert(io.read("n"), "invalid input")
+```
+
+函数 `assert` 会检查其第一个参数是否为假，并简单地返回该参数；如果该参数为假，`assert` 就会抛出错误。第二个参数，即消息，是可选的。不过请注意，`assert` 是个常规函数。因此，Lua 在调用函数之前，总是先求取其参数。在我们写出下面这样的代码时
+
+
+```lua
+n = io.read()
+assert(tonumber(n), "invalid input: " .. n .. " is not a number")
+```
+
+那么 Lua 将总是会执行那个字符串连接， 即使 `n` 是个数字。在这种情况下，使用一个显式测试，可能更为明智。
+
+
+当函数发现意外情况（即 *异常，exception*）时，他可以采取两种基本行为：可以返回错误代码（通常为 `nil` 或 `false`），或者可以抛出错误，即调用 `error`。两种选择之间，没有固定规则，但我（作者）会用到以下准则：容易避免的异常，应抛出错误；否则，应返回错误代码。
+
+
+例如，我们来设想一下 `math.sin`。于某个表上调用他时，他应如何运行？假设他返回了某个错误代码。在我们需要检查错误时，就必须这样写：
+
+```lua
+local res = math.sin(x)
+if not res then     -- 出错了吗？
+    -- error-handling code
+```
+
+不过，在调用函数 *之前*，我们原本可以很容易地检查这个异常：
+
+
+```lua
+if not tonumber(x) then     -- 'x' 不是个数字？
+    -- error-handling code
+```
+
+咱们经常既不会检查参数，也不会检查调用 `sin` 的结果；如果参数不是数字，就意味着我们的程序，可能出了问题。在这种情况下，处理异常的最简单最实用的方法，就是停止计算并发出一条错误信息。
+
+
+另一方面，我们来考虑一下打开某个文件的 `io.open`。当被要求打开某个不存在的文件时，他应该如何表现？在这种情况下，在调用该函数之前，并没有检查该异常的简单方法。在许多系统中，获悉某个文件是否存在的唯一方法，就是尝试打开他。因此，如果 `io.open` 由于外部原因（如“文件不存在” 或 “权限被拒绝”），而无法打开某个文件时，他就会返回 `false`，并附带一个包含错误信息的字符串。这样，我们就有机会以适当的方式，来处理这种情况，例如，要求用户提供另一个文件名：
+
+
+```lua
+local file, msg
+repeat
+    print "enter a file name:"
+    local name = io.read()
+    if not name then return end     -- 无输入
+    file, msg = io.open(name, "r")
+    if not file then print(msg) end
+until file
+```
