@@ -9,10 +9,10 @@ end
 M.new = new
 
 -- 常量 'i'
-M.i = new(0, i)
+M.i = new(0, 1)
 
 function M.add (c1, c2)
-    return new(c1.r, + c2.r, c1.i + c2.i)
+    return new(c1.r + c2.r, c1.i + c2.i)
 end
 
 function M.sub (c1, c2)
@@ -34,7 +34,7 @@ function M.div (c1, c2)
 end
 
 function M.tostring (c)
-    return string.format("(%g,%g)", c.r, c.i)
+    return string.format("(%q,%q)", c.r, c.i)
 end
 
 return M
