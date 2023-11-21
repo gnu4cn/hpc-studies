@@ -89,3 +89,11 @@ local m = require(modname)
 
 
 在找不到有着该模组名字的 Lua 文件时，`require` 就会搜索有着该名字的 C 库 <sup>注 1</sup> 。（在这种情况下，搜索会由变量 `package.cpath` 引导。）如果找到了 C 库，他就会使用底层函数 `package.loadlib` 加载该库，寻找名为 <code>luaopen<i>_modname</i></code> 的函数。在这种情况下，加载器就是 `loadlib` 的结果，即用表示为某个 Lua 函数的 C 函数 <code>luaopen<i>_modname</i></code>。
+
+> **注 1**：在名为 [C 模组](calling_c_from_lua.md#C-模组) 的小节，咱们将讨论怎样编写 C 库。
+
+无论模组是在 Lua 文件，还是 C 库中找到的，`require` 现在都有了该模组的加载器。为最终加载该模组，`require` 会以两个参数，调用该加载器：模组名称，与获取到加载器的那个文件的名称。（多数模组，都只会忽略这两个参数。）如果加载器返回了任何值，`require` 就会将该值返回，并将其存储在 `package.loaded` 表中，以便在今后这个同一模组的调用中，返回同样的值。如果加载器没有返回值，并且表项 `package.loaded[@rep{modname}]` 仍然为空，`require` 则会如同该模组返回 `true` 那样行事。如果没有这一修正，后续的 `require` 调用，则将再次运行该模组。
+
+> **译注**：这里原文为：if the loader returns no value, and the table entry `package.loaded[@rep{modname}]` is still empty, `require` behaves as if the module returned `true`. Without this correction, a subsequent call to `require` would run the module again.
+
+
