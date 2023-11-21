@@ -88,4 +88,4 @@ local m = require(modname)
 在该模组尚未加载时，`require` 就会搜索带有该模组名字的 Lua 文件。(此搜索由 `package.path` 变量引导，稍后咱们将讨论到）。如果找到了，就用 `loadfile` 加载他。结果便是我们称之为 *加载器，loader* 的函数。(加载器是个，在其被调用时，加载模块的函数。）
 
 
-在找不到有着该模组名字的 Lua 文件时，`require` 就会搜索有着该名字的 C 库 <sup>注 1</sup> 。（在这种情况下，搜索会由变量 `package.cpath` 引导。）如果找到了 C 库，他就会使用底层函数 `package.loadlib` 加载该库，寻找名为 <code>luaopen_</code><i>modname</i> 的函数。在这种情况下，加载器就是 `loadlib` 的结果，即用表示为某个 Lua 函数的 C 函数 <code>luaopen_</code><i>modname</i>。
+在找不到有着该模组名字的 Lua 文件时，`require` 就会搜索有着该名字的 C 库 <sup>注 1</sup> 。（在这种情况下，搜索会由变量 `package.cpath` 引导。）如果找到了 C 库，他就会使用底层函数 `package.loadlib` 加载该库，寻找名为 luaopen_<i>modname</i> 的函数。在这种情况下，加载器就是 `loadlib` 的结果，即用表示为某个 Lua 函数的 C 函数 luaopen_<i>modname</i>。
