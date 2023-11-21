@@ -78,3 +78,14 @@ local m = require("math")
 local modname = 'math'
 local m = require(modname)
 ```
+
+函数 `require` 尽量减少了对模块是什么的假设。对他来说，模块就是定义了，一些诸如函数或包含函数的表，的代码。通常情况下，代码会返回一个包含着模组函数的表。然而，由于这一操作是由模组代码，而非 `require` 完成的，因此某些模组，就可能会选择返回一些别的值，甚至产生副作用（例如，创建出一些全局变量）。
+
+
+`require` 的第一步，是在 `package.loaded` 表中，检查该模块是否已被加载。如果是，`require` 会返回该模组相应的值。因此，一旦某个模组加载完毕，其他导入该同一模组的调用，就只需返回这同一值，而无需再次运行任何代码。
+
+
+在该模组尚未加载时，`require` 就会搜索带有该模组名字的 Lua 文件。(此搜索由 `package.path` 变量引导，稍后咱们将讨论到）。如果找到了，就用 `loadfile` 加载他。结果便是我们称之为 *加载器，loader* 的函数。(加载器是个，在其被调用时，加载模块的函数。）
+
+
+在找不到有着该模组名字的 Lua 文件时，`require` 就会搜索有着该名字的 C 库 <sup>注 1</sup> 。（在这种情况下，搜索会由变量 `package.cpath` 引导。）如果找到了 C 库，他就会使用底层函数 `package.loadlib` 加载该库，寻找名为 <code>luaopen_<i>modname</i></code> 的函数。在这种情况下，加载器就是 `loadlib` 的结果，即用表示为某个 Lua 函数的 C 函数 <code>luaopen_<i>modname</i></code>。
