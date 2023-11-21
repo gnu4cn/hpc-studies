@@ -127,4 +127,60 @@ local mod  = require "mod".init(0, 0)
 **Renaming a module**
 
 
-通常，我们会以模组的原名，使用该模组，但有时我们必须重新命名某个模组，以避免名字冲突。一种典型的情况是，我们需要加载同一模组的不同版本，例如用于测试。Lua 模组在内部并没有固定的名字，因此通常只需重命名 `.lua` 文件即可。但是，我们却无法编辑某个 C 库的目标代码，来修改其 `luaopen_*` 函数的名字。为了实现此类重命名，`require` 用到了一个小技巧：如果模组名字中包含连字符（`-`），`require` 在创建 `luaopen_*` 函数名称时，会从名字中删除连字符后的后缀。例如，如果模组名为 `mod-v3.4`，`require` 就会预期该模组的开放函数，its open function，被命名为 `luaopen_mod`，而不是 `luaopen_mod-v3.4`（这不会是个有效的 C 语言名字）。因此，在需要使用两个名为 `mod` 的模组（或同一模组的两个版本）时，我们可以将其中一个，重命名为 `mod-v1`。当我们调用 `m1 = require "mod-v1"` 时，`require` 会找到重命名后的文件 `mod-v1`，并在该文件中，找到原名为 `luaopen_mod` 的函数。
+通常，我们会以模组的原名，使用该模组，但有时我们必须重新命名某个模组，以避免名字冲突。一种典型的情况是，我们需要加载同一模组的不同版本，例如用于测试。Lua 模组在内部并没有固定的名字，因此通常只需重命名 `.lua` 文件即可。但是，我们却无法编辑某个 C 库的目标代码，来修改其 `luaopen_*` 函数的名字。为了实现此类重命名，`require` 用到了一个小技巧：如果模组名字中包含连字符（`-`），`require` 在创建 `luaopen_*` 函数名称时，会从名字中删除连字符后的后缀。例如，如果模组名为 `mod-v3.4`，`require` 就会预期该模组的开放函数，its open function，被命名为 `luaopen_mod`，而不是 `luaopen_mod-v3.4`（这不会是个有效的 C 语言名字）。因此，在需要使用两个名字均为 `mod` 的模组（或同一模组的两个版本）时，我们可以将其中一个，重命名为 `mod-v1`。当我们调用 `m1 = require "mod-v1"` 时，`require` 会找到重命名后的文件 `mod-v1`，并在该文件中，找到原名为 `luaopen_mod` 的函数。
+
+
+## 路径的检索
+
+**Path searching**
+
+
+当 `require` 检索某个 Lua 文件时，引导 `require` 的路径，与那些典型路径有些不同。所谓典型路径，a typical path，是个要在其中，检索给定文件的目录列表。然而，ISO C（Lua 所运行的抽象平台，the abstract platform where Lua runs），却并没有目录的概念。因此，`require` 用到的路径，是个 *模板，templates* 的列表，其中的每个模板，都指定了将模组名名字（`require` 的参数），转换为文件名的替代方法。更具体地说，路径中的每个模板，都是一个包含一些可选问号的文件名。对于每种模板，`require` 都会将模组名字，替换为各个问号，并检查是否存在与替换结果的名字相同的文件；如果没有，则转到下一模板。路径中的模板之间，是用分号隔开的，在大多数操作系统中，分号都很少用于文件名。例如，请看下面这个路径：
+
+
+```lua
+?;?.lua?c:\windows\?;/usr/local/lua/?/?.lua
+```
+
+
+在这个路径下，`require "sql"` 这个调用，将尝试打开下面这些 Lua 文件：
+
+
+```lua
+sql
+sql.lua
+c:\windows\sql
+/usr/local/lua/sql/sql.lua
+```
+
+函数 `require` 仅假定了分号（作为组件的分隔符）和问号；其他一切，包括目录分隔符与文件扩展名，都由路径本身定义。
+
+
+`require` 用于搜索 Lua 文件的路径，始终是变量 `package.path` 的当前值。当模组 `package` 被初始化时，他会以环境变量 `LUA_PATH_5_4` 的值，设置这个变量；如果这个环境变量未定义，Lua 就会尝试使用环境变量 `LUA_PATH`。如果这两个变量都未定义，Lua 将使用其编译时所定义的默认路径。<sup>注 2</sup>在使用某个环境变量的值时，Lua 会用该默认路径，代替任何子串 `";;"`。例如，在我们将 `LUA_PATH_5_4` 设置为 `"mydir/?.lua;;"` 时，最终路径将是其后带有默认路径的模板 `"mydir/?.lua"`。
+
+
+用于搜索 C 库的路径，与此完全相同，但其值来自变量 `package.cpath`，而不是 `package.path`。同样，该变量会从环境变量 `LUA_CPATH_5_4` 或 `LUA_CPATH`，获取其初始值。POSIX 中的该路径典型值，是下面这样的：
+
+
+```lua
+./?.so;/usr/local/lib/lua/5.4/?.so
+```
+
+请注意，该路径定义了文件扩展名。上面的示例，对全部所有模板都使用了 `.so` 文件扩展名；在 Windows 系统中，典型路径则会与此相似：
+
+
+```lua
+.\?.dll;C:/Program Files\Lua502\dll\?.dll
+```
+
+函数 `package.searchpath`，会把全部这些规则，编码用于库的检索。他会取一个模组名字，以及一个路径，并按照这里所描述的规则，查找某个文件。他要么返回存在的第一个文件的名字，要么返回 `nil`，以及一条说明他尝试未成功打开的所有文件的消息，如下面这个示例所示：
+
+
+```lua
+> path = ".\\?.dll;C:\\Program Files\\Lua502\\dll\\?.dll"
+> print(package.searchpath("X", path))
+nil     no file '.\X.dll'
+        no file 'C:\Program Files\Lua502\dll\X.dll'
+```
+
+
