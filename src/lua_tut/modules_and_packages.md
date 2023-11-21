@@ -130,7 +130,7 @@ local mod  = require "mod".init(0, 0)
 通常，我们会以模组的原名，使用该模组，但有时我们必须重新命名某个模组，以避免名字冲突。一种典型的情况是，我们需要加载同一模组的不同版本，例如用于测试。Lua 模组在内部并没有固定的名字，因此通常只需重命名 `.lua` 文件即可。但是，我们却无法编辑某个 C 库的目标代码，来修改其 `luaopen_*` 函数的名字。为了实现此类重命名，`require` 用到了一个小技巧：如果模组名字中包含连字符（`-`），`require` 在创建 `luaopen_*` 函数名称时，会从名字中删除连字符后的后缀。例如，如果模组名为 `mod-v3.4`，`require` 就会预期该模组的开放函数，its open function，被命名为 `luaopen_mod`，而不是 `luaopen_mod-v3.4`（这不会是个有效的 C 语言名字）。因此，在需要使用两个名字均为 `mod` 的模组（或同一模组的两个版本）时，我们可以将其中一个，重命名为 `mod-v1`。当我们调用 `m1 = require "mod-v1"` 时，`require` 会找到重命名后的文件 `mod-v1`，并在该文件中，找到原名为 `luaopen_mod` 的函数。
 
 
-## 路径的检索
+### 路径的检索
 
 **Path searching**
 
@@ -158,6 +158,7 @@ c:\windows\sql
 
 `require` 用于搜索 Lua 文件的路径，始终是变量 `package.path` 的当前值。当模组 `package` 被初始化时，他会以环境变量 `LUA_PATH_5_4` 的值，设置这个变量；如果这个环境变量未定义，Lua 就会尝试使用环境变量 `LUA_PATH`。如果这两个变量都未定义，Lua 将使用其编译时所定义的默认路径。<sup>注 2</sup>在使用某个环境变量的值时，Lua 会用该默认路径，代替任何子串 `";;"`。例如，在我们将 `LUA_PATH_5_4` 设置为 `"mydir/?.lua;;"` 时，最终路径将是其后带有默认路径的模板 `"mydir/?.lua"`。
 
+> **注 2**：自 Lua 5.2 起，独立解释器，就接受命令行选项 `-E`，来阻止使用这些环境变量，而强制使用默认值。
 
 用于搜索 C 库的路径，与此完全相同，但其值来自变量 `package.cpath`，而不是 `package.path`。同样，该变量会从环境变量 `LUA_CPATH_5_4` 或 `LUA_CPATH`，获取其初始值。POSIX 中的该路径典型值，是下面这样的：
 
@@ -183,4 +184,112 @@ nil     no file '.\X.dll'
         no file 'C:\Program Files\Lua502\dll\X.dll'
 ```
 
+作为一个有趣的练习，在下图 17.1，“一个自制的 `package.searchpath`” 中，我们实现了一个类似 `package.searchpath` 的函数。
 
+
+**图 17.1，一个自制的 `package.searchpath`**
+
+
+```lua
+function search (modname, path)
+    modname = string.gsub(modname, "%.", "/")
+    local msg = {}
+    for c in string.gmatch(path, "[^;]+") do
+        local fname = string.gsub(c, "?", modname)
+        local f = io.open(fname)
+        if f then
+            f:close()
+            return fname
+        else
+            msg[#msg + 1] = string.format("\n\tno file '%s'", fname)
+        end
+    end
+    return nil, table.concat(msg)       -- 未找到
+end
+```
+
+第一步是用目录分隔符（本例中假定为斜线），代替所有的点。（如同稍后我们将看到的，点在模组名字中，有特殊含义。）。然后，该函数循环遍历了路径的所有组件，其中每个组件，都是非分号字符的最大展开形式。对于每个组件，该函数都会用模组名字取代问号，来得到最终的文件名，然后检查是否存在这样一个文件。如果有，该函数将关闭这个文件，并返回其名字。否则，他会为一条可能的错误信息，存储这个失败的文件名。(请注意为了避免创建出无用的长字符串，其中字符串缓冲的运用。）如果没有找到文件，则其会返回 `nil` 和最终的错误信息。
+
+
+
+### 检索器
+
+**Searchers**
+
+
+实际上，`require` 要比我们曾描述的，要复杂一些。搜寻 Lua 文件和 C 库，只是 *检索器，searchers* 这一更普遍概念的两个实例。所谓检索器，只是个取模组名字，并要么返回该模组的加载器，要么在找不到时，返回 `nil` 的函数。
+
+
+数组 `package.searchers` 列出了 `require` 用到的那些检索器。在查找某个模组时，`require` 会调用这个列表中的各个检索器，传递该模组的名字，直到其中某个检索器找到该模组的加载器。如果列表结束时没有肯定的回应，`require` 就会抛出一个错误。
+
+
+使用列表来驱动模组的检索，实现了 `require` 的极大灵活性。例如，如果我们打算把模组，压缩存储在 zip 文件中，就只需为此提供一个适当的检索器函数，并将其添加到列表中。在其默认配置中，我们前面介绍过的 Lua 文件检索器，以及 C 语言库检索器，就分别是该列表中的第二和第三个元素。在他们之前，是预加载检索器，the preload searcher。
+
+
+*预加载* 检索器，实现了定义任意函数，来加载某个模组。他用到了一个将模组名称，映射到加载器函数，名为 `package.preload` 的表。在检索某个模组的名称时，该检索器只需在这个表中，查找所给的名称。如果在其中找到一个函数，就会将该函数作为模组加载器返回。否则，他将返回 `nil`。该检索器提供了一种处理一些非常规情况的通用方法。例如，静态链接到 Lua 的某个 C 库，便可以将其 `luaopen_` 函数，注册到 `preload` 表中，从而就只有在用户导入该模组时，才会调用该函数。以这种方式，在该模组不会被用到时，程序就不会浪费资源去打开他。
+
+
+`package.searchers` 的默认内容，包括了只与子模组相关的第四个函数。我们将在 [“子模组与包”](#子模组与包) 小节中讨论这个函数。
+
+
+## Lua 中编写模组的基本方法
+
+**The Basic Approch for Writing Modules in Lua**
+
+在 Lua 中创建模组的最简单方法，其实很简单：我们创建出一个表，将所有咱们打算导出的函数放在该表中，然后返回这个表。下图 17.2，“用于复数的简单模组”，展示了这种方法。
+
+
+```lua
+local M = {}        -- 模组
+
+
+-- 创建出一个新的复数
+local function new (r, i)
+    return {r = r, i = i}
+end
+
+M.new = new
+
+-- 常量 'i'
+M.i = new(0, i)
+
+function M.add (c1, c2)
+    return new(c1.r, + c2.r, c1.i + c2.i)
+end
+
+function M.sub (c1, c2)
+    return new(c1.r - c2.r, c1.i - c2.i)
+end
+
+
+function M.mul (c1, c2)
+    return new(c1.r*c2.r - c1.i*c2.i, c1.r*c2.i + c1.i*c2.r)
+end
+
+local function inv (c)
+    local n = c.r^2 + c.i^2
+    return new(c.r/n, -c.i/n)
+end
+
+function M.div (c1, c2)
+    return M.mul(c1, inv(c2))
+end
+
+function M.tostring (c)
+    return string.format("(%g,%g)", c.r, c.i)
+end
+
+return M
+```
+
+请注意我们是如何将 `new` 和 `inv` 定义为私有函数的，只需将他们声明为针对该代码块的本地函数。
+
+
+有的人会不喜欢最后的那个返回语句。消除他的一种方法，是将这个模组表，直接赋值给 `package.loaded`：
+
+
+```lua
+local M = {}
+package.loaded[...] = M
+    -- 随后的内容与之前一样，只是不带那个返回语句
+```
