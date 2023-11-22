@@ -83,3 +83,8 @@
 - [数据文件与序列化](lua_tut/data_files.md)
 - [编译，执行及报错](lua_tut/cee.md)
 - [模组与包](lua_tut/modules_and_packages.md)
+
+
+# 第三部分，Lua 的各种机制，Lua-isms
+
+- [迭代器与通用的 `for`](lua_tut/iterators.md)
