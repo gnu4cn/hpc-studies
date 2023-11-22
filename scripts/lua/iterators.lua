@@ -19,8 +19,8 @@ for el in values(t) do
     print(el)
 end
 
-function allwords (f)
-    local line = f:read()           -- 当前行
+function allwords ()
+    local line = io.read()           -- 当前行
     local pos = 1                   -- 行中的当前位置
 
     return function ()              -- 迭代器函数
@@ -30,7 +30,7 @@ function allwords (f)
                 pos = e             -- 下一位置是在这个单词之后
                 return w            -- 返回这个单词
             else
-                line = f:read()     -- 未找到单词；尝试下一行
+                line = io.read()     -- 未找到单词；尝试下一行
                 pos = 1             -- 从首个位置重新开始
             end
         end
@@ -38,8 +38,10 @@ function allwords (f)
     end
 end
 
-f = assert(io.open("article", "r"))
-for w in allwords(f) do
+io.input("article")
+for w in allwords() do
     print(w)
 end
-f:close()
+io.close()
+
+for k, v in pairs(t) do print(k, v) end
