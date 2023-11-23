@@ -88,3 +88,4 @@
 # 第三部分，Lua 的各种机制，Lua-isms
 
 - [迭代器与通用的 `for`](lua_tut/iterators.md)
+- [序曲：马科夫链算法](lua_tut/markov_chain_algorithm.md)
