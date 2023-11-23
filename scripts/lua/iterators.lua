@@ -76,3 +76,6 @@ for w in allwords() do
     if w == "hello" then count = count + 1 end
 end
 print(count)
+
+
+
