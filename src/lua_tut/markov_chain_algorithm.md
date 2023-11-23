@@ -40,3 +40,17 @@ end
 
 
 ```lua
+function insert (prefix, value)
+    local list = statetab[prefix]
+    if list == nil then
+        statetab[prefix] = {value}
+    else
+        list[#list + 1] = value
+    end
+end
+```
+
+他首先检查了，该前缀是否已经有一个列表；如果没有，就用那个新值创建出一个新的列表。否则，他会将那个新值，插入于现有列表的末尾。
+
+
+
