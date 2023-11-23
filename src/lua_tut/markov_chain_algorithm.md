@@ -1,4 +1,4 @@
-# 序曲：马科夫链算法
+# 插曲：马科夫链算法
 
 **Interlude: Markov Chain Algorithm**
 
@@ -12,3 +12,31 @@
 
 
 > **译注**：关于马科夫链算法与 GPT 的区别，请参阅：[GPT vs. 马科夫链](https://chat.openai.com/share/ac4230fa-0f19-4607-83c2-9dc5f1c6a6dc)，内容由 [ChatGPT 3.5](https://chat.openai.com/) 生成。
+
+为将两单词的前缀，用作表中的键，我们将通过把两个单词，中间用一个空格连接起来表示这种两单词的前缀：
+
+
+```lua
+function prefix (w1, w2)
+    return w1 .. " " .. w2
+end
+```
+
+我们会使用字符串 `NOWORD`（换行符），来初始化这些前缀词，以及标记文本的结束。例如，对于文本 `"the more we try the more we do"`，接续单词表，the table of following words，将会如下所示：
+
+
+```lua
+{ ["\n \n"] = {"the"},
+  ["\n the"] = {"more"},
+  ["the more"] = {"we", "we"},
+  ["more we"] = {"try", "do"},
+  ["we try"] = {"the"},
+  ["try the"] = ["more"]
+  ["we do"] = {"\n"}
+}
+```
+
+该程序将其表，保存在变量 `statetab` 中。要在这个表的某个列表中，插入一个新词，我们会使用以下函数：
+
+
+```lua
