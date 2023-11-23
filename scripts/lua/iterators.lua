@@ -1,22 +1,13 @@
 #!/usr/bin/env lua
 
-a = {"one", "two", "three"}
-for i, v in ipairs(a) do
-    print(i, v)
-end
+lines = {
+    ["luaH_set"] = 10,
+    ["luaH_get"] = 24,
+    ["luaH_present"] = 48,
+}
 
-local function iter (t, i)
-    i = i + 1
-    local v = t[i]
-    if v then
-        return i, v
-    end
-end
+a = {}
+for n in pairs(lines) do a[#a + 1] = n end
+table.sort(a)
 
-function ipairs (t)
-    return iter, t, 0
-end
-
-function pairs (t)
-    return next, t, nil
-end
+for _, n in ipairs(a) do print(n) end

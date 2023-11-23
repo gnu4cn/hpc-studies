@@ -192,4 +192,82 @@ end
 ```
 
 
+`next(t,k)` 的调用（其中 `k` 是表 `t` 的一个键），会以任意顺序，返回表中的下一个键，并将与该键相关的值，作为第二个返回值。`next(t, nil)` 的调用，会返回第一个键值对。如果没有了更多键值对，`next` 就会返回 `nil`。
+
+
+我们原本可以直接使用 `next`，而无需调用 `pairs`：
+
+
+```lua
+for k, v in next, t do
+    -- loop body
+end
+```
+
+请记住，`for` 循环会将其表达式列表，调整为三个结果，从而他会得到 `next`、`t` 和 `nil`；这正是他在调用 `pairs(t)` 时，所得到的结果。
+
+
+无状态迭代器的另一个有趣示例，便是遍历某个链表。(链表在 Lua 中并不常见，但有时我们会需要。）我们首先想到的，是只使用当前节点，作为控制变量，这样迭代器函数就可以返回下一节点：
+
+
+```lua
+local function getnext (node)
+    return node.next
+end
+
+function traverse (list)
+    return getnext, nil, list
+end
+```
+
+但是，这种实现方式会跳过第一个节点。相反，我们可以使用下面的代码：
+
+
+```lua
+local function getnext (list, node)
+    if not node then
+        return list
+    else
+        return node.next
+    end
+end
+
+function traverse (list)
+    return getnext, list, nil
+end
+```
+
+
+这里的诀窍，是除了把当前节点用作控制变量外，还讲第一个节点（？**译注**：不是列表吗？）用作了不变状态（`traverse` 返回的第二个值）。首次调用那个迭代器函数 `getnext` 时，`node` 将为 `nil`，因此该函数将返回 `list` 作为第一个节点。在随后的调用中，`node` 不会为 `nil`，因此迭代器将如预期，返回 `node.next`。
+
+
+## 按顺序遍历表
+
+**Traversing Tables in Order**
+
+
+当程序员试图给表中的条目排序时，就会发生一种常见的混淆。在表中，那些条目构成一个集合，而没有任何的顺序。如果咱们打算对他们进行排序，就必须将其中的那些键，复制到某个数组中，然后对数组排序。
+
+
+在第 11 章 [*插曲：高频词*](interlude_most_frequent_words.md) 的 “高频词” 程序中，咱们曾看到过这一技巧的示例。下面我们来看另一个例子。假设我们读取了一个源代码文件，并建立了一个，为每个函数名称，提供了定义该函数所在行的表；类似于下面这样的表：
+
+
+```lua
+lines = {
+    ["luaH_set"] = 10,
+    ["luaH_get"] = 24,
+    ["luaH_present"] = 48,
+}
+```
+
+现在，我们打算按字母顺序，打印出这些函数名。如果我们用 `pairs`，来遍历这个表，名称就会以任意顺序出现。因为这些名称是表的键，故咱们不能直接对他们排序。但是，如果我们将他们放入某个数组，那么就可以对他们进行排序了。首先，我们必须用这些名字，创建出一个数组，然后对其排序，最后打印结果：
+
+
+```lua
+a = {}
+for n in pairs(lines) do a[#a + 1] = n end
+table.sort(a)
+for _, n in ipairs(a) do print(n) end
+```
+
 
