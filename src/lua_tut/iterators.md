@@ -151,3 +151,45 @@ end
 
 
 顾名思义，无状态迭代器是一种自身不保留任何状态的迭代器。因此，我们可以在多个循环中，使用同一个无状态迭代器，避免了创建新闭包的代价。
+
+正如我们刚才看到的，`for` 循环会以两个参数：不变状态和控制变量，调用他的迭代器函数。而无状态迭代器，就只使用这两个值，生成迭代的下一元素。这类迭代器的一个典型例子，就是可以遍历某个序列所有元素的 `ipairs`：
+
+
+```lua
+a = {"one", "two", "three"}
+for i, v in ipairs(a) do
+    print(i, v)
+end
+```
+
+该迭代的整个状态，是由正被遍历的那个表（即在循环过程中，不会改变的所谓不变状态），与当前索引（控制变量）二者构成。`ipairs`（迭代器工厂）和迭代器，都很简单；我们可以用 Lua，将他们写成下面这样：
+
+
+```lua
+local function iter (t, i)
+    i = i + 1
+    local v = t[i]
+    if v then
+        return i, v
+    end
+end
+
+function ipairs (t)
+    return iter, t, 0
+end
+```
+
+当 Lua 在 `for` 循环中，调用 `ipairs(t)` 时，会得到三个值：作为迭代器的函数 `iter`、作为不变状态的表 `t`，以及作为控制变量初始值的 `0`。然后，Lua 会调用 `iter(t, 0)`，其结果为 `1,t[1]`（除非 `t[1]` 已经是 `nil`）。在第二次迭代中，Lua 会调用 `iter(t,1)`，其结果是 `2,t[2]`，以此类推，直到出现首个 `nil` 的元素。
+
+
+对表中所有元素，进行遍历的函数 `pairs` 与之类似，只是他的迭代函数是 `next`，而 `next` 是 Lua 中的一个原语函数，a primitive function in Lua：
+
+
+```lua
+function pairs (t)
+    return next, t, nil
+end
+```
+
+
+
