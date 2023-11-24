@@ -89,3 +89,4 @@
 
 - [迭代器与通用的 `for`](lua_tut/iterators.md)
 - [插曲：马科夫链算法](lua_tut/markov_chain_algorithm.md)
+- [元表与元方法](lua_tut/metatables_and_metamethods.md)
