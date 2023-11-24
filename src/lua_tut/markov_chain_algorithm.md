@@ -94,3 +94,8 @@ function allwords ()
 end
 
 local statetab = {}
+```
+
+### 图 19.2，马科夫程序
+
+
