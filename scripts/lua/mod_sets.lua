@@ -10,6 +10,10 @@ function Set.new (l)
 end
 
 function Set.union (a, b)
+    if getmetatable(a) ~= mt or getmetatable(b) ~= mt then
+        error("attempt to 'add' a set with a non-set value", 2)
+    end
+
     local res = Set.new{}
     for k in pairs(a) do res[k] = true end
     for k in pairs(b) do res[k] = true end

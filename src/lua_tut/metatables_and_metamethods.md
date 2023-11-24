@@ -192,3 +192,34 @@ s = s + 8
 ```
 
 在查找元方法时，Lua 会执行以下步骤：在第一个值有着带有所需元方法的元表时，那么 Lua 就会独立于第二个值，而使用这个元方法；否则，在第二个值有着带有所需元方法的元表时，Lua 就会使用这个元方法；否则，Lua 就会抛出错误。因此，最后这个示例，与表达式 `10 + s` 和 `"hello" + s` 一样，都将调用 `Set.union`（因为数字和字符串，都没有元方法 `__add`）。
+
+Lua 不会关心这些混合类型，但我们的实现会关心。如果我们运行 `s = s + 8` 那个示例，我们会得到函数 `Set.union` 内部的一个报错：
+
+```console
+bad argument #1 to 'for iterator' (table expected, got number)
+```
+
+如果我们想要获得更清晰的错误信息，就必须在尝试执行该运算前，显式检查操作数的类型，例如使用下面这样的代码：
+
+```lua
+    if getmetatable(a) ~= mt or getmetatable(b) ~= mt then
+        error("attempt to 'add' a set with a non-set value", 2)
+    end
+
+    -- as before
+```
+
+请记住，`error` 的第二个参数（本例中为 `2`），会将错误信息中的源位置，设置到调用该运算的代码。
+
+> **注意**：这句话的意思，是说报错本来是在 `mod_sets` 模组中，但因为这个第二参数 `2`，最终的报错输出，会显示为导入该模组的程序中。实际输出为：
+
+```console
+lua: ./arithmetic_metamethod.lua:16: attempt to 'add' a set with a non-set value
+stack traceback:
+        [C]: in function 'error'
+        ./mod_sets.lua:14: in function 'mod_sets.union'
+        ./arithmetic_metamethod.lua:16: in main chunk
+        [C]: in ?
+```
+
+> 表示在 `arithmetic_metamethod.lua` 的第 16 行出错，该行正是调用了 `Set.union` 的 `s = s + 8` 语句。
