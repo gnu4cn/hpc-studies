@@ -58,7 +58,7 @@ end
 建立了这个表后，程序会开始生成包含 `MAXGEN` 个单词的文本。首先，程序会重新初始化变量 `w1` 和 `w2`。随后，对于每个前缀，程序从有效的下一单词列表，随机选择一个下一单词，打印出该单词，并更新 `w1` 和 `w2`。下面的图 19.1，“马尔可夫程序的辅助定义” 和图 19.2，“马尔可夫程序” 给出了完整程序。
 
 
-### 图 19.1，马科夫程序的辅助定义
+### 图 19.1，马科夫程序的一些辅助定义
 
 ```lua
 function prefix (w1, w2)
@@ -98,4 +98,33 @@ local statetab = {}
 
 ### 图 19.2，马科夫程序
 
+```lua
+local MAXGEN = 200
+local NOWORD = "\n"
 
+-- 构建出表
+local w1, w2 = NOWORD, NOWORD
+for nextword in allwords() do
+    insert(prefix(w1, w2), nextword)
+    w1 = w2; w2 = nextword
+end
+insert(prefix(w1, w2), NOWORD)
+
+-- 生成文本
+w1 = NOWORD; w2 = NOWORD        -- 重新初始化
+for i = 1, MAXGEN do
+    local list = statetab[prefix(w1, w2)]
+    -- 从清单选择一个随机项目
+    local r = math.random(#list)
+    local nextword = list[r]
+    if nextword == NOWORD then return end
+    io.write(nextword, " ")
+    w1 = w2; w2 = nextword
+end
+```
+
+
+## 练习
+
+
+练习 19.1：将马尔可夫链算法推广扩大，使其能够在选择下一个单词时，使用的任意大小的前导单词序列。
