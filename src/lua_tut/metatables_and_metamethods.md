@@ -48,4 +48,137 @@ print(getmetatable(print))              --> nil
 **Arithmetic Metamethods**
 
 
+在这一小节中，我们将引入一个运行示例，来解释元表的基础知识。假设我们有个使用表来表示集合，并使用函数来计算集合的并集、交集等的模组，如下图 20.1，“一个简单的集合模块” 所示。
+
+
+### 图 20.1，一个简单的集合模组
+
+
+```lua
+local Set = {}
+
+-- 以给定列表，创建出一个新的集合
+function Set.new (l)
+    local set = {}
+    for _, v in ipairs(l) do set[v] = true end
+    retur set
+end
+
+function Set.union (a, b)
+    local res = Set.new{}
+    for k in pairs(a) do do res[k] = true end
+    for k in pairs(b) do do res[k] = true end
+    return res
+end
+
+function Set.intersection (a, b)
+    local res = Set.new{}
+    for k in pairs(a) do
+        res[k] = b[k]
+    end
+    return res
+end
+
+
+-- 将集合表示为字符串
+function Set.tostring (set)
+    local l = {}    -- 将该集合中全部元素放入的列表
+    for e in pairs(set) do
+        l[#l + 1] = tostring(e)
+    end
+    return "{" .. table.concat(l, ", ") .. "}"
+end
+
+return Set
+```
+
+
+现在，我们打算使用加法运算符，来计算两个集合的并集。为此，我们将安排所有代表集合的表，共享某个元表。这个元表将定义出，他们对加法运算符的反应。我们的第一步，是创建出一个常规表，并将其用作集合的元表：
+
+
+```lua
+local mt = {}       -- 集合的元表
+```
+
+
+下一步是修改创建出集合的 `Set.new`。新版本只多了将 `mt`，设置为其所创建出表的元表的一行：
+
+
+```lua
+function Set.new (l)        -- 第二版
+    local set = {}
+    setmetatable(set, mt)
+    for _, v in ipairs(l) do set[v] = true end
+    retur set
+end
+```
+
+
+自那以后，我们使用 `Set.new` 创建的每个集合，都将以那同一个表，作为其元表：
+
+
+```lua
+s1 = Set.new{10, 20, 30, 50}
+s2 = Set.new{30, 1}
+print(getmetatable(s1))         --> table: 000002ade230b160
+print(getmetatable(s2))         --> table: 000002ade230b160
+```
+
+最后，我们将 *元方法，metamethod* `__add`，一个描述如何执行加法运算的字段，添加到那个元表：
+
+
+```lua
+mt.__add = Set.union
+```
+
+自那以后，每当 Lua 尝试加上两个集合时，他都会调用 `Set.union`，并将两个操作数，作为参数。
+
+有了这个元方法，我们就可以使用加法运算符，来完成集合的并集运算：
+
+
+```lua
+s3 = s1 + s2
+print(Set.tostring(s3))         --> {1, 30, 10, 20, 50}
+```
+
+类似地，我们也可以将乘法运算符，设置为执行集合的交集运算：
+
+
+```lua
+mt.__mul = Set.intersection
+
+print("s1 x s2 = ", Set.tostring(s2 * s1))  --> {30}
+```
+
+对于每个算术运算符，都有一个元方法名字与之对应。除加法和乘法外，还有：
+
+- 减法（`__sub`）
+
+- 浮除，float division（`__div`）
+
+- 底除，floor division（`__idiv`）
+
+- 求反，negation（`__unm`）
+
+- 取模，modulo（`__mod`）
+
+- 及幂运算（`__pow`）
+
+同样，所有位操作，也都有相应的元方法：
+
+- 位与操作，AND (`__band`)
+
+- 或，OR (`__bor`)
+
+- 异或，OR (`__bxor`)
+
+- 非，NOT (`__bnot`)
+
+- 左移位 (`__shl`)
+
+- 右移位 (`__shr`)
+
+我们还可以用（元表中的）字段 `__concat`，来定义连接运算符（`..`）的行为。
+
+
 
