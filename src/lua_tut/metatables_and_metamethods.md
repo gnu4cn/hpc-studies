@@ -39,3 +39,13 @@ print(getmetatable("xuxu"))             --> table: 000002634fa4aea0
 print(getmetatable(10))                 --> nil
 print(getmetatable(print))              --> nil
 ```
+
+任何的表，都可以是任何值的元表；一组相关的表，可以共用一个描述他们共同行为的共同元表；某个表可以是他自己的元表，从而用来描述他自己的单独行为。任何的配置，都是有效的。
+
+
+## 算术的元方法
+
+**Arithmetic Metamethods**
+
+
+
