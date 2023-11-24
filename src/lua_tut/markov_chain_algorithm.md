@@ -52,4 +52,45 @@ end
 
 他首先检查了，该前缀是否已经有一个列表；如果没有，就用那个新值创建出一个新的列表。否则，他会将那个新值，插入于现有列表的末尾。
 
-为了建立这个 `statetab`，我们保留了有着最后读取两个单词的两个变量 `w1` 和 `w2`。我们使用 "迭代器和闭包 "一节中的迭代器 allwords 读取单词，但我们调整了 "单词 "的定义，将逗号和句号等可选标点符号也包括在内（参见图 19.1 "马尔可夫程序的辅助定义"）。每读取一个新词，我们就将其添加到与 w1-w2 关联的列表中，然后更新 w1 和 w2。
+为了建立起 `statetab` 这个表，我们会保留分别有着最后读取的两个单词的两个变量 `w1` 和 `w2`。我们会用到 [迭代器和闭包](iterators.md#迭代器与闭包) 小节中，那个迭代器 `allwords` 读取单词，但我们调整了 “单词” 的定义，将逗号和句号等可选标点符号，也包括在内（参见下图 19.1，“马尔可夫程序的辅助定义”）。每读取一个新词，我们就将其添加到与 `w1-w2` 关联的列表中，然后更新 `w1` 和 `w2`。
+
+
+建立了这个表后，程序会开始生成包含 `MAXGEN` 个单词的文本。首先，程序会重新初始化变量 `w1` 和 `w2`。随后，对于每个前缀，程序从有效的下一单词列表，随机选择一个下一单词，打印出该单词，并更新 `w1` 和 `w2`。下面的图 19.1，“马尔可夫程序的辅助定义” 和图 19.2，“马尔可夫程序” 给出了完整程序。
+
+
+### 图 19.1，马科夫程序的辅助定义
+
+```lua
+function prefix (w1, w2)
+    return w1 .. " " .. w2
+end
+
+function insert (prefix, value)
+    local list = statetab[prefix]
+    if list == nil then
+        statetab[prefix] = {value}
+    else
+        list[#list + 1] = value
+    end
+end
+
+
+function allwords ()
+    local line = io.read()      -- 当前行
+    local pos = 1               -- 行中的当前位置
+    return function ()          -- 迭代器函数
+        while line do           -- 在有行时重复
+            local w, e = string.match(line, "(%w+[,;.:]?)()", pos)
+            if w then                       -- 找了个单词？
+                pos = e                     -- 更新下一位置
+                return w                    -- 返回该单词
+            else
+                line = io.read()        -- 未找到单词；尝试下一行
+                pos = 1
+            end
+        end
+        return nil
+    end
+end
+
+local statetab = {}

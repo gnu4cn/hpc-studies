@@ -187,7 +187,7 @@ nil     no file '.\X.dll'
 作为一个有趣的练习，在下图 17.1，“一个自制的 `package.searchpath`” 中，我们实现了一个类似 `package.searchpath` 的函数。
 
 
-**图 17.1，一个自制的 `package.searchpath`**
+### 图 17.1，一个自制的 `package.searchpath`
 
 
 ```lua

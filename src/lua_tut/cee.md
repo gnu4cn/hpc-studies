@@ -244,7 +244,7 @@ a = x + y - z
 ```
 
 
-**图 16.1，`luac -l` 的示例输出**
+### 图 16.1，`luac -l` 的示例输出
 
 
 ```txt
@@ -539,7 +539,7 @@ f = multiload("loacal x = 10;",
 练习 16.3：下图 16.2，”字符串重复“ 中的函数 `stringrep`，使用了一种二进制乘法算法，a binary multiplication algorithm，来连接给定字符串 `s` 的 `n` 份副本。
 
 
-**图 16.2，字符串重复**
+### 图 16.2，字符串重复
 
 
 ```lua
