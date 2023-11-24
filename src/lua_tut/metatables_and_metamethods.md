@@ -181,4 +181,4 @@ print("s1 x s2 = ", Set.tostring(s2 * s1))  --> {30}
 我们还可以用（元表中的）字段 `__concat`，来定义连接运算符（`..`）的行为。
 
 
-> **译注**：Lua 的这种元表与元方法的特性，与 Rust 中运用特质实现运算符重载类似。
+> **译注**：Lua 的这种元表与元方法的特性，与 Rust 中 [运用特质实现运算符重载](https://doc.rust-lang.org/rust-by-example/trait/ops.html) 类似。
