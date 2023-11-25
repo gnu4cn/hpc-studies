@@ -40,4 +40,19 @@ end
 
 mt.__add = Set.union
 mt.__mul = Set.intersection
+
+mt.__le = function (a, b)       -- 子集
+    for k in pairs(a) do
+        if not b[k] then return false end
+    end
+    return true
+end
+
+mt.__lt = function (a, b)       -- 恰当的子集
+    return a <= b and not (b <= a)
+end
+
+mt.__eq = function (a, b)
+    return a <= b and b <= a
+end
 return Set

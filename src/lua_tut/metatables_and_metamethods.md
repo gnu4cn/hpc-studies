@@ -247,3 +247,27 @@ stack traceback:
 - 把`a >= b` 转换为 `b <= a`。
 
 在旧有版本中，Lua 曾通过把 `a <= b`，转换为 `not (b < a)`，把所有顺序运算符，order operators，都转换为单个运算符。然而，在我们有着其中的全部元素，并非都是恰当排序的类型，这种 *部分序，partial order* 时，这样的转换是不正确的。例如，由于非数值，Not a Number，`NaN` 值的存在，大多数机器都没有浮点数的一种总顺序，a total order for floating-point numbers。根据 IEEE 754 标准，`NaN` 表示未定义的值，例如 `0/0` 的结果。这意味着 `NaN <= x` 总是假，而 `x < NaN` 也是假。这也意味着在这种情况下，从 `a <= b` 到 `not (b < a)` 的转换，是无效的。
+
+在我们那个集合的例子中，我们有着类似的问题。集合中 `<=` 的一个显而易见（而且有用）的含义，便是是集合的包含关系：`a <= b` 表示 `a` 是 `b` 的子集。因此，我们必须同时实现 `__le`（ *小于* 或 *等于*，子集关系）以及 `__lt`（*小于，less than*，恰当的那种子集关系）：
+
+
+```lua
+mt.__le = function (a, b)       -- 子集
+    for k in pairs(a) do
+        if not b[k] then return false end
+    end
+    return true
+end
+
+mt.__lt = function (a, b)       -- 恰当的子集
+    return a <= b and not (b <= a)
+end
+```
+
+最后，通过集合的包含关系，我们可以定义出集合的相等：
+
+```lua
+mt.__eq = function (a, b)
+    return a <= b and b <= a
+end
+```
