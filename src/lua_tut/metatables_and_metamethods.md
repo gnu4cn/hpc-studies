@@ -422,4 +422,21 @@ mt.__index = prototype
 **Tables with default values**
 
 
+常规表中的任何字段，默认值都是 `nil`。使用元表，便可轻松更改默认值：
 
+```lua
+function setDefault (t, d)
+    local mt = {__index = function () return d end}
+    setmetatable(t, mt)
+end
+
+tab = {x=10, y=20}
+print(tab.x, tab.z)         --> 10      nil
+setDefault(tab, 0)
+print(tab.x, tab.z)         --> 10      0
+```
+
+
+在其中到 `setDefault` 的调用后，对 `tab` 中某个缺失字段的任何访问，都会调用其 `__index` 元方法，其就会返回零（这个元方法的 `d` 值）。
+
+> **译注**：若把该元方法的 `d` 改为 `s`，就不会生效（仍然会返回 `nil`）。故可认为 Lua 将 `d` 硬编码到了其解释器中。
