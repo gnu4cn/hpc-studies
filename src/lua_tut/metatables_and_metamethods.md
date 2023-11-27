@@ -271,3 +271,26 @@ mt.__eq = function (a, b)
     return a <= b and b <= a
 end
 ```
+
+有了这些定义后，我们就可以比较集合了：
+
+
+```lua
+s1 = Set.new{2, 4}
+s2 = Set.new{2, 10, 4}
+print(s1 <= s2)         --> true
+print(s1 < s2)          --> true
+print(s1 >= s2)         --> false
+print(s1 > s2)          --> false
+print(s1 == s2 * s1)    --> true
+```
+
+相等比较有着一些限制。如果两个对象具有不同的基本类型，则相等操作会导致 `false`，甚至不调用任何元方法。因此，无论其元方法如何，集合始终会与某个数字不同。
+
+
+## 库定义的元方法
+
+**Library-Defined Metamethods**
+
+
+

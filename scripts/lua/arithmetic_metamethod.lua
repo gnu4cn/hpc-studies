@@ -14,5 +14,8 @@ print("s1 x s2 = ", Set.tostring(s2 * s1))  --> {30}
 
 s1 = Set.new{2, 4}
 s2 = Set.new{2, 10, 4}
-print(s1 > s2)
-print(s1 < s2)
+print(s1 <= s2)         --> true
+print(s1 < s2)          --> true
+print(s1 >= s2)         --> false
+print(s1 > s2)          --> false
+print(s1 == s2 * s1)    --> true
