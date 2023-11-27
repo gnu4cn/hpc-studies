@@ -407,4 +407,9 @@ mt.__index = prototype
 当我们打算在不调用其 `__index` 元方法下，访问某个表时，我们要使用 `rawget` 函数。调用 `rawget(t, i)` 可以对表 `t`，进行 *原始，raw* 访问，即不考虑元表的一种原语访问，a primitive access。进行原始访问，不会加快我们代码（函数调用的开销，会抹杀我们可能获得的任何收益），但有时我们需要他，正如我们稍后将看到的那样。
 
 
+## `__newindex` 元方法
+
+**The `__newindex` metamethod**
+
+
 
