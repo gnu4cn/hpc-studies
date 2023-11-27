@@ -3,8 +3,8 @@ authors = ["Lenny Peng"]
 language = "zh"
 multilingual = false
 src = "src"
-title = "Yet another Chinese book about high performance computing."
-description = "又一本有关高性能计算技术的书。"
+title = "又一本有关高性能计算技术的书。"
+description = "又一本有关高性能计算技术的书。Yet another Chinese book about high performance computing."
 
 [preprocessor.last-changed]
 command = "mdbook-last-changed"
