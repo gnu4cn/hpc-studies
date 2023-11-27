@@ -1,5 +1,8 @@
 local Set = {}
 local mt = {}
+local MT_HASH = "V8K4Rwux72nEYFfSDTWmCp"
+mt.__metatable = MT_HASH
+
 
 -- 以给定列表，创建出一个新的集合
 function Set.new (l)
@@ -10,7 +13,7 @@ function Set.new (l)
 end
 
 function Set.union (a, b)
-    if getmetatable(a) ~= mt or getmetatable(b) ~= mt then
+    if getmetatable(a) ~= MT_HASH or getmetatable(b) ~= MT_HASH then
         error("attempt to 'add' a set with a non-set value", 2)
     end
 
@@ -32,14 +35,15 @@ end
 -- 将集合表示为字符串
 function Set.tostring (set)
     local l = {}    -- 将该集合中全部元素放入的列表
-    for e in pairs(set) do
-        l[#l + 1] = tostring(e)
+    for el in pairs(set) do
+        l[#l + 1] = tostring(el)
     end
     return "{" .. table.concat(l, ", ") .. "}"
 end
 
 mt.__add = Set.union
 mt.__mul = Set.intersection
+mt.__tostring = Set.tostring
 
 mt.__le = function (a, b)       -- 子集
     for k in pairs(a) do

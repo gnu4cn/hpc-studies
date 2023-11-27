@@ -293,4 +293,51 @@ print(s1 == s2 * s1)    --> true
 **Library-Defined Metamethods**
 
 
+到目前为止，我们看到的所有元方法，都是属于 Lua 核心的。虚拟机会检测到某项操作中涉及到的值，有着对该操作元方法的元表。不过，由于元表是常规表，从而任何人都可以使用他们。因此，在元表中定义和使用库自己的一些字段，便是库的常见做法。
 
+
+函数 `tostring` 就提供了个典型的例子。正如我们前面看到的，`tostring` 以一种相当简单的格式，表示表：
+
+```lua
+print({})       --> table: 00000223d28cafc0
+```
+
+函数 `print` 总是会调用 `tostring`，来格式化其输出。然而，在格式化任何值时，`tostring` 会首先检查，该值是否有个 `__tostring` 元方法。在这种情况下，`tostring` 会将该对象作为参数，传递调用这个元方法完成其工作。这个元方法返回的结果，就是 `tostring` 的结果。
+
+
+在上面的集合示例中，我们已经定义了一个，将集合显示为字符串的函数。因此，我们只需在元表中设置 `__tostring` 字段：
+
+
+```lua
+mt.__tostring = Set.tostring
+```
+
+此后，每当我们以某个集合为参数，调用 `print` 时，`print` 都会调用 `tostring`，而 `tostring` 又会调用 `Set.tostring`：
+
+
+```lua
+s1 = Set.new{10, 4, 5}
+print(s1)       --> {10, 5, 4}
+```
+
+
+函数 `setmetatable` 和 `getmetatable`，也用到了一个元字段，这种情形下，是为了保护元表。假设我们打算保护咱们的集合，进而用户既不能看到也不能更改他们的元表。如果我们在元表中，设置了一个 `__metatable` 字段，那么 `getmetatable` 将返回该字段的值，而 `setmetatable` 将抛出错误：
+
+
+```lua
+local MT_HASH = "V8K4Rwux72nEYFfSDTWmCp"
+
+s1 = Set.new{}
+print(getmetatable(s1))     --> V8K4Rwux72nEYFfSDTWmCp
+setmetatable(s1, {})
+    -->  stdin:30: cannot change a protected metatable
+```
+
+> **译注**：这里对 `mt.__metatable` 使用了一次性密码网站生成的随机密码，类似于 UUID 值。
+
+自 Lua 5.2 起，`pairs` 也有了元方法，这样我们就可以修改表的遍历方式，并为非表对象，添加遍历行为。当某个对象有 `__pairs` 元方法时，`pairs` 将调用他，来完成其所有工作。
+
+
+## 表访问元方法
+
+**Table-Access Metamethods**
