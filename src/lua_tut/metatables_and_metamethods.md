@@ -345,7 +345,7 @@ setmetatable(s1, {})
 算术运算符、位运算符和关系运运算符的元方法，都是为其他错误情形，而定义行为；他们不会改变语言的正常行为。Lua 还为两种正常情况，即访问与修改表中的缺失字段，提供了改变表行为的方法。
 
 
-## `__index` 方法
+### `__index` 方法
 
 早先我们曾看到，当我们访问表中不存在的字段时，结果为 `nil`。这是事实，但并非全部的事实。实际上，这种访问会触发解释器，寻找一个 `__index` 元方法：如果没有这种方法（通常就会发生这种情况），则该访问就会导致 `nil`；否则，这个元方法将提供结果。
 
@@ -407,7 +407,7 @@ mt.__index = prototype
 当我们打算在不调用其 `__index` 元方法下，访问某个表时，我们要使用 `rawget` 函数。调用 `rawget(t, i)` 可以对表 `t`，进行 *原始，raw* 访问，即不考虑元表的一种原语访问，a primitive access。进行原始访问，不会加快我们代码（函数调用的开销，会抹杀我们可能获得的任何收益），但有时我们需要他，正如我们稍后将看到的那样。
 
 
-## `__newindex` 元方法
+### `__newindex` 元方法
 
 **The `__newindex` metamethod**
 
@@ -417,7 +417,7 @@ mt.__index = prototype
 结合使用 `__index` 和 `__newindex` 两个元方法，便可以在 Lua 中实现多种强大结构，如只读表、带默认值的表，以及面向对象编程的继承。在本章中，我们将看到其中的一些用途。稍后，面向对象编程将有自己的一章。
 
 
-## 带默认值的表
+### 带默认值的表
 
 **Tables with default values**
 
@@ -440,3 +440,88 @@ print(tab.x, tab.z)         --> 10      0
 在其中到 `setDefault` 的调用后，对 `tab` 中某个缺失字段的任何访问，都会调用其 `__index` 元方法，其就会返回零（这个元方法的 `d` 值）。
 
 > **译注**：若把该元方法的 `d` 改为 `s`，就不会生效（仍然会返回 `nil`）。故可认为 Lua 将 `d` 硬编码到了其解释器中。
+
+
+那个函数 `setDefault`，创建了个新的闭包，以及给到需要某个默认值的各个表的一个新元表。在有很多表都需要默认值时，这样做的成本会很高。然而，元表将其中的默认值 `d`，连接到了他的元方法，因此我们无法为具有不同默认值的表，使用单一的元表。为了让所有表都能使用单一元表，我们可使用某个独占字段，将每个表的默认值，存储在表本身中。在不用担心名字冲突下，我们可以使用类似 `"____"` 的键，作为独占字段：
+
+
+```lua
+local mt = {__index = function (t) return t.___ end}
+function setDefault (t, d)
+    t.___ = d
+    setmetatable(t, mt)
+end
+```
+
+请注意，现在我们只在 `SetDefault` 之外，创建了一次元表 `mt` 及其相应的元方法。
+
+
+若担心名字冲突，则很容易就能确保，那个特殊键的唯一性。我们只需要用作键的一个新的独占表：
+
+
+```lua
+local key = {}      -- 唯一键
+local mt = {__index = function (t) return t[key] end}
+function setDefault (t, d)
+    t.[key] = d
+    setmetatable(t, mt)
+end
+```
+
+
+将每个表与其默认值关联起来的另一种方法，是我（作者）称之为 *双重表示，dual representation* 的一种技巧，其要用到其中索引是一些表，值为这些表的默认值的一个单独表。不过，要正确实现这种方法，我们需要称为 *弱表，weak tables* 的一种特殊表，因此我们不会在此使用他；我们将在第 23 章，[垃圾](garbage.md) 中，再讨论这个问题。
+
+
+另一种方法是 *记住，memorize* 元表，以便在带有相同默认值的那些表中，重用同一个元表。不过，这也需要弱表，所以我们还是要等到，在第 23 章 [垃圾](garbage.md) 中再讨论。
+
+
+
+### 对表访问进行追踪
+
+
+**Tracking table accesses**
+
+
+假设我们打算跟踪对某个表的每次访问。只有当表中不存在索引时，`__index` 和 `__newindex` 才有意义。因此，捕捉对表全部访问的唯一方法，就是保持表为空。在我们打算监控对表的所有访问时，就应该为真正的表，创建一个 *代理，proxy*。此代理会是个带有适当元方法，可以跟踪所有访问，并将其重定向到原始表的空表。图 20.2 中的代码，“跟踪表访问”，实现了这一概念。
+
+
+#### 追踪表访问
+
+```lua
+function track (t)
+    local proxy = {}        -- `t` 的代理表
+
+    -- 创建代理的元表
+    local mt = {
+        __index = function (_, k)
+            print("*access to element " .. tostring(k))
+            return t[k]     -- 访问原始表
+        end,
+
+
+        __newindex = function (_, k, v)
+            print("*update of element " .. tostring(k) ..
+                " to " .. tostring(v))
+            t[k] = v    -- 更新原始表
+        end,
+
+        __pairs = function ()
+            return function (_, k)      -- 迭代函数
+                local nextkey, nextvalue = next(t, k)
+                if nextkey ~= nil then      -- 避开最后一个值
+                    print("*traversing element " .. tostring(nextkey))
+                end
+                return nextkey, nextvalue
+            end
+        end,
+
+        __len = function () return #t end
+    }
+
+    setmetatable(proxy, mt)
+
+    return proxy
+end
+```
+
+
