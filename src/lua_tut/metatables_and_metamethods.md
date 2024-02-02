@@ -524,4 +524,20 @@ function track (t)
 end
 ```
 
+下面的示例演示了其用法：
+
+```console
+> dofile("tracking_table_access.lua")
+> t = {}
+> t = track(t)
+> t[2] = "hello"
+*update of element 2 to hello
+> t[2]
+*access to element 2
+hello
+> print(t[2])
+*access to element 2
+hello
+```
+
 
