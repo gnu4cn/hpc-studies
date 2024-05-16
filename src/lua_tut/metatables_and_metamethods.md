@@ -527,14 +527,12 @@ end
 下面的示例演示了其用法：
 
 ```console
-> dofile("tracking_table_access.lua")
+$ lua -i lib/fact.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 > t = {}
 > t = track(t)
 > t[2] = "hello"
 *update of element 2 to hello
-> t[2]
-*access to element 2
-hello
 > print(t[2])
 *access to element 2
 hello

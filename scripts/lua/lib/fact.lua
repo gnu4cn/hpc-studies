@@ -1,5 +1,3 @@
-#!/usr/bin/env lua
-
 function track (t)
     local proxy = {}        -- `t` 的代理表
 
@@ -34,3 +32,4 @@ function track (t)
 
     return proxy
 end
+
