@@ -527,7 +527,7 @@ end
 下面的示例演示了其用法：
 
 ```console
-$ lua -i lib/fact.lua
+$ lua -i lib/track.lua
 Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 > t = {}
 > t = track(t)
