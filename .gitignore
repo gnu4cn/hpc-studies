@@ -1,4 +1,5 @@
 book
+*.swp
 target
 Cargo.lock
 /index.html
