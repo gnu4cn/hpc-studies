@@ -568,7 +568,7 @@ Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 function readOnly (t)
 	local proxy = {}
 
-	local mt = { -- create metatable
+	local mt = { -- 创建元表
 	    __index = t,
     	__newindex = function (t, k, v)
 		    error("attempt to update a read-only table", 2)
@@ -581,3 +581,35 @@ end
 ```
 
 
+举例来说，我们可以创建一个工作日只读表：
+
+
+```console
+$ lua -i lib/read_only.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> days = readOnly{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}
+> print(days[1])
+周日
+> days[2] = "星期八"
+stdin:1: attempt to update a read-only table
+stack traceback:
+        [C]: in function 'error'
+        lib/read_only.lua:7: in metamethod 'newindex'
+        stdin:1: in main chunk
+        [C]: in ?
+```
+
+
+## 练习
+
+练习 20.1：请为集合定义一个返回两个集合差值的元方法 `__sub`；(集合 `a - b` 是 `a` 中不在 `b` 中的元素集合。）
+
+练习 20.2：请为集合定义一个元方法 `__len`，使 `#s` 返回集合 `s` 中的元素个数；
+
+练习 20.3：实现只读表的另一种方法，是使用一个函数作为 `__index` 元方法。这种方法的访问开销较高，而创建只读表的成本较低，因为所有只读表都可以公用一个元表。请使用这种方式重写函数 `readOnly`；
+
+
+练习 20.4：代理表可以表示表格以外的其他类型对象。 请编写一个取文件名做参数，并返回该文件的代理的函数 `fileAsArray`，这样在调用 `t = fileAsArray("myFile")` 之后，访问 `t[i]` 返回该文件的第 `i` 个字节，并在赋值给 `t[i]`  时更新其第 `i` 个字节；
+
+
+练习 20.5：请扩展前面的示例，实现使用 `pairs(t)` 遍历文件中的字节，使用 `#t` 获取文件长度。
