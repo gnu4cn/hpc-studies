@@ -538,4 +538,46 @@ Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 hello
 ```
 
+其中元方法 `__index` 和 `__newindex` 遵循了我们所设定的准则，跟踪每次访问，然后将其重定向到原始表。通过 `__pairs` 元方法，我们可以像遍历原始表一样遍历代理表，同时跟踪这些访问。最后，`__len` 元方法通过代理表，提供了长度运算符：
+
+
+```console
+$ lua -i lib/track.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> t = track({10, 20})
+> print(#t)                                                                                                    2
+> for k, v in pairs(t) do print(k, v) end
+*traversing element 1
+1       10
+*traversing element 2
+2       20
+```
+
+如果我们想监控多个表，就不需要为每个表使用不同元表。相反，我们可以通过某种方式，将每个代理表映射到其原始表，并为所有代理表共用一个共同的元表。这个问题与我们在上一节讨论过的，将表与其默认值关联起来的问题类似，而可以采用相同的解决方案。例如，我们可以使用独占键，在某个代理表字段中保留原始表，或者使用双重表示法，a dual representation，将每个代理表映射到其对应的表。
+
+
+### 只读表
+
+**Read-only tables**
+
+
+运用代理表的概念，实现只读表非常简单。我们所要做的就是，每当我们跟踪到任何更新表的尝试时，就抛出一个错误。对于 `__index` 元方法，我们可以使用一个表 -- 原始表本身 -- 而不是函数，因为我们不需要跟踪查询；将所有查询重定向到原始表会更简单、更有效。这种用法要求为每个只读代理表，创建一个新的元表，其中 `__index` 指向原始表：
+
+
+```lua
+function readOnly (t)
+	local proxy = {}
+
+	local mt = { -- create metatable
+	    __index = t,
+    	__newindex = function (t, k, v)
+		    error("attempt to update a read-only table", 2)
+	    end
+    }
+
+    setmetatable(proxy, mt)
+    return proxy
+end
+```
+
 
