@@ -1,4 +1,9 @@
-Account = {balance = 0}
-function Account.withdraw (v)
-    Account.balance = Account.balance - v
+Account = {balance = 0,
+    withdraw = function (self, v)
+        self.balance = self.balance - v
+    end
+}
+
+function Account:deposit (v)
+    self.balance = self.balance + v
 end
