@@ -91,7 +91,7 @@ Account = {balance = 0,
     end
 }
 
-function Account::deposit (v)
+function Account:deposit (v)
     self.balance = self.balance + v
 end
 ```
@@ -113,6 +113,22 @@ Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 
 **Classes**
 
+
+到目前为止，我们的对象已经有了身份、状态和对状态的操作。他们仍然缺乏类系统、继承和隐私，lack a class system, inheritance, and privacy。咱们来解决第一个问题：如何创建具有相似行为的多个对象？具体来说，我们如何创建多个账户？
+
+
+大多数面向对象编程语言，都提供类的概念，其充当了创建对象的模具。在这类语言中，每个对象都是个特定类的实例。Lua 没有类的概念；元表的概念有些类似，但将其用作类，并不会让我们走得太远。相反，我们可以效仿基于原型的语言（如 [Self](https://selflanguage.org/)，Javascript 同样遵循了这条路径），在 Lua 中模拟出类。在这些语言中，对象同样没有类。相反，每个对象都可能有是个常规对象的原型，a prototype, which is a regular object，首个对象会在原型中，查找他不知道的任何操作。要在这类语言中表示类，我们只需创建一个对象，专门用作其他对象（其实例）的原型。类和原型，都是放置多个对象共用行为的地方。
+
+
+在 Lua 中，我们可以使用在 [`__index` 元方法](https://hpcl.xfoss.com/lua_tut/metatables_and_metamethods.html#__index-%E6%96%B9%E6%B3%95) 小节中，看到的继承概念来实现原型。更具体地说，如果我们有两个对象 `A` 和 `B`，要使 `B` 成为 `A` 的原型，我们只需这样做：
+
+
+```lua
+    setmetable(A, {__index = B})
+```
+
+
+之后，`A` 会在 `B` 中，查找他没有的任何操作。把 `B` 看作对象 `A` 的类，不过是术语上的变化而已。
 
 
 
