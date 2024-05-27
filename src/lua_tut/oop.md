@@ -131,4 +131,68 @@ Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 之后，`A` 会在 `B` 中，查找他没有的任何操作。把 `B` 看作对象 `A` 的类，不过是术语上的变化而已。
 
 
+咱们回到银行账户的例子。要创建行为与 `Account` 类似的其他账户，我们可以使用 `__index` 元方法，让这些新对象从 `Account` 继承其操作。
 
+
+```lua
+local mt = {__index = Account}
+
+function Account.new (o)
+    o = o or {}     -- 若用户没有提供表，就要创建出表
+    setmetatable(o, mt)
+    return o
+end
+```
+
+在这段代码之后，当我们创建一个新账户并调用某个方法时，会发生什么呢？
+
+
+```console
+$ lua -i lib/account.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> a = Account.new{balance = 0}
+> a:deposit(100.00)
+> a.balance
+100.0
+```
+
+当我们创建新帐户 `a` 时，他将使用 `mt` 作为其元表。当我们调用 `a:deposit(100.00)` 时，我们实际上是在调用 `a.deposit(a, 100.00)`；冒号只是语法糖。然而，Lua 在表 `a` 中找不到 `deposit` 条目；因此，Lua 会查看元表的 `__index` 条目。现在的情况或多或少是这样的:
+
+```lua
+getmetatable(a).__index.deposit(a, 100.00)
+```
+
+
+`a` 的元表是 `mt`，而 `mt.__index` 是 `Account`。因此，前一个表达式就会求值到这个表达式：
+
+
+```lua
+Account.deposit(a, 100.00)
+```
+
+也就是说，Lua 调用了原先的 `deposit` 函数，但将 `a` 作为 `self` 参数传递。因此，这个新账户 `a` 就从 `Account` 继承了 `deposit` 函数。通过同样的机制，他也继承了 `Account` 的所有字段。
+
+我们可以对这种方案做两处小的改进。首先，我们不需要为其中的元表角色，创建一个新表；相反，我们可以使用 `Account` 表本身，来实现这一目的。第二处改进是，我们也可以为 `new` 方法使用冒号语法。有了这两处改动，方法 `new` 就变成了下面这样：
+
+
+```lua
+function Account:new (o)
+    o = o or {}
+    self.__index = self
+    setmetatable(o, self)
+    return o
+end
+```
+
+现在，当我们调用 `Account:new()` 时，那个隐藏参数 `self` 的值，即为 `Account`，我们使 `Account.__index` 同样等于 `Account`，进而将 `Account` 设置为其中新对象的元表。第二处改动（其中的冒号语法），似乎并没有给我们带来什么好处；在下一节中介绍类的继承时，使用 `self` 的好处就会显现出来。
+
+
+继承不仅适用于方法，也适用于在新账号中，缺失的其他字段。因此，某个类不仅可以提供方法，还可以为其实例的字段，提供常量及默认值。请记住，在 `Account` 的首个定义中，我们提供了一个值为 `0` 的字段 `balance`。因此，如果我们创建出一个没有初始余额的新账户，他将继承这个默认值：
+
+
+```console
+$ lua -i lib/account.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> b = Account:new()
+> print(b.balance)                                                                                                                 0
+```
