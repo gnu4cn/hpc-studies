@@ -195,4 +195,66 @@ $ lua -i lib/account.lua
 Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 > b = Account:new()
 > print(b.balance)                                                                                                                 0
+0
 ```
+
+当我们调用 `b` 上的 `deposit` 方法时，他会运行与以下代码等效的代码，因为 `self` 就是 `b`：
+
+```lua
+b.balance = b.balance + v
+```
+
+其中的表达式 `b.balance` 的计算结果为零，并且该方法会将初始存款，分配给 `b.balance`。后续访问 `b.balance` 将不会调用索引的元方法，因为现在 `b` 有了自己的 `balance` 字段。
+
+
+## 继承
+
+**Inheritance**
+
+
+因为类属于对象，所以他们也可以从其他类中获取方法。这种行为使得继承（在通常的面向对象意义上）就很容易在 Lua 中实现。
+
+假设我们有个如下图 21.1 中 “`Account` 类” 的基类，a base class。
+
+
+**图 21.1 `Account` 类**
+
+
+```lua
+Account = {balance = 0}
+
+function Account:new (o)
+    o = o or {}
+    self.__index = self
+    setmetatable(o, self)
+    return o
+end
+
+function Account:deposit (v)
+    self.balance = self.balance + v
+end
+
+function Account:withdraw (v)
+    if v > self.balance then error"资金不足" end
+    self.balance = self.balance - v
+end
+```
+
+
+现在我们打算从该类，派生出一个允许客户提取超过余额金额的子类 `SpecialAccount`。我们从一个直接从其基类，继承了所有操作的空类开始：
+
+
+```lua
+SpecialAccount = Account:new()
+```
+
+
+到目前为止，`SpecialAccount` 还只是 `Account` 的一个实例。现在，神奇的事情发生了：
+
+
+```console
+s = SpecialAccount:new{limit=1000.00}
+```
+
+
+
