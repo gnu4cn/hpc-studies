@@ -257,4 +257,46 @@ s = SpecialAccount:new{limit=1000.00}
 ```
 
 
+和其他方法一样，`SpecialAccount` 从 `Account` 继承了 `new`。不过，这次 `new` 执行时，他的 `self` 参数将指向 `SpecialAccount`。因此，`s` 的元表将是 `SpecialAccount`，其字段 `__index` 的值也是 `SpecialAccount`。因此，`s` 继承自 `SpecialAccount`，而 `SpecialAccount` 又继承自 `Account`。稍后，当我们对 `s:deposit(100.00)` 求值时，Lua 无法在 `s` 中找到 `deposit` 字段，因此他会查找 `SpecialAccount`；他也无法在 `SpecialAccount` 中找到 `deposit` 字段，因此他会查找 `Account`；在 `Account` 中他就找到了 `deposit` 的原始实现。
+
+`SpecialAccount` 的特别之处在于，我们可以重新定义从其超类继承到的任何方法。我们只需编写出新方法即可：
+
+
+```lua
+function SpecialAccount:withdraw (v)
+    if v - self.balance > self:getLimit() then
+        error"无效金额"
+    end
+    self.balance = self.balance -v
+end
+
+function SpecialAccount:getLimit ()
+    return self.limit or 0
+end
+```
+
+
+现在，当我们调用 `s:withdraw(200.00)` 时，Lua 就不会转到 `Account` 了，因为他首先会在 `SpecialAccount` 中找到新的 `withdraw` 方法。由于 `s.limit` 是 `1000.00`（请记住，我们在创建 `s` 时设置了这个字段），程序会执行提款操作，使 `s` 的余额为负数。
+
+
+Lua 中对象的一个有趣之处在于，我们无需为指明某个新的行为，而创建出一个心累。在只有一个对象需要特定行为时，我们可以直接在对象中，实现该行为。例如，如果账户 `s` 代表某名特殊客户，其限额总是余额的 10%，我们就可以只修改这个单一账户：
+
+
+```console
+    function s:getLimit ()
+        return self.balance * 0.1
+    end
+```
+
+在此声明之后，调用 `s:withdraw(200.00)` 就会运行 `SpecialAccount` 的 `withdraw` 方法，但 `withdraw` 调用 `self:getLimit` 时，调用的便是这个最新的定义。
+
+
+
+## 多重继承
+
+
+**Multiple Inheritance**
+
+
+
 
