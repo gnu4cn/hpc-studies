@@ -449,3 +449,84 @@ Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
 ```
 
 
+这种设计为存储在 `self` 表中任何的内容，提供了完全的隐私。在对 `newAccount` 的调用返回后，就无法直接访问这个表了。我们只能通过 `newAccount` 内部创建的函数来访问他。尽管我们的示例只在那个私有表中，放入了一个实例变量，但我们可以在这个表中，存储对象的所有私有部分。我们还可以定义私有方法：他们与公开方法类似，但我们不把他们放在接口中。例如，我们的账户可以为余额超过一定限额的用户，提供 10% 的额外积分，但我们不希望用户获取计算细节的访问。我们可以通过以下方式，实现这一功能：
+
+
+```lua
+function newAccount (initialBalance)
+    local self = {
+        balance = initialBalance,
+        LIM = 10000.00,
+    }
+
+    local extra = function ()
+        if self.balance > self.LIM then
+            return self.balance*0.10
+        else
+            return 0
+        end
+    end
+    
+    local getBalance = function () 
+        return self.balance + extra()
+    end
+
+    -- 照旧
+end
+```
+
+
+同样，任何用户都无法直接访问这个 `extra` 函数。
+
+> **译注**：下面的代码，演示了这种模式下，一个公开函数对另一公开函数的访问（与对私有函数的访问类似，被调用的公开函数前不带 `self`）。
+
+
+```lua
+function newAccount (initialBalance)
+    local self = {
+        balance = initialBalance,
+        LIM = 10000.00,
+    }
+
+    local extra = function ()
+        if self.balance > self.LIM then
+            return self.balance*0.10
+        else
+            return 0
+        end
+    end
+    
+    local getBalance = function () 
+        return self.balance + extra()
+    end
+
+    local withdraw = function (v)
+                        self.balance = getBalance() -v
+                    end
+
+    local deposit = function (v)
+                        self.balance = getBalance() + v
+                    end
+
+
+
+    return {
+        withdraw = withdraw,
+        deposit = deposit,
+        getBalance = getBalance
+    }
+
+end
+```
+
+
+
+## 单一方法方式
+
+**The Single-Method Approach**
+
+
+当某个对象只有一个方法时，前面这种面向对象编程方式，就会出现一种特殊情况。在这种情况下，我们不需要创建接口表；相反，我们可以返回这个单一方法，作为对象表示，the object representation。如果这听起来有点奇怪，那么我们不妨回忆一下 `io.lines` 或 `string.gmatch` 等迭代器。在内部保持状态的迭代器，正是单一方法的对象。
+
+
+
