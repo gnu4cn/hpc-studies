@@ -376,4 +376,4 @@ Paul
 
 
 
-现在，我们来看看 Lua 是如何计算出 `account:getname()` 表达式的；更具体地说，我们来看看 `account["getname"]` 的求值过程。Lua 无法在 `account` 中找到字段 `"getname"`；因此，Lua 会查找 `account` 元表中的 `__index` 字段，在我们的例子中就是 NamedAccount。但 NamedAccount 也不能提供 "getname "字段，因此 Lua 会查找 NamedAccount 元表中的 __index 字段。因为这个字段包含一个函数，所以 Lua 调用了它。该函数首先在 Account 中查找 "getname"，但没有成功，然后在 Named 中查找，在 Named 中找到了一个非零值，这就是搜索的最终结果。
+现在，我们来看看 Lua 是如何计算出 `account:getname()` 表达式的；更具体地说，我们来看看 `account["getname"]` 的求值过程。Lua 无法在 `account` 中找到字段 `"getname"`；因此，Lua 会查找 `account` 元表，在咱们的例子中即 `NamedAccount` 上的 `__index` 字段。但 `NamedAccount` 也无法提供 `getname` 字段，因此 Lua 会查找 `NamedAccount` 元表中的 `__index` 字段。因为这个字段包含着一个函数，所以 Lua 便调用了他。该函数首先在 `Account` 中查找 `getname`，但没有成功，然后在 `Named` 中查找，在 `Named` 中找到了一个非零值（a non-nil value），这就是本次检索的最终结果。
