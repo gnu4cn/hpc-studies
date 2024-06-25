@@ -399,4 +399,53 @@ Paul
 **Privacy**
 
 
+许多人把隐私（也称为 *信息隐藏，information hiding*），看着是面向对象语言不可分割的一部分：每个对象的状态，应是其内部事务。在 C++ 和 Java 等一些面向对象语言中，我们可以控制某个字段（也称为 *实例变量，instance variable*）或方法，是否在对象外部可见。让面向对象语言变得流行起来的 Smalltalk，就把所有变量私有，而把所有方法公开。而有史以来的第一种面向对象语言 Simula，却没有提供任何保护。
+
+
+我们之前已经展示过 Lua 中，对象的标准实现，其并未提供隐私机制。部分原因是我们使用了通用结构（a general structure，表）来表示对象。此外，Lua 避免了冗余和人为限制。如果咱们不打算访问对象内部的内容，那就 *不要访问*。一种常见的做法，是在所有私有名字的末尾加上下划线。当咱们看到一个被标记的名字在公共场合使用时，就会立刻感觉到这种气氛。
+
+
+不过，Lua 的另一个目标是灵活性，为程序员提供元机制，meta-mechanisms，使其能够模拟许多不同机制。虽然 Lua 中对象的基本设计并未提供隐私机制，但我们可以用一种不同方式，实现具有访问控制的对象。虽然程序员并不经常使用这种实现方式，但了解这种方式还是很有意义的，因为他探究了 Lua 的一些有趣方面，而且是解决更多具体问题的好办法。
+
+
+这种替代设计的基本思想，是通过两个表来表示每个对象：一个表表示对象的状态，另一个表示对象的操作或其接口。我们通过第二个表，即通过构成对象接口的操作，来访问对象本身。为了避免未经授权的访问，代表对象状态的表，不会保存在另一个表的字段中；相反，他只会保存在方法的闭包中。例如，要使用这种设计，来表示我们的银行账户，我们可以通过运行以下工厂函数，factory function，来创建新的对象：
+
+
+```lua
+function newAccount (initialBalance)
+    local self = {balance = initialBalance}
+
+    local withdraw = function (v)
+                        self.balance = self.balance -v
+                    end
+
+    local deposit = function (v)
+                        self.balance = self.balance + v
+                    end
+
+    local getBalance = function () return self.balance end
+
+
+    return {
+        withdraw = withdraw,
+        deposit = deposit,
+        getBalance = getBalance
+    }
+
+end
+```
+
+首先，该函数创建了一个表，来保存对象的内部状态，并将其存储在局部变量 `self` 中。然后，该函数创建了这个对象的方法。最后，该函数创建并返回了将方法名称，映射到实际的方法实现的外部对象，external object。这里的关键点是，这些方法不会将 `self` 作为额外参数，而是直接访问 `self`。因为没有额外参数，所以我们就不使用冒号语法，来操作这些对象。我们就像调用普通函数一样，调用他们的方法：
+
+
+```console
+$ lua -i lib/account.neo.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> acc1 = newAccount(100.00)
+> acc1.withdraw(40.00)
+> acc1.getBalance()
+60.0
+> acc1.balance                                                                                                                                  nil
+```
+
 
