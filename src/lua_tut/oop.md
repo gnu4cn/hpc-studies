@@ -340,7 +340,7 @@ function createClass (...)
 end
 ```
 
-我们来用一个小的示例，来说明 `createClass` 的使用。假设咱们之前的类 `Account` 和另一个只有两个方法：`setname 和 `getname` 的类 `Named`。
+我们来用一个小的示例，来说明 `createClass` 的使用。假设咱们之前的类 `Account` 和另一个只有两个方法：`setname` 和 `getname` 的类 `Named`。
 
 
 ```lua
@@ -377,3 +377,26 @@ Paul
 
 
 现在，我们来看看 Lua 是如何计算出 `account:getname()` 表达式的；更具体地说，我们来看看 `account["getname"]` 的求值过程。Lua 无法在 `account` 中找到字段 `"getname"`；因此，Lua 会查找 `account` 元表，在咱们的例子中即 `NamedAccount` 上的 `__index` 字段。但 `NamedAccount` 也无法提供 `getname` 字段，因此 Lua 会查找 `NamedAccount` 元表中的 `__index` 字段。因为这个字段包含着一个函数，所以 Lua 便调用了他。该函数首先在 `Account` 中查找 `getname`，但没有成功，然后在 `Named` 中查找，在 `Named` 中找到了一个非零值（a non-nil value），这就是本次检索的最终结果。
+
+
+当然，由于这种搜索的潜在复杂性，多重继承的性能与单一继承并不相同。提高性能的一种简单办法是将所继承的方法，复制到子类中。使用这种技巧，类的索引元方法，将如下所示：
+
+
+```lua
+    setmetatable (c, {__index = function (t, k)
+        local v = search (k, parents)
+        t[k] = v    -- 保存用于下次访问
+        return v
+    end})
+```
+
+
+通过这个技巧，除了第一次外，对所继承方法的访问，与对本地方法的访问一样快。缺点是程序启动后，就很难更改方法定义了，因为这些更改不会在层次链中向下传播，these changes do not propagate down the hierarchy chain。
+
+
+## 隐私问题
+
+**Privacy**
+
+
+
