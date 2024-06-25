@@ -331,7 +331,7 @@ function createClass (...)
 
     -- 定义这个新类的新构造器
     function c:new (o)
-        o = o {}
+        o = o or {}
         setmetatable (o, c)
         return o
     end
@@ -339,3 +339,41 @@ function createClass (...)
     return c
 end
 ```
+
+我们来用一个小的示例，来说明 `createClass` 的使用。假设咱们之前的类 `Account` 和另一个只有两个方法：`setname 和 `getname` 的类 `Named`。
+
+
+```lua
+Named = {}
+function Named:getname ()
+    return self.name
+end
+function Named:setname (n)
+    self.name = n
+end
+```
+
+
+要创建一个同时是 `Account` 和 `Named` 子类的新类 `NamedAccount`，我们只需调用 `createClass` 即可：
+
+```lua
+NamedAccount = createClass(Account, Named)
+```
+
+要创建和使用实例，我们照常进行：
+
+
+> **注**：在 Lua 控制台，或 Lua 脚本中使用 `dofile("lib/account.lua")`、`dofile("lib/Named.lua")` 及 `dofile("lib/multi_inheritance.lua")`，将上述库代码加载到程序中。
+
+```lua
+> account = NamedAccount:new{name = "Paul"}
+> account.name
+Paul
+> account:getname()
+Paul
+```
+
+
+
+
+现在，我们来看看 Lua 是如何计算出 `account:getname()` 表达式的；更具体地说，我们来看看 `account["getname"]` 的求值过程。Lua 无法在 `account` 中找到字段 `"getname"`；因此，Lua 会查找 `account` 元表中的 `__index` 字段，在我们的例子中就是 NamedAccount。但 NamedAccount 也不能提供 "getname "字段，因此 Lua 会查找 NamedAccount 元表中的 __index 字段。因为这个字段包含一个函数，所以 Lua 调用了它。该函数首先在 Account 中查找 "getname"，但没有成功，然后在 Named 中查找，在 Named 中找到了一个非零值，这就是搜索的最终结果。

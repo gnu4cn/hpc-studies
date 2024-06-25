@@ -20,7 +20,7 @@ function createClass (...)
 
     -- 定义这个新类的新构造器
     function c:new (o)
-        o = o {}
+        o = o or {}
         setmetatable (o, c)
         return o
     end
