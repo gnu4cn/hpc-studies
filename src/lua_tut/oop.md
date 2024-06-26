@@ -529,4 +529,144 @@ end
 当某个对象只有一个方法时，前面这种面向对象编程方式，就会出现一种特殊情况。在这种情况下，我们不需要创建接口表；相反，我们可以返回这个单一方法，作为对象表示，the object representation。如果这听起来有点奇怪，那么我们不妨回忆一下 `io.lines` 或 `string.gmatch` 等迭代器。在内部保持状态的迭代器，正是单一方法的对象。
 
 
+单一方法对象的另一个有趣情况，就是当这个单一方法实际上是个调度方法，a dispatch method，时，就会根据不同参数，a distinguished argument，执行不同任务。这种对象的原型实现如下所示：
+
+
+```lua
+function newObject (value)
+    return function (action, v)
+        if action == "get" then return value
+        elseif action == "set" then value = v
+        else error"无效操作"
+        end
+    end
+end
+```
+
+
+其使用方法简单明了：
+
+
+```console
+$ lua -i lib/single-method_object.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> d = newObject(0)
+> d("get")
+0
+> d("set", 10)
+> d("get")
+10
+```
+
+
+这种非常规的对象实现方式相当有效。语法 `d("set", 10)` 虽然奇特，但只比常规的 `d:set(10)` 长两个字符。每个对象使用一个闭包，通常比一个表开销更低。虽然没有继承，但我们有着完全的隐私：访问对象状态的仅有途径，是通过其唯一的方法。
+
+
+
+## 双重表示
+
+
+**Dual Representation**
+
+
+另一种有趣的隐私实现方式，是使用 *双重表示法，dual representation*。我们先来看看什么是双重表示法。
+
+通常，我们使用键，将属性与表关联起来，we associate attributes to tables using keys, 如下所示：
+
+
+```lua
+table[key] = value
+```
+
+不过，我们可以使用双重表示法：我们可以使用表来表示键，并将对象本身作为表中的键：
+
+```lua
+key = {}
+
+key[table] = value
+```
+
+这里的一个关键因素，是我们不仅可以用数字和字符串，还可以用任何值（尤其是其他表），为 Lua 中的表编制索引。
+
+
+例如，在我们的账户实现中，我们可以将所有账户的余额，保存在一个 `balance` 表中，而不是保存在账户本身中。咱们的 `withdraw` 方法就会变成下面这样：
+
+
+```lua
+function Account.withdraw (self, v)
+    balance[self] = balance[self] -v
+end
+```
+
+这里我们获得了什么？隐私。即使函数可以访问某个账户，也无法直接访问其余额，除非他也可以访问表 `balance`。如果表 `balance` 保存在 `Account` 模块内部的某个本地（变量）中，那么就只有这模块内部的函数才可以访问他，因此也只有这些函数才可以操作账户余额。
+
+
+在咱们继续之前，我（作者）必须讨论一下这种实现方法的一个很大的天真之处。一旦我们将某个账户作为 `balance` 表中的键，那么这个账户就永远不会成为垃圾回收器的垃圾。他将被固定在那里，直到某些代码显式地将其从那个表中删除。这对于银行账户来说，可能不是问题（因为账户在消失前，通常必须正式关闭），但对于其他情形来说，这就可能是个很大的缺陷。在 [“对象属性”](garbage.md#对象属性) 小节，我们将了解如何解决这个问题。现在，我们先不考虑这个问题。
+
+
+图 21.3 “用到双重表示的账户” 再次给出了一种账户的实现，这次使用了双重表示法。
+
+
+### 用到双重表示的账户
+
+
+```lua
+local balance = {}
+
+Account = {}
+
+
+function Account:withdraw (v)
+    balance[self] = balance[self] -v
+end
+
+function Account:deposit (v)
+    balance[self] = balance[self] + v
+end
+
+function Account:balance ()
+    return balance[self]
+end
+
+function Account:new (o)
+    o = o or {}     -- 在用户没有提供表表时，创建出表
+    setmetatable(o, self)
+    self.__index = self
+    balance[o] = 0      -- 初始余额
+    return o
+end
+```
+
+我们就像使用其他类一样，使用这个类：
+
+
+```console
+$ lua -i lib/account.dual-rep.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> a = Account:new{}
+> a:balance()
+0
+> a:deposit(100.00)
+> a:balance()
+100.0
+```
+
+但是，我们不能篡改账户余额，tamper with an account balance。通过保持 `balance` 表对该模块的私有性，这种实现方式确保了他的安全。
+
+继承无需修改即可用。在时间和内存开销方面，这种方式与标准方法非常相似。新对象需要一个新表，以及每个用到的私有表中的一个新条目。访问 `balance[self]` 可能比访问 `self.balance` 稍慢，因为后者使用的是本地变量，而前者使用的是外部变量。通常这种差异可以忽略不计。稍后我们将看到，其还需要在垃圾回收器，完成一些额外工作。
+
+
+
+## 练习
+
+**Exercises**
+
+
+练习 21.1：实现一个具有 `push`、`pop`、`top` 和 `isempty` 等方法的 `Stack` 类；
+
+练习 21.2：实现一个作为 `Stack` 子类的 `StackQueue` 类。除了继承的方法外，请在该类中添加一个 `insertbottom` 方法，用以在栈的底部插入一个元素。(此方法允许我们将该类的对象用作队列）；
+
+练习 21.3：请使用双重表示法重新实现咱们的 `Stack` 类；
+
+练习 21.4：双重表示法的一个变种，是使用代理，proxy，来实现对象（名为 [追踪表访问](metatables_and_metamethods.md#追踪表访问) 的小节）。每个对象都由一个空代理表来表示。一张内部表会将代理，映射到承载对象状态的表。这个内部表不能从外部访问，但方法会使用他，来将其 `self` 参数转换到他们所操作的真实表。请使用这种方法，实现那个银行账户的示例，并讨论其利弊。
 
