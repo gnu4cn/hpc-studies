@@ -236,7 +236,7 @@ f:close()
 
 这里的关键函数，是 `string.dump`：他接收一个 Lua 函数，在为今后由 Lua 加载而适当格式化后，返回该函数的预编译代码。
 
-这个 `luac` 程序，还提供了其他一些有趣的选项。其中，选项 `-l` 会列出，对于给定代码块，编译器所生成的操作码，the opcodes that the compiler generates for a given chunk。例如，下图 16.1，“`luac - l` 的输出示例”，显示了在以下单行文件上，带有 `-l` 选项 `luac` 的输出：
+这个 `luac` 程序，还提供了其他一些有趣的选项。其中，选项 `-l` 会列出，对于给定代码块，编译器所生成的操作码，the opcodes that the compiler generates for a given chunk。例如，下 [图 16.1，“`luac - l` 的输出示例”](#f-16.1)，显示了在以下单行文件上，带有 `-l` 选项 `luac` 的输出：
 
 
 ```lua
@@ -244,7 +244,7 @@ a = x + y - z
 ```
 
 
-### 图 16.1，`luac -l` 的示例输出
+<a name="f-16.1">**图 16.1，`luac -l` 的示例输出**</a>
 
 
 ```txt
@@ -536,10 +536,10 @@ f = multiload("loacal x = 10;",
 在上面的示例中，`multiload` 应加载一个相当于，字符串 `"local..."`、`temp` 文件内容与字符串 `" print(x)"`三者连接的代码块。与前面练习中的 `loadwithprefix` 一样，`multiload` 不应具体连接任何内容。
 
 
-练习 16.3：下图 16.2，”字符串重复“ 中的函数 `stringrep`，使用了一种二进制乘法算法，a binary multiplication algorithm，来连接给定字符串 `s` 的 `n` 份副本。
+练习 16.3：下 [图 16.2，“字符串重复”](#f-16.2) 中的函数 `stringrep`，使用了一种二进制乘法算法，a binary multiplication algorithm，来连接给定字符串 `s` 的 `n` 份副本。
 
 
-### 图 16.2，字符串重复
+<a name="f-16.2">**图 16.2，字符串重复**</a>
 
 
 ```lua
