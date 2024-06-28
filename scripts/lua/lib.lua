@@ -174,3 +174,51 @@ function Lib.mt_mult (a, b)
 
     return c
 end
+
+function Lib.getfield (f)
+    local v = _G    -- 从全局变量表开始
+
+    for w in string.gmatch(f, "[%a_][%w_]*") do
+        v = v[w]
+    end
+
+    return v
+end
+
+
+function Lib.setfield (f, v)
+    local t = _G                -- 从全局变量表开始
+    for w, d in string.gmatch(f, "([%a_][%w_]*)(%.?)") do
+        if d == "." then        -- 不是最后的名字？
+            t[w] = t[w] or {}   -- 在缺失时创建表
+            t = t[w]            -- 获取到该表
+        else                    -- 是最后的名字时
+            t[w] = v            -- 进行赋值
+        end
+    end
+end
+
+Lib.setfield("_PROMPT", "*-*: ")
+
+local declaredNames = {}
+
+setmetatable(_G, {
+    __newindex = function(t, n, v)
+        if not declaredNames[n] then
+            local w = debug.getinfo(2, "S").what
+            if w ~= "main" and w ~= "C" then
+                error("尝试写入未经声明的变量"..n, 2)
+            end
+            declaredNames[n] = true
+        end
+        rawset(t, n, v)     -- 执行真正设置
+    end,
+
+    __index = function (_, n)
+        if not declaredNames[n] then
+            error("尝试读取未经声明的变量 "..n, 2)
+        else
+            return nil
+        end
+    end,
+})

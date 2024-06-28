@@ -121,4 +121,183 @@ pcall
 ```
 
 
+由于环境是个常规表，因此我们只需用所需的键（变量名），对其进行索引即可。
+
+
+以类似的方式，我们可以通过写下 `_G[varname] = value`，来为名字为动态计算出的全局变量赋值。但请注意：有些程序员对这些功能感到有点兴奋，而最终编写出类似 `_G["a"] = _G["b"]` 的代码，这只是 `a = b` 的一种复杂写法。
+
+
+上面这个问题的概括，便是允许在动态名字中使用字段，如 `"io.read"` 或 `"a.b.c.d"`。如果我们写下 `_G["io.read"]`，显然就无法获得从 `io` 表中获取到 `read` 字段。但我们可以编写一个函数 `getfield`，使 `getfield("io.read")` 返回预期的结果。这个函数主要是个循环，从 `_G` 开始，逐个字段进行推进：
+
+```lua
+    function getfield (f)
+        local v = _G    -- 从全局变量表开始
+
+        for w in string.gmatch(f, "[%a_][%w_]*") do
+            v = v[w]
+        end
+
+        return v
+    end
+```
+
+我们依靠 `gmatch` 遍历 `f` 中的所有标识符。
+
+
+设置字段的相应函数，就会稍微复杂一些。像 `a.b.c.d = v` 这样的赋值，相当于下面的代码：
+
+
+```lua
+    local temp = a.b.c
+    temp.d = v
+```
+
+也就是说，我们必须检索到最后的名字，然后单独处理这个最后的名字。[图 22.1 “函数 `setfield`”]() 中的函数 `setfield`，就可以完成这项任务，并在路径中的中间表不存在时，创建出他们。
+
+
+### 图 22.1 `setfield` 函数
+
+
+```lua
+function setfield (f, v)
+    local t = _G                -- 从全局变量表开始
+    for w, d in string.gmatch(f, "([%a_][%w_]*)(%.?)") do
+        if d == "." then        -- 不是最后的名字？
+            t[w] = t[w] or {}   -- 在缺失时创建表
+            t = t[w]            -- 获取到该表
+        else                    -- 是最后的名字时
+            t[w] = v            -- 进行赋值
+        end
+    end
+end
+```
+
+
+这里的模式会捕获变量 `w` 中的字段名字，以及变量 `d` 中可选的后跟点。如果字段后面没有点，则其就是最后的名字了。
+
+
+有了前面的函数，接下来的调用将创建一个全局表 `t`、另一个表 `t.x`，并将 `10` 赋值给 `t.x.y`：
+
+
+```console
+$ lua -i lib.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+> Lib.setfield("t.x.y", 10)
+> t.x.y
+10
+> Lib.getfield("t.x.y")
+10
+```
+
+
+## 全局变量的声明
+
+**Global-Variable Declarations**
+
+
+Lua 中的全局变量不需要声明。虽然这种行为对小型程序来说很方便，但在稍大的一些程序中，一个简单拼写问题，就可能导致难以发现的错误。不过，如果我们愿意，也可以改变这种行为。由于 Lua 将全局变量保存在常规表中，因此我们可以使用元表，来检测 Lua 于何时访问不存在的变量。
+
+
+第一种方法仅是检测任何对全局表中不存在键的访问：
+
+
+```lua
+Lib.setfield("_PROMPT", "*-*: ")
+
+setmetatable(_G, {
+    __newindex = function (_, n)
+        error("尝试写入未声明的变量 " .. n, 2)
+    end,
+    __index = function (_, n)
+        error("尝试读取未声明的变量 " .. n, 2)
+    end
+})
+```
+
+这段代码后，任何访问不存在全局变量的尝试，都会引发错误：
+
+
+```console
+$ lua -i lib.lua
+Lua 5.4.4  Copyright (C) 1994-2022 Lua.org, PUC-Rio
+*-*: print(a)
+stdin:1: 尝试读取未声明的变量 a
+stack traceback:
+        [C]: in function 'error'
+        lib.lua:208: in metamethod 'index'
+        stdin:1: in main chunk
+        [C]: in ?
+```
+
+
+但是我们如何声明新变量呢？一个选项是使用会绕过元方法的 `rawset`：
+
+
+（其中带 `false` 的 `or`，确保了这个新全局变量，会始终得到一个与 `nil` 不同的值。）
+
+
+一种更简单的选项，是将对新全局变量的赋值，限制在函数内部，而允许在代码块的外层进行自由赋值，restrict assignment to new global variables only inside functions, allowing free assignments in the outer level of a chunk。
+
+
+要检查某个赋值是否在主块中，我们就必须使用调试库。调用 `debug.getinfo(2, "S")` 会返回一个表，其中的 `what` 字段，会显示调用元方法的函数，是个主代码块、常规 Lua 函数，还是 C 函数。(我们将在 [“内省设施，Introspective Facilities”](reflection.md#内省设施) 小节中，详细介绍 `debug.getinfo`）。使用这个函数，我们可以像下面这样重写 `__newindex` 元方法：
+
+
+```lua
+    __newindex = function (t, n, v)
+        local w = debug.getinfo(2, "S").what
+        if w ~= "main" and w ~= "C" then
+            error("尝试写入未声明的变量 " .. n, 2)
+        end
+        rawset(t, n, v)
+    end,
+```
+
+这个新版本还接受来自 C 代码的赋值，因为这种代码通常知道他在做什么。
+
+
+当我们需要测试某个变量是否存在时，我们不能简单地将他与 `nil` 进行比较，因为如果他为 nil，访问就会引发错误。相反，我们可以使用避免了使用元方法的 `rawget`：
+
+
+```lua
+    if rawget(_G, var) == nil then
+        -- ‘var’ 未经声明
+        ...
+    end
+```
+
+目前，咱们的方案不允许全局变量的值为 `nil`，因为他们会被自动视为未声明变量。但要解决这个问题并不难。我们只需一个辅助表，来保存那些已声明变量的名字。每当某个元方法被调用时，元方法都会在该表中，检查变量是否为未声明变量。这样的代码可以如下 [图 22.2：“检查全局变量声明”]()。
+
+
+### 图 22.2 检查全局变量的声明
+
+```lua
+local declaredNames = {}
+
+setmetatable(_G, {
+    __newindex = function(t, n, v)
+        if not declaredNames[n] then
+            local w = debug.getinfo(2, "S").what
+            if w ~= "main" and w ~= "C" then
+                error("尝试写入未经声明的变量"..n, 2)
+            end
+            declaredNames[n] = true
+        end
+        rawset(t, n, v)     -- 执行真正设置
+    end,
+
+    __index = function (_, n)
+        if not declaredNames[n] then
+            error("尝试读取未经声明的变量 "..n, 2)
+        else
+            return nil
+        end
+    end,
+})
+```
+
+
+现在，即使像 `x = nil` 这样的赋值，也足以声明某个全局变量了。
+
+这两种解决方案的开销都可以忽略不计。在第一种方案下，于正常运行期间，那些元方法永远不会被调用。而在第二种方案下，他们可以被调用，但只有当程序访问某个保存着 `nil` 的变量时，才会被调用。
+
 
