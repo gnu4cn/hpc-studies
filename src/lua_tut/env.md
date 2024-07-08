@@ -380,3 +380,62 @@ _ENV.x = _ENV.y +z
 > - <a name="foot-note-1"><sup>1</sup></a>该机制是 Lua 从 5.1 版到 5.2 版变化最大的部分之一。以下讨论几乎不适用于 Lua 5.1。
 >
 > - <a name="foot-note-2"><sup>2</sup></a>老实说，Lua 在错误信息中就使用了这个名字，因此他会将涉及变量 `_ENV.x` 的错误，报告为有关 `global x` 的错误。
+
+
+
+## 使用 `_ENV`
+
+
+在本节中，我们将看到一些对 `_ENV` 所带来灵活性加以探索的方法。请记住，本节中的大多数示例，都必须作为一个单独代码块来运行。如果我们在交互模式下，逐行输入代码，那么每行都将成为不同的代码块，因此每行都将有个不同的 `_ENV` 变量。而要将一段代码作为单独代码块运行，我们可以从文件中运行它，或者将其封装在 `do--end` 块中。
+
+
+因为 `_ENV` 是个常规变量，所以我们可以像其他变量一样，对其赋值及读取。`_ENV = nil` 这个赋值，将使其余代码块中，对全局变量的直接访问无效。这对于控制我们的代码使用哪些变量，会非常有用：
+
+
+```lua
+local print, sin = print, math.sin
+
+_ENV = nil
+print(13)
+print(sin(13))
+print(math.cos(13))
+```
+
+*脚本：`env-demo.lua`*
+
+
+```console
+$ lua env_demo.lua
+13
+0.42016703682664
+lua: env_demo.lua:6: attempt to index a nil value (upvalue '_ENV')
+stack traceback:
+        env_demo.lua:6: in main chunk
+        [C]: in ?
+```
+
+对自由名字（某个 “全局变量”）的赋值，都会引发类似的错误。
+
+
+我们可以明确写出 `_ENV`，来绕过某个本地的声明：
+
+```lua
+a = 13          -- 全局的
+local a = 12    
+print(a)        --> 12 （局部的）
+print(_ENV.a)   --> 13 （全局的）
+```
+
+
+我们可以使用 `_G`，实现同样目的：
+
+
+```lua
+a = 13          -- 全局的
+local a = 12    
+print(a)        --> 12 （局部的）
+print(_G.a)   --> 13 （全局的）
+```
+
+
+通常，`_G` 和 `_ENV` 指向的是同一个表，但尽管如此，他们是完全不同的实体。`_ENV` 是个局部变量，所有对 “全局变量” 的全部访问，实际上都是对他的访问。而 `_G` 则是个全局变量，没有任何特殊地位。根据定义，`_ENV` 总是指向当前环境；而 `_G` 则通常指向全局环境，前提是他是可见的，而且没有人改变过他的值，`_G` usually refers to the global environment, provided it is visible and no one changed its value。
