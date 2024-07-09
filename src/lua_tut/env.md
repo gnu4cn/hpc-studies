@@ -439,3 +439,32 @@ print(_G.a)   --> 13 （全局的）
 
 
 通常，`_G` 和 `_ENV` 指向的是同一个表，但尽管如此，他们是完全不同的实体。`_ENV` 是个局部变量，所有对 “全局变量” 的全部访问，实际上都是对他的访问。而 `_G` 则是个全局变量，没有任何特殊地位。根据定义，`_ENV` 总是指向当前环境；而 `_G` 则通常指向全局环境，前提是他是可见的，而且没有人改变过他的值，`_G` usually refers to the global environment, provided it is visible and no one changed its value。
+
+
+`_ENV` 的主要用途，是更改某段代码所用到的环境。一旦我们更改了环境，那么所有全局的访问，都将使用这个新表：
+
+
+```lua
+-- 将当前环境修改未一个新的空表
+_ENV = {}
+a = 1           -- 在 _ENV 中创建出一个字段
+print(a)
+    --> stdina:4: attempt to call global 'print'(a nil value)
+```
+
+
+> **注意**：实际输出与上面的原书中的输出有差异。
+
+
+```console
+$ lua env_demo.lua
+lua: env_demo.lua:4: attempt to call a nil value (global 'print')
+stack traceback:
+        env_demo.lua:4: in main chunk
+        [C]: in ?
+```
+
+> 这可能与 Lua 的版本有关。
+
+
+
