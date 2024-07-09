@@ -1,9 +1,5 @@
-function factory (_ENV)
-    return function () return a end
+local M = {}
+_ENV = M
+function add (c1, c2)
+    return new(c1.r + c2.r, c1.i + c2.i)
 end
-
-
-f1 = factory{a = 6}
-f2 = factory{a = 7}
-print(f1())             --> 6
-print(f2())             --> 7
