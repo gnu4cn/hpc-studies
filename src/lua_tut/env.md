@@ -520,4 +520,99 @@ print(_G.a)                 --> 20
 ```
 
 
+作为常规变量，`_ENV` 遵循通常的作用域规则。特别是，在一个代码块中定义的函数，会像访问任何其他外部变量一样，访问 `_ENV`：
+
+
+```lua
+_ENV = {_G = _G}
+
+local function foo ()
+    _G.print(a)         -- 会被编译作 `_ENV._G.print(_ENV.a)`
+end
+
+a = 10
+foo()                   --> 10
+
+_ENV = {_G = _G, a = 20}
+foo()                   --> 20
+```
+
+
+> **注**：在使用了 `_ENV` 后，执行 `for i in _G.pairs(_G) do _G.print(i) end`，将打印出如下内容。
+
+```console
+assert
+math
+require
+loadfile
+debug
+arg
+load
+os
+collectgarbage
+pairs
+_G
+string
+coroutine
+dofile
+table
+_VERSION
+setmetatable
+rawget
+utf8
+print
+rawlen
+tostring
+package
+io
+getmetatable
+warn
+select
+rawequal
+error
+next
+pcall
+type
+rawset
+xpcall
+tonumber
+ipairs
+```
+
+
+> 这与不使用 `_ENV` 时自由名字会进入到 `_G` 不同。或许表明使用 `_ENV` 可以防止 `_G` 被污染。
+
+
+如果我们定义一个名为 `_ENV` 的新局部变量，那么对一些自由名字的引用，就会绑定到那个新变量：
+
+
+```lua
+a = 2
+do
+    local _ENV = {print = print, a = 14}
+    print(a)        --> 14
+end
+
+print(a)            --> 2 （会回到最初的 _ENV）
+```
+
+因此，要定义某个有着私有环境的函数，就并不困难了：
+
+
+
+```lua
+function factory (_ENV)
+    return function () return a end
+end
+
+f1 = factory{a = 6}
+f2 = factory{a = 7}
+print(f1())             --> 6
+print(f2())             --> 7
+```
+
+
+这个 `factory` 函数，创建返回其自己的 “全局” 变量 `a` 的简单闭包。在闭包被创建出时，其可见的 `_ENV` 变量，就是外层 `factory` 函数的参数 `_ENV`；因此，每个闭包都将使用自己的外部变量（作为上值），来访问他的自由名字。
+
+
 

@@ -1,11 +1,9 @@
-a = 1
-local newgt = {}            -- 创建新环境
-setmetatable(newgt, {__index = _G})
-_ENV = newgt                -- 设置他
-print(a)                    --> 1
+function factory (_ENV)
+    return function () return a end
+end
 
--- 继续前一代码块
-a = 10
-print(a, _G.a)              --> 10      1
-_G.a = 20
-print(_G.a)                 --> 20
+
+f1 = factory{a = 6}
+f2 = factory{a = 7}
+print(f1())             --> 6
+print(f2())             --> 7
