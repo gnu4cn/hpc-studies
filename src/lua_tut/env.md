@@ -681,4 +681,121 @@ _ENV = nil
 ## `_ENV` 与 `load`
 
 
+正如我（作者）之前提到的，`load` 通常会以全局环境，初始化所加载代码块的上值 `_ENV`。不过，`load` 有个允许我们为 `_ENV` 提供不同初始值的可选第四参数。(函数 `loadfile` 也有类似参数。）
 
+
+作为初始示例，假设我们有个定义了程序会用到的几个常量和函数的典型配置文件；他可以是这样的：
+
+
+```lua
+-- 文件 'config.lua'
+width = 200
+height = 300
+-- ...
+```
+
+我们可以用以下代码加载他：
+
+
+```lua
+env = {}
+loadfile("config.lua", "t", env) ()
+```
+
+该配置文件中的所有代码，都将在充当了某种沙盒的空环境 `env` 中运行。特别是，全部的定义都将进入该环境。该配置文件无法影响其他任何东西，即便在失误下。即使是恶意代码，也无法造成太大破坏。他可以进行拒绝服务（DoS）攻击，浪费掉 CPU 时间和内存，但不会造成其他影响。
+
+
+有时，我们可能打算多次运行某个代码块，每次都使用不同的环境表。在这种情况下，那个额外加载参数，就没有用了。相反，我们还有另外两个选项。
+
+
+第一个选项是使用调试库中的函数 `debug.setupvalue`。顾名思义，`setupvalue` 允许我们更改给定函数的任何上值。下一个代码片段，说明了他的用法：
+
+
+```lua
+f = load("b = 10; return a")
+
+env = {a = 20}
+debug.setupvalue(f, 1, env)
+
+print(f())              --> 20
+print(env.b)            --> 10
+```
+
+其中 `setupvalue` 调用的第一个参数是函数，第二个是上值的索引，第三个是该上值的新值。对于这种用法，第二个参数始终为 `1`：当某个函数代表了一个代码块时，Lua 会确保他只有一个上值，并且这个上值就是 `_ENV`。
+
+
+这个选项的一个小缺点，是他对调试库的依赖。这个库破坏了一些关于程序的一般假设。例如，`debug.setupvalue` 就破坏了确保我们无法从其词法范围之外，访问局部变量的 Lua 可见性规则。
+
+
+以多个不同环境，运行某个代码块的另一个选项，便是在加载代码块时，对其稍加改动。请设想我们在代码块前，添加以下一行：
+
+
+```lua
+_ENV = ...;
+```
+
+
+请记住，Lua 会将任何代码块，都编译为可变参数函数，a variadic function。因此，这个额外代码行，会将传递给该代码块的第一个参数，赋值给给 `_ENV` 这个变量，进而将该参数设置为环境。下面的代码片段，使用了咱们在 [练习 16.1](cee.md#exercise-16.1) 中实现的 `loadwithprefix` 函数，说明这个想法：
+
+
+```lua
+prefix = "_ENV = ...;"
+f = loadwithprefix(prefix, io.lines(filename, "*L"))
+-- ...
+env1 = {}
+f(env1)
+env2 = {}
+f(env2)
+```
+
+## 练习
+
+
+练习 22.1：我们在本章开头定义的函数 `getfield` 过于宽容，因为他会接受像 `math?sin` 或 `string!!!gsub` 这样的 “字段”。请重写他，使其仅接受单个点（`.`），作为名字分隔符；
+
+
+练习 22.2：请详细解释下面的程序中发生了什么，以及他将打印出什么内容；
+
+
+```lua
+local foo
+do
+    local _ENV = _ENV
+    function foo () print(X) end
+end
+
+X = 13
+_ENV = nil
+foo()
+X = 0
+```
+
+
+> **注**：运行该程序的输出为：
+
+
+```console
+$ lua exercise-22.2.lua
+13
+lua: exercise-22.2.lua:10: attempt to index a nil value (upvalue '_ENV')
+stack traceback:
+        exercise-22.2.lua:10: in main chunk
+        [C]: in ?
+```
+
+> 其中 `exercise-22.2.lua:10` 即为 `X = 0`。
+
+
+练习 22.3：请详细解释下面的程序中发生了什么，以及将打印出什么内容。
+
+
+```lua
+local print = print
+
+function foo (_ENV, a)
+    print(a + b)
+end
+
+foo({b = 14}, 12)
+foo({b = 10}, 1)
+```
